@@ -558,8 +558,8 @@
     const layout = getNucleusLayoutPoints();
     const useCount = Math.min(desired, layout.length);
 
-    // Deterministic, spatially-decorrelated assignment order to prevent
-    // "one color per side" banding (still stable across reloads).
+    // Deterministic type assignment that minimizes adjacent same-type contacts
+    // (so we don't end up with large "same color" clumps).
     function mix32(x) {
       x |= 0;
       x ^= x >>> 16;
@@ -570,45 +570,75 @@
       return x >>> 0;
     }
     function hash3(a, b, c) {
-      // Combine 3 signed ints into one 32-bit hash.
       let h = mix32(a + 0x9e3779b9);
       h ^= mix32(b + 0x85ebca6b);
       h ^= mix32(c + 0xc2b2ae35);
       return mix32(h | 0);
     }
 
-    const assignOrder = new Array(useCount);
-    for (let i = 0; i < useCount; i++) assignOrder[i] = i;
-    assignOrder.sort((i, j) => {
-      const pi = layout[i];
-      const pj = layout[j];
-      const hi = hash3(pi.hx | 0, pi.hy | 0, pi.hz | 0);
-      const hj = hash3(pj.hx | 0, pj.hy | 0, pj.hz | 0);
-      return hi - hj;
-    });
+    // FCC nearest-neighbor deltas in half-step integer coordinates.
+    const nnDeltas = [
+      [1, 1, 0], [1, -1, 0], [-1, 1, 0], [-1, -1, 0],
+      [1, 0, 1], [1, 0, -1], [-1, 0, 1], [-1, 0, -1],
+      [0, 1, 1], [0, 1, -1], [0, -1, 1], [0, -1, -1]
+    ];
 
-    // Interleave proton/neutron assignment (p,n,p,n,...) in the hashed order.
-    const typeByIndex = new Array(useCount);
+    const coordToIndex = new Map();
+    for (let i = 0; i < useCount; i++) {
+      const p = layout[i];
+      coordToIndex.set(`${p.hx},${p.hy},${p.hz}`, i);
+    }
+
+    const assigned = new Array(useCount).fill(null);
     let pLeft = Z;
     let nLeft = N;
-    let nextType = (pLeft >= nLeft) ? "p" : "n";
-    for (let oi = 0; oi < assignOrder.length; oi++) {
-      const idx = assignOrder[oi];
-      let type;
-      if (pLeft === 0) type = "n";
-      else if (nLeft === 0) type = "p";
-      else type = nextType;
 
-      if (type === "p") pLeft--;
+    function sameNeighborCount(index, type) {
+      const p = layout[index];
+      let count = 0;
+      for (let d = 0; d < nnDeltas.length; d++) {
+        const dx = nnDeltas[d][0], dy = nnDeltas[d][1], dz = nnDeltas[d][2];
+        const j = coordToIndex.get(`${p.hx + dx},${p.hy + dy},${p.hz + dz}`);
+        if (j == null) continue;
+        const t = assigned[j];
+        if (t && t === type) count++;
+      }
+      return count;
+    }
+
+    for (let i = 0; i < useCount; i++) {
+      if (pLeft === 0) {
+        assigned[i] = "n";
+        nLeft--;
+        continue;
+      }
+      if (nLeft === 0) {
+        assigned[i] = "p";
+        pLeft--;
+        continue;
+      }
+
+      const scoreP = sameNeighborCount(i, "p");
+      const scoreN = sameNeighborCount(i, "n");
+      let chosen;
+      if (scoreP < scoreN) chosen = "p";
+      else if (scoreN < scoreP) chosen = "n";
+      else {
+        // Tie-break: alternate by hashed lattice coords, nudged by remaining counts.
+        const p = layout[i];
+        const bit = hash3(p.hx | 0, p.hy | 0, p.hz | 0) & 1;
+        const prefer = (pLeft >= nLeft) ? "p" : "n";
+        chosen = bit ? (prefer === "p" ? "n" : "p") : prefer;
+      }
+
+      if (chosen === "p") pLeft--;
       else nLeft--;
-      if (pLeft > 0 && nLeft > 0) nextType = (type === "p") ? "n" : "p";
-
-      typeByIndex[idx] = type;
+      assigned[i] = chosen;
     }
 
     for (let i = 0; i < useCount; i++) {
       const p = layout[i];
-      nucleusNucleons.push({ x: p.x, y: p.y, z: p.z, type: typeByIndex[i] });
+      nucleusNucleons.push({ x: p.x, y: p.y, z: p.z, type: assigned[i] });
     }
   }
 
