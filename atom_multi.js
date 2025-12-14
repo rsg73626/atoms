@@ -1,5 +1,6 @@
 // Atomic Explorer v7 – Canvas-only, with i18n and accessibility tweaks
 (function() {
+  try {
   const canvas = document.getElementById('atomCanvas');
   const ctx = canvas.getContext('2d');
 
@@ -398,9 +399,9 @@
     const delta = e.deltaY;
     const zoomStep = 0.03;
     if (delta > 0) {
-      cameraDistanceFactor = Math.min(2.0, cameraDistanceFactor + zoomStep);
+      cameraDistanceFactor = Math.min(2.5, cameraDistanceFactor + zoomStep);
     } else {
-      cameraDistanceFactor = Math.max(0.6, cameraDistanceFactor - zoomStep);
+      cameraDistanceFactor = Math.max(0.25, cameraDistanceFactor - zoomStep);
     }
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
   }, { passive: false });
@@ -436,6 +437,90 @@
   let stars = [];
   let nucleusNucleons = [];
 
+  // --- deterministic nucleus packing -------------------------------------
+  // Precompute a stable sequence of packed points (center -> outward) so that:
+  // - Nucleus layout is consistent across reloads
+  // - Heavier elements reuse lighter elements' layout (prefix points)
+  const MAX_NUCLEONS = 118 * 2; // Z + N (approx) where N≈Z
+  function buildNucleusLayoutPoints(maxCount) {
+    // FCC (face-centered cubic) close packing + carve a sphere:
+    // - Deterministic across reloads
+    // - Ordered center -> outward so heavier nuclei reuse lighter nuclei prefixes
+    const maxR = 0.98;
+
+    // Nearest-neighbor distance in normalized nucleus units.
+    // Increase to reduce overlap; decrease for tighter packing.
+    const nn = 0.235;
+    const a = nn * Math.SQRT2; // FCC cubic lattice constant where nn = a / sqrt(2)
+
+    // FCC basis in half-step integer coordinates (so we can sort/group stably).
+    // Coordinate = (h/2) * a where h is integer.
+    const basisH = [
+      { hx: 0, hy: 0, hz: 0 },
+      { hx: 0, hy: 1, hz: 1 },
+      { hx: 1, hy: 0, hz: 1 },
+      { hx: 1, hy: 1, hz: 0 }
+    ];
+
+    const maxIndex = Math.ceil(maxR / a) + 2;
+    const candidates = [];
+    const maxR2 = maxR * maxR;
+
+    for (let i = -maxIndex; i <= maxIndex; i++) {
+      for (let j = -maxIndex; j <= maxIndex; j++) {
+        for (let k = -maxIndex; k <= maxIndex; k++) {
+          const hx0 = 2 * i;
+          const hy0 = 2 * j;
+          const hz0 = 2 * k;
+          for (let b = 0; b < basisH.length; b++) {
+            const p = basisH[b];
+            const hx = hx0 + p.hx;
+            const hy = hy0 + p.hy;
+            const hz = hz0 + p.hz;
+            const x = (hx * 0.5) * a;
+            const y = (hy * 0.5) * a;
+            const z = (hz * 0.5) * a;
+            const r2 = x * x + y * y + z * z;
+            if (r2 <= maxR2) {
+              const s = hx * hx + hy * hy + hz * hz; // integer shell key
+              candidates.push({ x, y, z, r2, s, hx, hy, hz });
+            }
+          }
+        }
+      }
+    }
+
+    candidates.sort((p1, p2) => {
+      if (p1.s !== p2.s) return p1.s - p2.s;
+      if (p1.x !== p2.x) return p1.x - p2.x;
+      if (p1.y !== p2.y) return p1.y - p2.y;
+      return p1.z - p2.z;
+    });
+
+    // Ensure exact center is the first point.
+    const points = [{ x: 0, y: 0, z: 0, s: 0, hx: 0, hy: 0, hz: 0 }];
+    for (let idx = 0; idx < candidates.length && points.length < maxCount; idx++) {
+      const c = candidates[idx];
+      if (c.s === 0) continue;
+      points.push({ x: c.x, y: c.y, z: c.z, s: c.s, hx: c.hx, hy: c.hy, hz: c.hz });
+    }
+
+    return points.slice(0, maxCount);
+  }
+
+  let nucleusLayoutPoints = null;
+  function getNucleusLayoutPoints() {
+    if (nucleusLayoutPoints) return nucleusLayoutPoints;
+    try {
+      nucleusLayoutPoints = buildNucleusLayoutPoints(MAX_NUCLEONS);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Failed to build nucleus layout points:", err);
+      nucleusLayoutPoints = [{ x: 0, y: 0, z: 0, s: 0 }];
+    }
+    return nucleusLayoutPoints;
+  }
+
   function rebuildShellsAndElectrons() {
     shells = buildShellsForElement(currentElement);
     electrons = [];
@@ -469,33 +554,61 @@
     const Z = el.Z;
     const N = approximateNeutrons(Z);
     const desired = Z + N;
-    const points = [];
-    const spacing = 0.33;
-    const radius = 1.0;
-    for (let x = -radius; x <= radius; x += spacing) {
-      for (let y = -radius; y <= radius; y += spacing) {
-        for (let z = -radius; z <= radius; z += spacing) {
-          const dist2 = x * x + y * y + z * z;
-          if (dist2 <= radius * radius * 0.95) {
-            points.push({ x, y, z });
-          }
-        }
-      }
+
+    const layout = getNucleusLayoutPoints();
+    const useCount = Math.min(desired, layout.length);
+
+    // Deterministic, spatially-decorrelated assignment order to prevent
+    // "one color per side" banding (still stable across reloads).
+    function mix32(x) {
+      x |= 0;
+      x ^= x >>> 16;
+      x = Math.imul(x, 0x7feb352d);
+      x ^= x >>> 15;
+      x = Math.imul(x, 0x846ca68b);
+      x ^= x >>> 16;
+      return x >>> 0;
     }
-    for (let i = points.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [points[i], points[j]] = [points[j], points[i]];
+    function hash3(a, b, c) {
+      // Combine 3 signed ints into one 32-bit hash.
+      let h = mix32(a + 0x9e3779b9);
+      h ^= mix32(b + 0x85ebca6b);
+      h ^= mix32(c + 0xc2b2ae35);
+      return mix32(h | 0);
     }
-    const total = Math.min(points.length, desired + 40);
-    for (let i = 0; i < total; i++) {
-      const isProton = i < Z;
-      const p = points[i];
-      nucleusNucleons.push({
-        x: p.x,
-        y: p.y,
-        z: p.z,
-        type: isProton ? "p" : "n"
-      });
+
+    const assignOrder = new Array(useCount);
+    for (let i = 0; i < useCount; i++) assignOrder[i] = i;
+    assignOrder.sort((i, j) => {
+      const pi = layout[i];
+      const pj = layout[j];
+      const hi = hash3(pi.hx | 0, pi.hy | 0, pi.hz | 0);
+      const hj = hash3(pj.hx | 0, pj.hy | 0, pj.hz | 0);
+      return hi - hj;
+    });
+
+    // Interleave proton/neutron assignment (p,n,p,n,...) in the hashed order.
+    const typeByIndex = new Array(useCount);
+    let pLeft = Z;
+    let nLeft = N;
+    let nextType = (pLeft >= nLeft) ? "p" : "n";
+    for (let oi = 0; oi < assignOrder.length; oi++) {
+      const idx = assignOrder[oi];
+      let type;
+      if (pLeft === 0) type = "n";
+      else if (nLeft === 0) type = "p";
+      else type = nextType;
+
+      if (type === "p") pLeft--;
+      else nLeft--;
+      if (pLeft > 0 && nLeft > 0) nextType = (type === "p") ? "n" : "p";
+
+      typeByIndex[idx] = type;
+    }
+
+    for (let i = 0; i < useCount; i++) {
+      const p = layout[i];
+      nucleusNucleons.push({ x: p.x, y: p.y, z: p.z, type: typeByIndex[i] });
     }
   }
 
@@ -516,7 +629,7 @@
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
   }
   function adjustZoom(delta) {
-    cameraDistanceFactor = Math.max(0.6, Math.min(2.0, cameraDistanceFactor + delta));
+    cameraDistanceFactor = Math.max(0.25, Math.min(2.5, cameraDistanceFactor + delta));
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
   }
 
@@ -594,6 +707,35 @@
     };
   }
 
+  function isOccludedByNucleus(v, proj, nucleusProj, nucleusRScreen, nucleusRadiusWorld) {
+    // Quick reject in screen space (matches the solid circle we draw).
+    const dxs = proj.x - nucleusProj.x;
+    const dys = proj.y - nucleusProj.y;
+    if ((dxs * dxs + dys * dys) > nucleusRScreen * nucleusRScreen) return false;
+
+    // Precise: ray-sphere intersection (camera -> point) against sphere at origin.
+    const camZ = cameraDistance;
+    const R = nucleusRadiusWorld;
+    const R2 = R * R;
+    const r2Point = v.x * v.x + v.y * v.y + v.z * v.z;
+    if (r2Point <= R2) return true;
+
+    // Ray: O + tD, where O=(0,0,camZ), P=(x,y,z), D=P-O, and point is at t=1.
+    const dx = v.x;
+    const dy = v.y;
+    const dz = v.z - camZ;
+    const A = dx * dx + dy * dy + dz * dz;
+    const B = 2 * camZ * dz;
+    const C = camZ * camZ - R2;
+    const disc = B * B - 4 * A * C;
+    if (disc <= 0) return false;
+    const sqrtDisc = Math.sqrt(disc);
+    const t0 = (-B - sqrtDisc) / (2 * A);
+    const t1 = (-B + sqrtDisc) / (2 * A);
+    // If either intersection occurs between camera and the point, the point is occluded.
+    return (t0 > 0 && t0 < 1) || (t1 > 0 && t1 < 1);
+  }
+
   function draw() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -635,6 +777,130 @@
     const nucleusPos = project({ x: 0, y: 0, z: 0 }, w, h);
     const nucleusR = nucleusRadius * nucleusPos.scale;
     const useNucleons = nucleusToggle.checked;
+    const occlusionRadiusWorld = nucleusRadius * (useNucleons ? 1.04 : 1.0);
+    const occlusionRadiusScreen = nucleusR * (useNucleons ? 1.04 : 1.0);
+
+    shells.forEach(shell => {
+      shell.phase += shell.speed * globalSpeedFactor;
+    });
+
+    const showOrbits = orbitLinesToggle.checked;
+
+    // --- orbit/electron occlusion against a solid nucleus -----------------
+    const orbitBack = [];
+    const orbitFront = [];
+    const electronsBack = [];
+    const electronsFront = [];
+
+    if (showOrbits) {
+      shells.forEach(shell => {
+        const samples = [];
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 90) {
+          let v = { x: Math.cos(a) * shell.radius, y: 0, z: Math.sin(a) * shell.radius };
+          v = rotateX(v, shell.tiltX);
+          v = rotateY(v, shell.tiltY);
+          v = rotateY(v, globalRotY);
+          v = rotateX(v, globalRotX);
+          samples.push(v);
+        }
+
+        const segmentsBack = [];
+        const segmentsFront = [];
+        let current = null;
+        let currentIsBack = null;
+        for (let i = 0; i < samples.length; i++) {
+          const v = samples[i];
+          const proj = project(v, w, h);
+          const back = isOccludedByNucleus(
+            v,
+            proj,
+            nucleusPos,
+            occlusionRadiusScreen,
+            occlusionRadiusWorld
+          );
+          if (current == null) {
+            current = [proj];
+            currentIsBack = back;
+            continue;
+          }
+          if (back !== currentIsBack) {
+            if (currentIsBack) segmentsBack.push(current);
+            else segmentsFront.push(current);
+            current = [current[current.length - 1], proj];
+            currentIsBack = back;
+          } else {
+            current.push(proj);
+          }
+        }
+        if (current && current.length > 1) {
+          if (currentIsBack) segmentsBack.push(current);
+          else segmentsFront.push(current);
+        }
+
+        orbitBack.push(...segmentsBack);
+        orbitFront.push(...segmentsFront);
+      });
+    }
+
+    electrons.forEach(e => {
+      const shell = shells[e.shellIndex];
+      const ang = e.baseAngle + shell.phase * globalSpeedFactor;
+      let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
+      v = rotateX(v, shell.tiltX);
+      v = rotateY(v, shell.tiltY);
+      v = rotateY(v, globalRotY);
+      v = rotateX(v, globalRotX);
+      const proj = project(v, w, h);
+      (isOccludedByNucleus(v, proj, nucleusPos, occlusionRadiusScreen, occlusionRadiusWorld)
+        ? electronsBack
+        : electronsFront
+      ).push(v);
+    });
+
+    function drawOrbitSegments(segments) {
+      segments.forEach(seg => {
+        if (seg.length < 2) return;
+        ctx.save();
+        ctx.beginPath();
+        for (let i = 0; i < seg.length; i++) {
+          const p = seg[i];
+          if (i === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.strokeStyle = "rgba(148,163,184,0.45)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+      });
+    }
+
+    function drawElectronPoints(points3d) {
+      const sorted = points3d.slice().sort((a, b) => b.z - a.z);
+      sorted.forEach(v => {
+        const proj = project(v, w, h);
+        if (proj.scale <= 0) return;
+        const r = 6 * proj.scale;
+        const alpha = 0.55 + 0.45 * (proj.scale);
+        ctx.save();
+        const gradEl = ctx.createRadialGradient(
+          proj.x - r * 0.3, proj.y - r * 0.3, r * 0.2,
+          proj.x, proj.y, r
+        );
+        gradEl.addColorStop(0, "#ffffff");
+        gradEl.addColorStop(0.4, electronColorInner);
+        gradEl.addColorStop(1, electronColorOuter + "00");
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = gradEl;
+        ctx.beginPath();
+        ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+    }
+
+    // Draw anything behind the nucleus first, then the solid nucleus, then the front.
+    if (showOrbits) drawOrbitSegments(orbitBack);
+    drawElectronPoints(electronsBack);
 
     if (!useNucleons) {
       const grad = ctx.createRadialGradient(
@@ -657,16 +923,9 @@
       ctx.fill();
       ctx.restore();
     } else {
-      ctx.save();
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(15,23,42,0.98)";
-      ctx.arc(nucleusPos.x, nucleusPos.y, nucleusR * 1.04, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
       const nucleonPoints = [];
       nucleusNucleons.forEach(nucl => {
-        const scaleLocal = nucleusRadius * 0.95;
+        const scaleLocal = nucleusRadius * 0.92;
         let v = {
           x: nucl.x * scaleLocal,
           y: nucl.y * scaleLocal,
@@ -679,8 +938,9 @@
       nucleonPoints.sort((a, b) => a.v.z - b.v.z);
       nucleonPoints.forEach(p => {
         const proj = project(p.v, w, h);
-        const baseR = nucleusR * 0.16;
-        const r = Math.max(1.5, baseR * (0.72 + 0.22 * proj.scale));
+        // Reduce "merging" by keeping nucleon radius smaller and stable across rotation.
+        const baseR = nucleusR * 0.135;
+        const r = Math.max(1.2, baseR);
         const gradN = ctx.createRadialGradient(
           proj.x - r * 0.3, proj.y - r * 0.3, r * 0.1,
           proj.x, proj.y, r
@@ -698,73 +958,8 @@
       });
     }
 
-    shells.forEach(shell => {
-      shell.phase += shell.speed * globalSpeedFactor;
-    });
-
-    const points = [];
-    const showOrbits = orbitLinesToggle.checked;
-    if (showOrbits) {
-      shells.forEach(shell => {
-        const orbitPoints = [];
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 90) {
-          let v = { x: Math.cos(a) * shell.radius, y: 0, z: Math.sin(a) * shell.radius };
-          v = rotateX(v, shell.tiltX);
-          v = rotateY(v, shell.tiltY);
-          v = rotateY(v, globalRotY);
-          v = rotateX(v, globalRotX);
-          orbitPoints.push(v);
-        }
-        const screenOrbit = orbitPoints.map(v => project(v, w, h));
-        ctx.save();
-        ctx.beginPath();
-        for (let i = 0; i < screenOrbit.length; i++) {
-          const p = screenOrbit[i];
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = "rgba(148,163,184,0.45)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.restore();
-      });
-    }
-
-    electrons.forEach(e => {
-      const shell = shells[e.shellIndex];
-      const ang = e.baseAngle + shell.phase * globalSpeedFactor;
-      let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
-      v = rotateX(v, shell.tiltX);
-      v = rotateY(v, shell.tiltY);
-      v = rotateY(v, globalRotY);
-      v = rotateX(v, globalRotX);
-      points.push({ type: "electron", v, shellIndex: e.shellIndex });
-    });
-
-    points.sort((a, b) => b.v.z - a.v.z);
-    points.forEach(p => {
-      if (p.type === "electron") {
-        const proj = project(p.v, w, h);
-        if (proj.scale <= 0) return;
-        const r = 6 * proj.scale;
-        const alpha = 0.55 + 0.45 * (proj.scale);
-        ctx.save();
-        const gradEl = ctx.createRadialGradient(
-          proj.x - r * 0.3, proj.y - r * 0.3, r * 0.2,
-          proj.x, proj.y, r
-        );
-        gradEl.addColorStop(0, "#ffffff");
-        gradEl.addColorStop(0.4, electronColorInner);
-        gradEl.addColorStop(1, electronColorOuter + "00");
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = gradEl;
-        ctx.beginPath();
-        ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    });
+    if (showOrbits) drawOrbitSegments(orbitFront);
+    drawElectronPoints(electronsFront);
 
     requestAnimationFrame(draw);
   }
@@ -795,7 +990,7 @@
         rebuildShellsAndElectrons();
         rebuildNucleusNucleons();
         updateDetails(currentSymbol);
-        resetView();
+        // Keep current zoom/rotation when switching elements.
       });
     });
     if (cellsBySymbol[currentSymbol]) {
@@ -830,4 +1025,15 @@
   });
 
   updateSpeedUI();
+  } catch (err) {
+    // Fail loudly in the UI if something goes wrong early during init.
+    try {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      const details = document.getElementById("details");
+      if (details) {
+        details.innerHTML = `<b>Initialization error</b><br><code>${String(err)}</code>`;
+      }
+    } catch (_) {}
+  }
 })();
