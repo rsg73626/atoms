@@ -154,7 +154,6 @@
       opacity: 0.82;
       margin-top: 6px;
     }
-    #nucleusToggleWrapper,
     #orbitLinesWrapper {
       display: flex;
       align-items: center;
@@ -162,7 +161,6 @@
       margin-top: 6px;
       font-size: 13px;
     }
-    #nucleusToggle,
     #orbitLinesToggle {
       accent-color: #38bdf8;
       width: 16px;
@@ -613,10 +611,6 @@
         <button class="view-btn" id="controlZoomOut" aria-label="Zoom out"><span class="icon zoom-icon zoom-out" aria-hidden="true"></span></button>
         <button class="view-btn" id="controlCentralize" aria-label="Centralize"><span class="restore-icon" aria-hidden="true"></span></button>
       </div>
-      <label class="view-toggle" for="nucleusToggle">
-        <input type="checkbox" id="nucleusToggle" checked />
-        <span id="nucleusToggleLabel">Show protons & neutrons</span>
-      </label>
       <label class="view-toggle" for="orbitLinesToggle">
         <input type="checkbox" id="orbitLinesToggle" />
         <span id="orbitLinesLabel">Show orbits</span>
@@ -631,7 +625,7 @@
           <span id="speedValue">1.0×</span>
           <button class="speed-btn" id="speedPlus" aria-label="Speed up">+</button>
         </div>
-        <input id="speedRange" type="range" min="0" max="3" step="0.1" value="1" />
+        <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
       </div>
     </div>
     <div id="bottomLegend">

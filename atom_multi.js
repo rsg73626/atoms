@@ -10,7 +10,6 @@
   const speedMinusBtn = document.getElementById('speedMinus');
   const speedPlusBtn = document.getElementById('speedPlus');
   const speedRabbit = document.getElementById('speedRabbit');
-  const nucleusToggle = document.getElementById('nucleusToggle');
   const orbitLinesToggle = document.getElementById('orbitLinesToggle');
   const axesToggle = document.getElementById('axesToggle');
   const periodicGrid = document.getElementById('periodicGrid');
@@ -28,7 +27,6 @@
   const currentSectionTitleEl = document.getElementById('currentSectionTitle');
   const visualSectionTitleEl = document.getElementById('visualSectionTitle');
   const speedLabelTextEl = document.getElementById('speedLabelText');
-  const nucleusToggleLabelEl = document.getElementById('nucleusToggleLabel');
   const orbitLinesLabelEl = document.getElementById('orbitLinesLabel');
   const axesToggleLabelEl = document.getElementById('axesToggleLabel');
   const zoomHintEl = document.getElementById('zoomHint');
@@ -60,7 +58,6 @@
       currentSectionTitle: "Selected element",
       visualSectionTitle: "Visualization",
       speedLabel: "Orbital speed:",
-      nucleusToggle: "Show protons & neutrons",
       orbitLinesLabel: "Show orbits",
       axesToggleLabel: "Show axes",
       zoomHint: "Zoom: scroll on the atom (trackpad pinch). Drag to rotate in 3D.",
@@ -89,7 +86,6 @@
       currentSectionTitle: "Elemento selecionado",
       visualSectionTitle: "Visualização",
       speedLabel: "Velocidade das órbitas:",
-      nucleusToggle: "Mostrar prótons e nêutrons",
       orbitLinesLabel: "Mostrar órbitas",
       axesToggleLabel: "Mostrar eixos",
       zoomHint: "Zoom: role o mouse / trackpad sobre o átomo. Arraste para girar em 3D.",
@@ -118,7 +114,6 @@
       currentSectionTitle: "Elemento seleccionado",
       visualSectionTitle: "Visualización",
       speedLabel: "Velocidad de las órbitas:",
-      nucleusToggle: "Mostrar protones y neutrones",
       orbitLinesLabel: "Mostrar órbitas",
       axesToggleLabel: "Mostrar ejes",
       zoomHint: "Zoom: desplázate sobre el átomo. Arrastra para rotar en 3D.",
@@ -157,7 +152,6 @@
     if (currentSectionTitleEl) currentSectionTitleEl.textContent = t.currentSectionTitle;
     if (visualSectionTitleEl) visualSectionTitleEl.textContent = t.visualSectionTitle;
     if (speedLabelTextEl) speedLabelTextEl.textContent = t.speedLabel;
-    if (nucleusToggleLabelEl) nucleusToggleLabelEl.textContent = t.nucleusToggle;
     if (orbitLinesLabelEl) orbitLinesLabelEl.textContent = t.orbitLinesLabel;
     if (axesToggleLabelEl) axesToggleLabelEl.textContent = t.axesToggleLabel;
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
@@ -399,6 +393,45 @@
 
   speedPlusBtn?.addEventListener("click", () => nudgeSpeed(1));
   speedMinusBtn?.addEventListener("click", () => nudgeSpeed(-1));
+
+  // Click-and-hold to continuously change speed.
+  function attachHoldRepeat(btn, direction) {
+    if (!btn) return;
+    let timeoutId = null;
+    let intervalId = null;
+    const initialDelayMs = 250;
+    const repeatMs = 55;
+
+    const stop = () => {
+      if (timeoutId != null) clearTimeout(timeoutId);
+      timeoutId = null;
+      if (intervalId != null) clearInterval(intervalId);
+      intervalId = null;
+    };
+
+    const start = () => {
+      stop();
+      // One immediate nudge on press.
+      nudgeSpeed(direction);
+      timeoutId = setTimeout(() => {
+        intervalId = setInterval(() => nudgeSpeed(direction), repeatMs);
+      }, initialDelayMs);
+    };
+
+    btn.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      btn.setPointerCapture?.(e.pointerId);
+      start();
+    });
+    btn.addEventListener("pointerup", stop);
+    btn.addEventListener("pointercancel", stop);
+    btn.addEventListener("lostpointercapture", stop);
+    btn.addEventListener("mouseleave", stop);
+    window.addEventListener("blur", stop);
+  }
+
+  attachHoldRepeat(speedPlusBtn, 1);
+  attachHoldRepeat(speedMinusBtn, -1);
 
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
@@ -888,9 +921,9 @@
     const nucleusRadius = baseNucleusRadius * zFactor;
     const nucleusPos = project({ x: 0, y: 0, z: 0 }, w, h);
     const nucleusR = nucleusRadius * nucleusPos.scale;
-    const useNucleons = nucleusToggle.checked;
-    const occlusionRadiusWorld = nucleusRadius * (useNucleons ? 1.04 : 1.0);
-    const occlusionRadiusScreen = nucleusR * (useNucleons ? 1.04 : 1.0);
+    const useNucleons = true;
+    const occlusionRadiusWorld = nucleusRadius * 1.04;
+    const occlusionRadiusScreen = nucleusR * 1.04;
 
     shells.forEach((shell, i) => {
       if (now < shell.startAt) return;
@@ -906,14 +939,9 @@
     const electronsBack = [];
     const electronsFront = [];
 
-    const orbitSweepSpin = (() => {
-      // Match orbit sweep angular velocity to electron angular velocity.
-      // `shell.speed` is tuned as rad/frame at ~60fps; convert to rad/s with `* 60`.
-      const baseSpeed = shells[0]?.speed ?? 0.03;
-      const omega = baseSpeed * 60 * globalSpeedFactor; // rad/s
-      const t = Math.max(0, (now - orbitSpinStartTime) / 1000);
-      return (t * omega) % (Math.PI * 2);
-    })();
+    // Match orbit sweep motion exactly to electron motion by reusing the same phase integrator.
+    // Since all shells share the same `speed`, we can take shell 0 as the reference.
+    const orbitSweepSpin = (shells[0]?.phase ?? 0) % (Math.PI * 2);
 
     electrons.forEach(e => {
       const shell = shells[e.shellIndex];
@@ -1042,61 +1070,41 @@
     orbitBack.forEach(o => drawOrbitSegments([o.seg], o.style, o.width));
     drawElectronPoints(electronsBack);
 
-    if (!useNucleons) {
-      const grad = ctx.createRadialGradient(
-        nucleusPos.x - nucleusR * 0.35,
-        nucleusPos.y - nucleusR * 0.35,
-        nucleusR * 0.1,
-        nucleusPos.x,
-        nucleusPos.y,
-        nucleusR
+    const nucleonPoints = [];
+    nucleusNucleons.forEach(nucl => {
+      const scaleLocal = nucleusRadius * 0.92;
+      let v = {
+        x: nucl.x * scaleLocal,
+        y: nucl.y * scaleLocal,
+        z: nucl.z * scaleLocal
+      };
+      // Rotate the whole nucleus with the same sweep phase as the orbit planes.
+      v = rotateAroundAxis(v, firstOrbitSpinAxis, orbitSweepSpin);
+      v = rotateY(v, globalRotY);
+      v = rotateX(v, globalRotX);
+      nucleonPoints.push({ v, type: nucl.type });
+    });
+    nucleonPoints.sort((a, b) => a.v.z - b.v.z);
+    nucleonPoints.forEach(p => {
+      const proj = project(p.v, w, h);
+      // Reduce "merging" by keeping nucleon radius smaller and stable across rotation.
+      const baseR = nucleusR * 0.135;
+      const r = Math.max(1.2, baseR);
+      const gradN = ctx.createRadialGradient(
+        proj.x - r * 0.3, proj.y - r * 0.3, r * 0.1,
+        proj.x, proj.y, r
       );
-      grad.addColorStop(0, el.colorNucleus);
-      grad.addColorStop(0.55, el.colorCore);
-      grad.addColorStop(1, "#0f172a");
+      const baseColor = p.type === "p" ? protonColor : neutronColor;
+      gradN.addColorStop(0, "#ffffff");
+      gradN.addColorStop(0.4, baseColor);
+      gradN.addColorStop(1, "rgba(0,0,0,0.78)");
       ctx.save();
       ctx.beginPath();
-      ctx.fillStyle = grad;
-      ctx.shadowColor = "rgba(250,250,210,0.9)";
-      ctx.shadowBlur = 28;
-      ctx.arc(nucleusPos.x, nucleusPos.y, nucleusR, 0, Math.PI * 2);
+      ctx.fillStyle = gradN;
+      ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
-    } else {
-      const nucleonPoints = [];
-      nucleusNucleons.forEach(nucl => {
-        const scaleLocal = nucleusRadius * 0.92;
-        let v = {
-          x: nucl.x * scaleLocal,
-          y: nucl.y * scaleLocal,
-          z: nucl.z * scaleLocal
-        };
-        v = rotateY(v, globalRotY);
-        v = rotateX(v, globalRotX);
-        nucleonPoints.push({ v, type: nucl.type });
-      });
-      nucleonPoints.sort((a, b) => a.v.z - b.v.z);
-      nucleonPoints.forEach(p => {
-        const proj = project(p.v, w, h);
-        // Reduce "merging" by keeping nucleon radius smaller and stable across rotation.
-        const baseR = nucleusR * 0.135;
-        const r = Math.max(1.2, baseR);
-        const gradN = ctx.createRadialGradient(
-          proj.x - r * 0.3, proj.y - r * 0.3, r * 0.1,
-          proj.x, proj.y, r
-        );
-        const baseColor = p.type === "p" ? protonColor : neutronColor;
-        gradN.addColorStop(0, "#ffffff");
-        gradN.addColorStop(0.4, baseColor);
-        gradN.addColorStop(1, "rgba(0,0,0,0.78)");
-        ctx.save();
-        ctx.beginPath();
-        ctx.fillStyle = gradN;
-        ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      });
-    }
+    });
 
     orbitFront.forEach(o => drawOrbitSegments([o.seg], o.style, o.width));
     drawElectronPoints(electronsFront);
