@@ -12,6 +12,7 @@
   const speedRabbit = document.getElementById('speedRabbit');
   const nucleusToggle = document.getElementById('nucleusToggle');
   const orbitLinesToggle = document.getElementById('orbitLinesToggle');
+  const axesToggle = document.getElementById('axesToggle');
   const periodicGrid = document.getElementById('periodicGrid');
   const searchInput = document.getElementById('searchInput');
   const clearSearchBtn = document.getElementById('clearSearch');
@@ -29,6 +30,7 @@
   const speedLabelTextEl = document.getElementById('speedLabelText');
   const nucleusToggleLabelEl = document.getElementById('nucleusToggleLabel');
   const orbitLinesLabelEl = document.getElementById('orbitLinesLabel');
+  const axesToggleLabelEl = document.getElementById('axesToggleLabel');
   const zoomHintEl = document.getElementById('zoomHint');
   const periodicTitleEl = document.getElementById('periodicTitle');
   const periodicIntroEl = document.getElementById('periodicIntro');
@@ -60,6 +62,7 @@
       speedLabel: "Orbital speed:",
       nucleusToggle: "Show protons & neutrons",
       orbitLinesLabel: "Show orbits",
+      axesToggleLabel: "Show axes",
       zoomHint: "Zoom: scroll on the atom (trackpad pinch). Drag to rotate in 3D.",
       periodicTitle: "Interactive periodic table",
       periodicIntro: "Tap or click an element to see its atom. All 118 elements are available.",
@@ -88,6 +91,7 @@
       speedLabel: "Velocidade das órbitas:",
       nucleusToggle: "Mostrar prótons e nêutrons",
       orbitLinesLabel: "Mostrar órbitas",
+      axesToggleLabel: "Mostrar eixos",
       zoomHint: "Zoom: role o mouse / trackpad sobre o átomo. Arraste para girar em 3D.",
       periodicTitle: "Tabela periódica interativa",
       periodicIntro: "Toque ou clique em um elemento para ver seu átomo. Todos os 118 estão disponíveis.",
@@ -116,6 +120,7 @@
       speedLabel: "Velocidad de las órbitas:",
       nucleusToggle: "Mostrar protones y neutrones",
       orbitLinesLabel: "Mostrar órbitas",
+      axesToggleLabel: "Mostrar ejes",
       zoomHint: "Zoom: desplázate sobre el átomo. Arrastra para rotar en 3D.",
       periodicTitle: "Tabla periódica interactiva",
       periodicIntro: "Haz clic en un elemento para ver su átomo. Los 118 elementos están disponibles.",
@@ -154,6 +159,7 @@
     if (speedLabelTextEl) speedLabelTextEl.textContent = t.speedLabel;
     if (nucleusToggleLabelEl) nucleusToggleLabelEl.textContent = t.nucleusToggle;
     if (orbitLinesLabelEl) orbitLinesLabelEl.textContent = t.orbitLinesLabel;
+    if (axesToggleLabelEl) axesToggleLabelEl.textContent = t.axesToggleLabel;
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
     if (periodicTitleEl) periodicTitleEl.textContent = t.periodicTitle;
     if (periodicIntroEl) periodicIntroEl.textContent = t.periodicIntro;
@@ -407,6 +413,7 @@
   }, { passive: false });
 
   function buildShellsForElement(el) {
+    const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
     const baseNucleusRadius = 40;
     const zFactor = 1 + (el.electrons.length - 1) * 0.3;
     const nucleusRadius = baseNucleusRadius * zFactor;
@@ -414,19 +421,18 @@
     const baseRadius = nucleusRadius + minGap;
     const shells = [];
     const layerCount = el.electrons.length;
-    const tiltX = 0.35;
-    const tiltY = 0.2;
+    const layerAngleStep = (Math.PI * 2) / Math.max(1, layerCount);
     for (let i = 0; i < layerCount; i++) {
       const count = el.electrons[i];
       const radius = baseRadius + i * 60;
-      const speedBase = 0.045 - i * 0.007;
+      const speedBase = 0.03;
       shells.push({
         count,
         radius,
-        speed: Math.max(0.01, speedBase),
-        tiltX,
-        tiltY,
-        phase: Math.random() * Math.PI * 2
+        speed: speedBase,
+        spinOffset: i * layerAngleStep,
+        phase: Math.random() * Math.PI * 2,
+        startAt: now + i * 350 // stagger animation start times (ms)
       });
     }
     return shells;
@@ -651,6 +657,9 @@
   let globalRotX = -1.2;
   cameraDistanceFactor = 0.9;
   cameraDistance = baseCameraDistance * cameraDistanceFactor;
+  let lastFrameTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+  const orbitSpinStartTime = lastFrameTime;
+  const firstOrbitSpinAxis = { x: 0, y: 0, z: 1 }; // Z axis (orbit sweep axis)
 
   function resetView() {
     globalRotY = 0;
@@ -726,10 +735,29 @@
       z: v.y * sin + v.z * cos
     };
   }
+  function rotateAroundAxis(v, axis, angle) {
+    const len = Math.sqrt(axis.x * axis.x + axis.y * axis.y + axis.z * axis.z) || 1e-6;
+    const ax = axis.x / len, ay = axis.y / len, az = axis.z / len;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const dot = v.x * ax + v.y * ay + v.z * az;
+    return {
+      x: v.x * cos + (ay * v.z - az * v.y) * sin + ax * dot * (1 - cos),
+      y: v.y * cos + (az * v.x - ax * v.z) * sin + ay * dot * (1 - cos),
+      z: v.z * cos + (ax * v.y - ay * v.x) * sin + az * dot * (1 - cos)
+    };
+  }
   function project(v, width, height) {
     const camZ = cameraDistance;
     const z = camZ - v.z;
+    // If a point is at/behind the camera plane, projection blows up (Infinity/NaN).
+    // Return a non-visible projection in that case.
+    if (!Number.isFinite(z) || z <= 1) {
+      return { x: 0, y: 0, scale: 0 };
+    }
     const f = 420 / z;
+    if (!Number.isFinite(f) || f <= 0) {
+      return { x: 0, y: 0, scale: 0 };
+    }
     return {
       x: width / 2 + v.x * f,
       y: height / 2 + v.y * f,
@@ -767,6 +795,10 @@
   }
 
   function draw() {
+    const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
+    const dt = Math.min(0.05, Math.max(0, (now - lastFrameTime) / 1000));
+    lastFrameTime = now;
+
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
     ctx.clearRect(0, 0, w, h);
@@ -800,6 +832,56 @@
     ctx.restore();
     ctx.globalAlpha = 1;
 
+    // --- 3D axes (X/Y/Z) --------------------------------------------------
+    // Optional overlay; draw after background, before atom.
+    if (axesToggle?.checked) {
+      const maxOrbitRadius = shells.reduce((m, s) => Math.max(m, s.radius), 0);
+      const axisLen = Math.max(120, maxOrbitRadius * 1.12);
+      const axisAlpha = 0.65;
+      const axisWidth = 3.5;
+      const origin = { x: 0, y: 0, z: 0 };
+      const oRot = rotateX(rotateY(origin, globalRotY), globalRotX);
+      const oP = project(oRot, w, h);
+
+      const axes = [
+        { name: "X", color: "rgba(239,68,68,1)", dir: { x: 1, y: 0, z: 0 } },
+        { name: "Y", color: "rgba(34,197,94,1)", dir: { x: 0, y: 1, z: 0 } },
+        { name: "Z", color: "rgba(59,130,246,1)", dir: { x: 0, y: 0, z: 1 } }
+      ];
+
+      if (oP.scale > 0) {
+        axes.forEach(ax => {
+          let vPos = { x: ax.dir.x * axisLen, y: ax.dir.y * axisLen, z: ax.dir.z * axisLen };
+          let vNeg = { x: -vPos.x, y: -vPos.y, z: -vPos.z };
+          vPos = rotateY(vPos, globalRotY);
+          vPos = rotateX(vPos, globalRotX);
+          vNeg = rotateY(vNeg, globalRotY);
+          vNeg = rotateX(vNeg, globalRotX);
+          const pPos = project(vPos, w, h);
+          const pNeg = project(vNeg, w, h);
+          if (pPos.scale <= 0 || pNeg.scale <= 0) return;
+
+          ctx.save();
+          ctx.globalAlpha = axisAlpha;
+          ctx.strokeStyle = ax.color;
+          ctx.lineWidth = axisWidth;
+          ctx.beginPath();
+          ctx.moveTo(pNeg.x, pNeg.y);
+          ctx.lineTo(pPos.x, pPos.y);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.save();
+          ctx.fillStyle = ax.color;
+          ctx.globalAlpha = 0.9;
+          ctx.font = "13px system-ui, -apple-system, Segoe UI, sans-serif";
+          ctx.fillText(`+${ax.name}`, pPos.x + 6, pPos.y - 6);
+          ctx.fillText(`-${ax.name}`, pNeg.x + 6, pNeg.y - 6);
+          ctx.restore();
+        });
+      }
+    }
+
     const el = currentElement;
     const baseNucleusRadius = 40;
     const zFactor = 1 + (el.electrons.length - 1) * 0.3;
@@ -810,8 +892,10 @@
     const occlusionRadiusWorld = nucleusRadius * (useNucleons ? 1.04 : 1.0);
     const occlusionRadiusScreen = nucleusR * (useNucleons ? 1.04 : 1.0);
 
-    shells.forEach(shell => {
-      shell.phase += shell.speed * globalSpeedFactor;
+    shells.forEach((shell, i) => {
+      if (now < shell.startAt) return;
+      // `speed` was tuned as rad/frame at ~60fps; convert to rad/s.
+      shell.phase += shell.speed * globalSpeedFactor * dt * 60;
     });
 
     const showOrbits = orbitLinesToggle.checked;
@@ -822,62 +906,24 @@
     const electronsBack = [];
     const electronsFront = [];
 
-    if (showOrbits) {
-      shells.forEach(shell => {
-        const samples = [];
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 90) {
-          let v = { x: Math.cos(a) * shell.radius, y: 0, z: Math.sin(a) * shell.radius };
-          v = rotateX(v, shell.tiltX);
-          v = rotateY(v, shell.tiltY);
-          v = rotateY(v, globalRotY);
-          v = rotateX(v, globalRotX);
-          samples.push(v);
-        }
-
-        const segmentsBack = [];
-        const segmentsFront = [];
-        let current = null;
-        let currentIsBack = null;
-        for (let i = 0; i < samples.length; i++) {
-          const v = samples[i];
-          const proj = project(v, w, h);
-          const back = isOccludedByNucleus(
-            v,
-            proj,
-            nucleusPos,
-            occlusionRadiusScreen,
-            occlusionRadiusWorld
-          );
-          if (current == null) {
-            current = [proj];
-            currentIsBack = back;
-            continue;
-          }
-          if (back !== currentIsBack) {
-            if (currentIsBack) segmentsBack.push(current);
-            else segmentsFront.push(current);
-            current = [current[current.length - 1], proj];
-            currentIsBack = back;
-          } else {
-            current.push(proj);
-          }
-        }
-        if (current && current.length > 1) {
-          if (currentIsBack) segmentsBack.push(current);
-          else segmentsFront.push(current);
-        }
-
-        orbitBack.push(...segmentsBack);
-        orbitFront.push(...segmentsFront);
-      });
-    }
+    const orbitSweepSpin = (() => {
+      // Match orbit sweep angular velocity to electron angular velocity.
+      // `shell.speed` is tuned as rad/frame at ~60fps; convert to rad/s with `* 60`.
+      const baseSpeed = shells[0]?.speed ?? 0.03;
+      const omega = baseSpeed * 60 * globalSpeedFactor; // rad/s
+      const t = Math.max(0, (now - orbitSpinStartTime) / 1000);
+      return (t * omega) % (Math.PI * 2);
+    })();
 
     electrons.forEach(e => {
       const shell = shells[e.shellIndex];
-      const ang = e.baseAngle + shell.phase * globalSpeedFactor;
+      const ang = e.baseAngle + (now < shell.startAt ? 0 : shell.phase);
       let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
-      v = rotateX(v, shell.tiltX);
-      v = rotateY(v, shell.tiltY);
+
+      // "Sphere sweep" motion: rotate the ring around a fixed axis (Z), creating a sphere surface.
+      // Each shell gets a fixed offset (evenly spaced around 360°) so starts at a different inclination.
+      v = rotateAroundAxis(v, firstOrbitSpinAxis, orbitSweepSpin + (shell.spinOffset || 0));
+
       v = rotateY(v, globalRotY);
       v = rotateX(v, globalRotX);
       const proj = project(v, w, h);
@@ -887,9 +933,59 @@
       ).push(v);
     });
 
-    function drawOrbitSegments(segments) {
+    function splitOrbitSegments(samples3d) {
+      const backSegments = [];
+      const frontSegments = [];
+      let current = null;
+      let currentIsBack = null;
+
+      for (let i = 0; i < samples3d.length; i++) {
+        const v = samples3d[i];
+        const isBack = v.z < 0;
+        const p = project(v, w, h);
+        if (p.scale <= 0) continue;
+
+        if (current == null) {
+          current = [p];
+          currentIsBack = isBack;
+          continue;
+        }
+
+        if (isBack !== currentIsBack) {
+          if (current.length > 1) {
+            (currentIsBack ? backSegments : frontSegments).push(current);
+          }
+          current = [current[current.length - 1], p];
+          currentIsBack = isBack;
+        } else {
+          current.push(p);
+        }
+      }
+
+      if (current && current.length > 1) {
+        (currentIsBack ? backSegments : frontSegments).push(current);
+      }
+
+      return { backSegments, frontSegments };
+    }
+
+    function buildOrbitSamples(radius, tiltX, tiltY, spinAngle) {
+      const samples = [];
+      for (let a = 0; a <= Math.PI * 2 + 1e-6; a += Math.PI / 90) {
+        let v = { x: Math.cos(a) * radius, y: 0, z: Math.sin(a) * radius };
+        v = rotateX(v, tiltX);
+        v = rotateY(v, tiltY);
+        if (spinAngle != null) v = rotateAroundAxis(v, firstOrbitSpinAxis, spinAngle);
+        v = rotateY(v, globalRotY);
+        v = rotateX(v, globalRotX);
+        samples.push(v);
+      }
+      return samples;
+    }
+
+    function drawOrbitSegments(segments, style, width) {
       segments.forEach(seg => {
-        if (seg.length < 2) return;
+        if (!seg || seg.length < 2) return;
         ctx.save();
         ctx.beginPath();
         for (let i = 0; i < seg.length; i++) {
@@ -897,8 +993,8 @@
           if (i === 0) ctx.moveTo(p.x, p.y);
           else ctx.lineTo(p.x, p.y);
         }
-        ctx.strokeStyle = "rgba(148,163,184,0.45)";
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = style;
+        ctx.lineWidth = width;
         ctx.stroke();
         ctx.restore();
       });
@@ -908,8 +1004,9 @@
       const sorted = points3d.slice().sort((a, b) => b.z - a.z);
       sorted.forEach(v => {
         const proj = project(v, w, h);
-        if (proj.scale <= 0) return;
+        if (proj.scale <= 0 || !Number.isFinite(proj.x) || !Number.isFinite(proj.y) || !Number.isFinite(proj.scale)) return;
         const r = 6 * proj.scale;
+        if (!Number.isFinite(r) || r <= 0) return;
         const alpha = 0.55 + 0.45 * (proj.scale);
         ctx.save();
         const gradEl = ctx.createRadialGradient(
@@ -928,8 +1025,21 @@
       });
     }
 
-    // Draw anything behind the nucleus first, then the solid nucleus, then the front.
-    if (showOrbits) drawOrbitSegments(orbitBack);
+    if (showOrbits) {
+      shells.forEach((shell, shellIndex) => {
+        const spin = orbitSweepSpin + (shell.spinOffset || 0);
+        const tiltX = 0;
+        const tiltY = 0;
+        const { backSegments, frontSegments } = splitOrbitSegments(
+          buildOrbitSamples(shell.radius, tiltX, tiltY, spin)
+        );
+        orbitBack.push(...backSegments.map(seg => ({ seg, style: "rgba(148,163,184,0.45)", width: 1 })));
+        orbitFront.push(...frontSegments.map(seg => ({ seg, style: "rgba(148,163,184,0.45)", width: 1 })));
+      });
+    }
+
+    // Draw back halves of orbits/electrons, then nucleus, then front halves.
+    orbitBack.forEach(o => drawOrbitSegments([o.seg], o.style, o.width));
     drawElectronPoints(electronsBack);
 
     if (!useNucleons) {
@@ -988,7 +1098,7 @@
       });
     }
 
-    if (showOrbits) drawOrbitSegments(orbitFront);
+    orbitFront.forEach(o => drawOrbitSegments([o.seg], o.style, o.width));
     drawElectronPoints(electronsFront);
 
     requestAnimationFrame(draw);
