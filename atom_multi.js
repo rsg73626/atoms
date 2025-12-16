@@ -171,6 +171,7 @@
   let elements = {};        // will be filled after periodicElements
   let currentElement = null;
   let isPaused = false;
+  let pausedRedrawPending = false;
 
   function updatePlayPauseUI() {
     if (!speedPlayPauseBtn) return;
@@ -179,6 +180,15 @@
     speedPlayPauseBtn.textContent = isPaused ? "▶" : "⏸";
     speedPlayPauseBtn.setAttribute("aria-label", label);
     speedPlayPauseBtn.setAttribute("title", label);
+  }
+
+  function requestPausedRedraw() {
+    if (!isPaused || pausedRedrawPending) return;
+    pausedRedrawPending = true;
+    requestAnimationFrame(() => {
+      pausedRedrawPending = false;
+      draw();
+    });
   }
 
   function applyLanguage(lang) {
@@ -241,8 +251,12 @@
     chargeToggle.checked = false;
     chargeToggle.addEventListener("change", () => {
       showCharges = !!chargeToggle.checked;
+      requestPausedRedraw();
     });
   }
+
+  orbitLinesToggle?.addEventListener("change", requestPausedRedraw);
+  axesToggle?.addEventListener("change", requestPausedRedraw);
 
   let protonColor = "#ff4d6d";
   let neutronColor = "#3b82f6";
@@ -374,6 +388,7 @@
     }
     persistParticleColor(particle, color);
     setLegendColors();
+    requestPausedRedraw();
   }
 
   let openParticle = null;
@@ -705,6 +720,7 @@
     isPaused = !isPaused;
     updatePlayPauseUI();
     if (wasPaused && !isPaused) {
+      lastFrameTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       requestAnimationFrame(draw);
     }
   });
@@ -719,6 +735,7 @@
       cameraDistanceFactor = Math.max(0.25, cameraDistanceFactor - zoomStep);
     }
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
+    requestPausedRedraw();
   }, { passive: false });
 
   // Toggle UI by clicking the canvas background (not UI controls).
@@ -993,10 +1010,12 @@
     globalRotX = -1.2;
     cameraDistanceFactor = 0.9;
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
+    requestPausedRedraw();
   }
   function adjustZoom(delta) {
     cameraDistanceFactor = Math.max(0.25, Math.min(2.5, cameraDistanceFactor + delta));
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
+    requestPausedRedraw();
   }
 
   controlCentralize?.addEventListener("click", resetView);
@@ -1029,6 +1048,7 @@
     if (dragDistance > 6) didUserDrag = true;
     globalRotY += dx * 0.005;
     globalRotX += dy * 0.005;
+    requestPausedRedraw();
   });
 
   canvas.addEventListener("touchstart", (e) => {
@@ -1054,6 +1074,7 @@
     if (dragDistance > 10) didUserDrag = true;
     globalRotY += dx * 0.005;
     globalRotX += dy * 0.005;
+    requestPausedRedraw();
   }, { passive: true });
 
   function rotateY(v, angle) {
@@ -1135,6 +1156,7 @@
     const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
     const dt = Math.min(0.05, Math.max(0, (now - lastFrameTime) / 1000));
     lastFrameTime = now;
+    const dtAnim = isPaused ? 0 : dt;
 
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -1232,7 +1254,7 @@
     shells.forEach((shell) => {
       if (now < shell.startAt) return;
       // `speed` was tuned as rad/frame at ~60fps; convert to rad/s.
-      shell.phase += shell.speed * globalSpeedFactor * dt * 60;
+      shell.phase += shell.speed * globalSpeedFactor * dtAnim * 60;
     });
 
     const showOrbits = orbitLinesToggle.checked;
@@ -1451,6 +1473,7 @@
         rebuildNucleusNucleons();
         updateDetails(currentSymbol);
         // Keep current zoom/rotation when switching elements.
+        requestPausedRedraw();
       });
     });
     if (cellsBySymbol[currentSymbol]) {
