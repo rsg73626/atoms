@@ -6,6 +6,12 @@
   <style>
     :root {
       color-scheme: dark;
+      --ctrl-bg: rgba(15,23,42,0.62);
+      --ctrl-bg-hover: rgba(148,163,184,0.14);
+      --ctrl-border: rgba(148,163,184,0.14);
+      --ctrl-shadow: 0 6px 14px rgba(0,0,0,0.38);
+      --ctrl-radius: 14px;
+      --ctrl-blur: blur(10px);
     }
     html, body {
       margin: 0;
@@ -73,15 +79,15 @@
       align-items: center;
       height: 44px;
       padding: 0 6px;
-      background: rgba(15,23,42,0.6);
-      border: none;
+      background: var(--ctrl-bg);
+      border: 1px solid var(--ctrl-border);
       border-radius: 12px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.38);
-      backdrop-filter: blur(10px);
+      box-shadow: var(--ctrl-shadow);
+      backdrop-filter: var(--ctrl-blur);
       transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
     }
     #languageCorner:hover {
-      background: rgba(148,163,184,0.14);
+      background: var(--ctrl-bg-hover);
       box-shadow: 0 10px 22px rgba(0,0,0,0.42);
       transform: translateY(-1px);
     }
@@ -452,11 +458,11 @@
       gap: 10px;
       align-items: center;
       padding: 8px 12px;
-      background: rgba(15,23,42,0.6);
-      border: none;
+      background: var(--ctrl-bg);
+      border: 1px solid var(--ctrl-border);
       border-radius: 999px;
       font-size: 12px;
-      backdrop-filter: blur(12px);
+      backdrop-filter: var(--ctrl-blur);
       cursor: pointer;
       user-select: none;
       color: #e5e7eb;
@@ -464,11 +470,11 @@
       -webkit-appearance: none;
       appearance: none;
       box-sizing: border-box;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      box-shadow: var(--ctrl-shadow);
       transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
     }
     .particle-control:hover {
-      background: rgba(148,163,184,0.14);
+      background: var(--ctrl-bg-hover);
       box-shadow: 0 10px 22px rgba(0,0,0,0.38);
       transform: translateY(-1px);
     }
@@ -620,8 +626,8 @@
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      border: none;
-      background: rgba(15,23,42,0.62);
+      border: 1px solid var(--ctrl-border);
+      background: var(--ctrl-bg);
       color: #e5e7eb;
       font-size: 18px;
       display: inline-flex;
@@ -629,15 +635,15 @@
       justify-content: center;
       cursor: pointer;
       transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+      backdrop-filter: var(--ctrl-blur);
+      box-shadow: var(--ctrl-shadow);
     }
     .speed-btn.speed-icon {
       font-size: 14px;
       letter-spacing: -0.02em;
     }
     .speed-btn:hover {
-      background: rgba(148,163,184,0.14);
+      background: var(--ctrl-bg-hover);
       box-shadow: 0 6px 16px rgba(0,0,0,0.26);
       transform: translateY(-1px);
     }
@@ -651,29 +657,78 @@
       align-items: center;
       font-size: 13px;
       cursor: pointer;
+      padding: 8px 10px;
+      background: var(--ctrl-bg);
+      border: 1px solid var(--ctrl-border);
+      border-radius: 999px;
+      box-shadow: var(--ctrl-shadow);
+      backdrop-filter: var(--ctrl-blur);
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .view-toggle:hover {
+      background: var(--ctrl-bg-hover);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+      transform: translateY(-1px);
+    }
+    .view-toggle:active {
+      transform: translateY(0);
     }
     .view-toggle input[type="checkbox"] {
       width: 16px;
       height: 16px;
       accent-color: #38bdf8;
     }
+    .shell-visibility {
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: max-content 120px max-content;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      padding: 8px 10px;
+      background: var(--ctrl-bg);
+      border: 1px solid var(--ctrl-border);
+      border-radius: 999px;
+      box-shadow: var(--ctrl-shadow);
+      backdrop-filter: var(--ctrl-blur);
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    .shell-visibility:hover {
+      background: var(--ctrl-bg-hover);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+      transform: translateY(-1px);
+    }
+    .shell-visibility:active {
+      transform: translateY(0);
+    }
+    .shell-visibility input[type="range"] {
+      width: 100%;
+      accent-color: #38bdf8;
+    }
+    .shell-visibility-value {
+      min-width: 40px;
+      text-align: right;
+      user-select: none;
+      opacity: 0.9;
+      font-variant-numeric: tabular-nums;
+    }
     .view-btn {
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      border: none;
-      background: rgba(15,23,42,0.62);
+      border: 1px solid var(--ctrl-border);
+      background: var(--ctrl-bg);
       color: #e5e7eb;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+      backdrop-filter: var(--ctrl-blur);
+      box-shadow: var(--ctrl-shadow);
     }
     .view-btn:hover {
-      background: rgba(148,163,184,0.14);
+      background: var(--ctrl-bg-hover);
       box-shadow: 0 6px 16px rgba(0,0,0,0.26);
       transform: translateY(-1px);
     }
@@ -802,6 +857,11 @@
         <input type="checkbox" id="chargeToggle" />
         <span id="chargeToggleLabel">Show charges</span>
       </label>
+      <div class="shell-visibility" id="shellVisibilityControl" role="group" aria-label="Shell visibility">
+        <span id="shellVisibilityLabel">Shells shown</span>
+        <input id="shellVisibilityRange" type="range" min="0" max="7" step="1" value="7" />
+        <span class="shell-visibility-value" id="shellVisibilityValue">7/7</span>
+      </div>
       <div id="speedControl">
         <div class="speed-row">
           <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>

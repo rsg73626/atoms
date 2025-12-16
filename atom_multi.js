@@ -37,6 +37,10 @@
   const orbitLinesLabelEl = document.getElementById('orbitLinesLabel');
   const axesToggleLabelEl = document.getElementById('axesToggleLabel');
   const chargeToggleLabelEl = document.getElementById('chargeToggleLabel');
+  const shellVisibilityControlEl = document.getElementById('shellVisibilityControl');
+  const shellVisibilityLabelEl = document.getElementById('shellVisibilityLabel');
+  const shellVisibilityRange = document.getElementById('shellVisibilityRange');
+  const shellVisibilityValueEl = document.getElementById('shellVisibilityValue');
   const zoomHintEl = document.getElementById('zoomHint');
   const periodicTitleEl = document.getElementById('periodicTitle');
   const periodicIntroEl = document.getElementById('periodicIntro');
@@ -91,6 +95,8 @@
       neutronColorLabel: "Neutron color",
       electronColorLabel: "Electron color",
       chargeToggleLabel: "Show charges",
+      shellVisibilityLabel: "Shells shown",
+      shellVisibilityAriaLabel: "Shells shown (from core to outer)",
       playLabel: "Play",
       pauseLabel: "Pause"
     },
@@ -125,6 +131,8 @@
       neutronColorLabel: "Cor do nêutron",
       electronColorLabel: "Cor do elétron",
       chargeToggleLabel: "Mostrar cargas",
+      shellVisibilityLabel: "Camadas exibidas",
+      shellVisibilityAriaLabel: "Camadas exibidas (do núcleo para fora)",
       playLabel: "Reproduzir",
       pauseLabel: "Pausar"
     },
@@ -159,6 +167,8 @@
       neutronColorLabel: "Color del neutrón",
       electronColorLabel: "Color del electrón",
       chargeToggleLabel: "Mostrar cargas",
+      shellVisibilityLabel: "Capas visibles",
+      shellVisibilityAriaLabel: "Capas visibles (del núcleo hacia fuera)",
       playLabel: "Reproducir",
       pauseLabel: "Pausar"
     }
@@ -172,6 +182,7 @@
   let currentElement = null;
   let isPaused = false;
   let pausedRedrawPending = false;
+  let visibleShellCount = null;
 
   function updatePlayPauseUI() {
     if (!speedPlayPauseBtn) return;
@@ -201,6 +212,12 @@
     if (orbitLinesLabelEl) orbitLinesLabelEl.textContent = t.orbitLinesLabel;
     if (axesToggleLabelEl) axesToggleLabelEl.textContent = t.axesToggleLabel;
     if (chargeToggleLabelEl) chargeToggleLabelEl.textContent = t.chargeToggleLabel;
+    if (shellVisibilityLabelEl) shellVisibilityLabelEl.textContent = t.shellVisibilityLabel;
+    if (shellVisibilityControlEl) shellVisibilityControlEl.setAttribute("aria-label", t.shellVisibilityAriaLabel);
+    if (shellVisibilityRange) {
+      shellVisibilityRange.setAttribute("aria-label", t.shellVisibilityAriaLabel);
+      shellVisibilityRange.setAttribute("title", t.shellVisibilityAriaLabel);
+    }
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
     if (periodicTitleEl) periodicTitleEl.textContent = t.periodicTitle;
     if (periodicIntroEl) periodicIntroEl.textContent = t.periodicIntro;
@@ -238,6 +255,19 @@
     neutronControl?.setAttribute("title", t.neutronColorLabel);
     electronControl?.setAttribute("aria-label", t.electronColorLabel);
     electronControl?.setAttribute("title", t.electronColorLabel);
+  }
+
+  function updateShellVisibilityUI(totalShellCountOverride) {
+    if (!shellVisibilityRange) return;
+    const total = Math.max(1, Number(totalShellCountOverride ?? currentElement?.electrons?.length ?? 1));
+    if (visibleShellCount == null) visibleShellCount = total;
+    visibleShellCount = Math.max(0, Math.min(visibleShellCount, total));
+    shellVisibilityRange.min = "0";
+    shellVisibilityRange.max = String(total);
+    shellVisibilityRange.step = "1";
+    shellVisibilityRange.value = String(visibleShellCount);
+    shellVisibilityRange.disabled = total <= 0;
+    if (shellVisibilityValueEl) shellVisibilityValueEl.textContent = `${visibleShellCount}/${total}`;
   }
 
   // --- visual constants ----------------------------------------------------
@@ -638,6 +668,7 @@
     searchInput.parentElement.classList.remove("has-text");
   }
   updateDetails(currentSymbol);
+  updateShellVisibilityUI(currentElement?.electrons?.length);
 
   function updateSpeedUI() {
     const min = parseFloat(speedRange.min || "0");
@@ -883,6 +914,9 @@
         });
       }
     });
+    // When switching elements, reset visibility to show all shells by default.
+    visibleShellCount = shells.length;
+    updateShellVisibilityUI(shells.length);
   }
 
   function buildStars() {
@@ -1191,10 +1225,14 @@
     ctx.restore();
     ctx.globalAlpha = 1;
 
+    const totalShellCount = shells.length;
+    const effectiveVisibleShellCount = Math.max(0, Math.min(visibleShellCount ?? totalShellCount, totalShellCount));
+    const visibleShells = shells.slice(0, effectiveVisibleShellCount);
+
     // --- 3D axes (X/Y/Z) --------------------------------------------------
     // Optional overlay; draw after background, before atom.
     if (axesToggle?.checked) {
-      const maxOrbitRadius = shells.reduce((m, s) => Math.max(m, s.radius), 0);
+      const maxOrbitRadius = visibleShells.reduce((m, s) => Math.max(m, s.radius), 0);
       const axisLen = Math.max(120, maxOrbitRadius * 1.12);
       const axisAlpha = 0.65;
       const axisWidth = 3.5;
@@ -1270,6 +1308,7 @@
     const orbitSweepSpin = (shells[0]?.phase ?? 0) % (Math.PI * 2);
 
     electrons.forEach(e => {
+      if (e.shellIndex >= effectiveVisibleShellCount) return;
       const shell = shells[e.shellIndex];
       const ang = e.baseAngle + (now < shell.startAt ? 0 : shell.phase);
       let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
@@ -1386,7 +1425,7 @@
     }
 
     if (showOrbits) {
-      shells.forEach((shell, shellIndex) => {
+      visibleShells.forEach((shell, shellIndex) => {
         const spin = orbitSweepSpin + (shell.spinOffset || 0);
         const tiltX = 0;
         const tiltY = 0;
@@ -1483,6 +1522,14 @@
 
   buildPeriodicGrid();
   requestAnimationFrame(draw);
+
+  shellVisibilityRange?.addEventListener("input", () => {
+    const total = Math.max(1, currentElement?.electrons?.length ?? shells.length ?? 1);
+    const next = Math.max(0, Math.min(parseInt(shellVisibilityRange.value, 10) || 0, total));
+    visibleShellCount = next;
+    updateShellVisibilityUI(total);
+    requestPausedRedraw();
+  });
 
   langSelect.addEventListener("change", () => {
     currentLanguage = langSelect.value;
