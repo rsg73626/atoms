@@ -7,20 +7,24 @@
   const detailsDiv = document.getElementById('details');
   const speedRange = document.getElementById('speedRange');
   const speedValue = document.getElementById('speedValue');
+  const speedPlayPauseBtn = document.getElementById('speedPlayPause');
   const speedMinusBtn = document.getElementById('speedMinus');
   const speedPlusBtn = document.getElementById('speedPlus');
   const speedRabbit = document.getElementById('speedRabbit');
   const orbitLinesToggle = document.getElementById('orbitLinesToggle');
   const axesToggle = document.getElementById('axesToggle');
+  const chargeToggle = document.getElementById('chargeToggle');
   const periodicGrid = document.getElementById('periodicGrid');
   const searchInput = document.getElementById('searchInput');
   const clearSearchBtn = document.getElementById('clearSearch');
   const currentElementNameEl = document.getElementById('currentElementName');
   const currentElementSymbolEl = document.getElementById('currentElementSymbol');
   const langSelect = document.getElementById('langSelect');
-  const bottomLegendBtn = document.getElementById('bottomLegend');
-  const themeMenuEl = document.getElementById('themeMenu');
-  const themeMenuGridEl = document.getElementById('themeMenuGrid');
+  const protonControl = document.getElementById('protonControl');
+  const neutronControl = document.getElementById('neutronControl');
+  const electronControl = document.getElementById('electronControl');
+  const colorMenuEl = document.getElementById('colorMenu');
+  const colorMenuGridEl = document.getElementById('colorMenuGrid');
   const controlCentralize = document.getElementById('controlCentralize');
   const controlZoomIn = document.getElementById('controlZoomIn');
   const controlZoomOut = document.getElementById('controlZoomOut');
@@ -32,6 +36,7 @@
   const speedLabelTextEl = document.getElementById('speedLabelText');
   const orbitLinesLabelEl = document.getElementById('orbitLinesLabel');
   const axesToggleLabelEl = document.getElementById('axesToggleLabel');
+  const chargeToggleLabelEl = document.getElementById('chargeToggleLabel');
   const zoomHintEl = document.getElementById('zoomHint');
   const periodicTitleEl = document.getElementById('periodicTitle');
   const periodicIntroEl = document.getElementById('periodicIntro');
@@ -82,12 +87,12 @@
       zoomOutLabel: "Zoom out",
       speedUp: "Increase speed",
       speedDown: "Decrease speed",
-      themeLabel: "Theme",
-      themeClassic: "Classic",
-      themeRBW: "RBW",
-      themeSolar: "Solar",
-      themeNeon: "Neon",
-      themeMono: "Monochrome"
+      protonColorLabel: "Proton color",
+      neutronColorLabel: "Neutron color",
+      electronColorLabel: "Electron color",
+      chargeToggleLabel: "Show charges",
+      playLabel: "Play",
+      pauseLabel: "Pause"
     },
     pt: {
       panelTitle: "Explorador Atômico",
@@ -116,12 +121,12 @@
       zoomOutLabel: "Afastar",
       speedUp: "Aumentar velocidade",
       speedDown: "Diminuir velocidade",
-      themeLabel: "Tema",
-      themeClassic: "Clássico",
-      themeRBW: "RBW",
-      themeSolar: "Solar",
-      themeNeon: "Neon",
-      themeMono: "Monocromático"
+      protonColorLabel: "Cor do próton",
+      neutronColorLabel: "Cor do nêutron",
+      electronColorLabel: "Cor do elétron",
+      chargeToggleLabel: "Mostrar cargas",
+      playLabel: "Reproduzir",
+      pauseLabel: "Pausar"
     },
     es: {
       panelTitle: "Explorador Atómico",
@@ -150,12 +155,12 @@
       zoomOutLabel: "Alejar",
       speedUp: "Aumentar velocidad",
       speedDown: "Disminuir velocidad",
-      themeLabel: "Tema",
-      themeClassic: "Clásico",
-      themeRBW: "RBW",
-      themeSolar: "Solar",
-      themeNeon: "Neón",
-      themeMono: "Monocromo"
+      protonColorLabel: "Color del protón",
+      neutronColorLabel: "Color del neutrón",
+      electronColorLabel: "Color del electrón",
+      chargeToggleLabel: "Mostrar cargas",
+      playLabel: "Reproducir",
+      pauseLabel: "Pausar"
     }
   };
 
@@ -165,6 +170,16 @@
   let currentSymbol = "Ca"; // default
   let elements = {};        // will be filled after periodicElements
   let currentElement = null;
+  let isPaused = false;
+
+  function updatePlayPauseUI() {
+    if (!speedPlayPauseBtn) return;
+    const t = i18n[currentLanguage] || i18n.en;
+    const label = isPaused ? t.playLabel : t.pauseLabel;
+    speedPlayPauseBtn.textContent = isPaused ? "▶" : "⏸";
+    speedPlayPauseBtn.setAttribute("aria-label", label);
+    speedPlayPauseBtn.setAttribute("title", label);
+  }
 
   function applyLanguage(lang) {
     const t = i18n[lang] || i18n.en;
@@ -175,6 +190,7 @@
     if (speedLabelTextEl) speedLabelTextEl.textContent = t.speedLabel;
     if (orbitLinesLabelEl) orbitLinesLabelEl.textContent = t.orbitLinesLabel;
     if (axesToggleLabelEl) axesToggleLabelEl.textContent = t.axesToggleLabel;
+    if (chargeToggleLabelEl) chargeToggleLabelEl.textContent = t.chargeToggleLabel;
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
     if (periodicTitleEl) periodicTitleEl.textContent = t.periodicTitle;
     if (periodicIntroEl) periodicIntroEl.textContent = t.periodicIntro;
@@ -205,10 +221,13 @@
     speedPlusBtn?.setAttribute("title", t.speedUp);
     speedMinusBtn?.setAttribute("aria-label", t.speedDown);
     speedMinusBtn?.setAttribute("title", t.speedDown);
-    bottomLegendBtn?.setAttribute("aria-label", t.themeLabel);
-    bottomLegendBtn?.setAttribute("title", t.themeLabel);
-    themeMenuEl?.setAttribute("aria-label", t.themeLabel);
-    rebuildThemeMenu();
+    updatePlayPauseUI();
+    protonControl?.setAttribute("aria-label", t.protonColorLabel);
+    protonControl?.setAttribute("title", t.protonColorLabel);
+    neutronControl?.setAttribute("aria-label", t.neutronColorLabel);
+    neutronControl?.setAttribute("title", t.neutronColorLabel);
+    electronControl?.setAttribute("aria-label", t.electronColorLabel);
+    electronControl?.setAttribute("title", t.electronColorLabel);
   }
 
   // --- visual constants ----------------------------------------------------
@@ -217,141 +236,230 @@
   let cameraDistanceFactor = 1.0;
   let cameraDistance = baseCameraDistance * cameraDistanceFactor;
 
-  const themes = {
-    classic: {
-      proton: "#ff4d6d",
-      neutron: "#3b82f6",
-      electronInner: "#67e8f9",
-      electronOuter: "#06b6d4"
-    },
-    // Electrons red, protons blue, neutrons white.
-    rbw: {
-      proton: "#007aff",
-      neutron: "#ffffff",
-      electronInner: "#ffb3ba",
-      electronOuter: "#ff3b30"
-    },
-    solar: {
-      proton: "#fbbf24",
-      neutron: "#e2e8f0",
-      electronInner: "#a5f3fc",
-      electronOuter: "#22d3ee"
-    },
-    neon: {
-      proton: "#e879f9",
-      neutron: "#a3e635",
-      electronInner: "#93c5fd",
-      electronOuter: "#3b82f6"
-    },
-    mono: {
-      proton: "#f8fafc",
-      neutron: "#cbd5e1",
-      electronInner: "#e2e8f0",
-      electronOuter: "#94a3b8"
-    }
-  };
+  let showCharges = false;
+  if (chargeToggle) {
+    chargeToggle.checked = false;
+    chargeToggle.addEventListener("change", () => {
+      showCharges = !!chargeToggle.checked;
+    });
+  }
 
-  let currentThemeKey = "classic";
-  try {
-    const savedTheme = localStorage.getItem("atomicExplorerTheme");
-    if (savedTheme && themes[savedTheme]) currentThemeKey = savedTheme;
-  } catch (_) {}
+  let protonColor = "#ff4d6d";
+  let neutronColor = "#3b82f6";
+  let electronColorOuter = "#06b6d4";
+  let electronColorInner = "#67e8f9";
+  // Keep electrons more "solid" by default (less fade-out).
+  let electronOuterFadeAlpha = "66";
 
-  let protonColor = themes[currentThemeKey]?.proton || themes.classic.proton;
-  let neutronColor = themes[currentThemeKey]?.neutron || themes.classic.neutron;
-  let electronColorInner = themes[currentThemeKey]?.electronInner || themes.classic.electronInner;
-  let electronColorOuter = themes[currentThemeKey]?.electronOuter || themes.classic.electronOuter;
+  function hexToRgb(hex) {
+    const raw = String(hex || "").replace("#", "").trim();
+    if (raw.length !== 6) return null;
+    const r = parseInt(raw.slice(0, 2), 16);
+    const g = parseInt(raw.slice(2, 4), 16);
+    const b = parseInt(raw.slice(4, 6), 16);
+    if ([r, g, b].some(n => Number.isNaN(n))) return null;
+    return { r, g, b };
+  }
 
-  function applyTheme(themeKey) {
-    if (!themes[themeKey]) return;
-    currentThemeKey = themeKey;
-    protonColor = themes[themeKey].proton;
-    neutronColor = themes[themeKey].neutron;
-    electronColorInner = themes[themeKey].electronInner;
-    electronColorOuter = themes[themeKey].electronOuter;
+  function relativeLuminance({ r, g, b }) {
+    // sRGB → linear
+    const toLin = (c) => {
+      const v = c / 255;
+      return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    const R = toLin(r), G = toLin(g), B = toLin(b);
+    return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+  }
+
+  function bestTextColorFor(bgHex) {
+    const rgb = hexToRgb(bgHex);
+    if (!rgb) return "#0b1120";
+    return relativeLuminance(rgb) > 0.65 ? "#0b1120" : "#f8fafc";
+  }
+
+  function rgbToHex({ r, g, b }) {
+    const toHex = (n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
+  function mixHex(hexA, hexB, t) {
+    const a = hexToRgb(hexA);
+    const b = hexToRgb(hexB);
+    if (!a || !b) return hexA;
+    const clampT = Math.max(0, Math.min(1, t));
+    return rgbToHex({
+      r: a.r + (b.r - a.r) * clampT,
+      g: a.g + (b.g - a.g) * clampT,
+      b: a.b + (b.b - a.b) * clampT
+    });
+  }
+
+  function computeElectronInner(outerHex) {
+    // Slightly lighter core to keep the electron readable.
+    return mixHex(outerHex, "#ffffff", 0.55);
+  }
+
+  function setLegendColors() {
     if (legendProtonEl) legendProtonEl.style.backgroundColor = protonColor;
     if (legendNeutronEl) legendNeutronEl.style.backgroundColor = neutronColor;
     if (legendElectronEl) legendElectronEl.style.backgroundColor = electronColorOuter;
-    try {
-      localStorage.setItem("atomicExplorerTheme", themeKey);
-    } catch (_) {}
-    updateThemeMenuSelection();
   }
 
-  applyTheme(currentThemeKey);
+  // Load saved colors (disabled-by-default, just restores when present).
+  try {
+    const savedProton = localStorage.getItem("atomicExplorerColorProton");
+    const savedNeutron = localStorage.getItem("atomicExplorerColorNeutron");
+    const savedElectron = localStorage.getItem("atomicExplorerColorElectron");
+    if (savedProton) protonColor = savedProton;
+    if (savedNeutron) neutronColor = savedNeutron;
+    if (savedElectron) {
+      electronColorOuter = savedElectron;
+      electronColorInner = computeElectronInner(savedElectron);
+    }
+  } catch (_) {}
 
-  function rebuildThemeMenu() {
-    if (!themeMenuGridEl) return;
+  setLegendColors();
+
+  function drawChargeSymbol(x, y, symbol, radiusPx, textColor) {
+    if (!showCharges) return;
+    if (!symbol) return;
+    if (!Number.isFinite(radiusPx) || radiusPx < 5) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = textColor || "#f8fafc";
+    ctx.font = `700 ${Math.max(9, Math.min(14, radiusPx * 1.15))}px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.shadowColor = "rgba(0,0,0,0.45)";
+    ctx.shadowBlur = 6;
+    ctx.fillText(symbol, x, y + 0.2);
+    ctx.restore();
+  }
+
+  const sharedColorOptions = [
+    // Rainbow (high saturation)
+    "#ff0000", // red
+    "#ff7a00", // orange
+    "#ffd400", // yellow
+    "#22c55e", // green
+    "#00d5ff", // cyan
+    "#0047ff", // blue
+    "#7c3aed", // indigo
+    "#d946ef", // violet
+    // Neutrals
+    "#000000", // black
+    "#111827", // gray 900
+    "#334155", // slate 700
+    "#64748b", // slate 500
+    "#94a3b8", // slate 400
+    "#cbd5e1", // slate 300
+    "#e2e8f0", // slate 200
+    "#ffffff"  // white
+  ];
+
+  function persistParticleColor(particle, color) {
+    try {
+      if (particle === "proton") localStorage.setItem("atomicExplorerColorProton", color);
+      if (particle === "neutron") localStorage.setItem("atomicExplorerColorNeutron", color);
+      if (particle === "electron") localStorage.setItem("atomicExplorerColorElectron", color);
+    } catch (_) {}
+  }
+
+  function applyParticleColor(particle, color) {
+    if (!color) return;
+    if (particle === "proton") protonColor = color;
+    if (particle === "neutron") neutronColor = color;
+    if (particle === "electron") {
+      electronColorOuter = color;
+      electronColorInner = computeElectronInner(color);
+    }
+    persistParticleColor(particle, color);
+    setLegendColors();
+  }
+
+  let openParticle = null;
+  let openControl = null;
+
+  function isColorMenuOpen() {
+    return colorMenuEl?.getAttribute("data-open") === "true";
+  }
+
+  function closeColorMenu() {
+    if (!colorMenuEl) return;
+    colorMenuEl.setAttribute("data-open", "false");
+    protonControl?.setAttribute("aria-expanded", "false");
+    neutronControl?.setAttribute("aria-expanded", "false");
+    electronControl?.setAttribute("aria-expanded", "false");
+    openParticle = null;
+    openControl = null;
+  }
+
+  function rebuildColorMenu(particle) {
+    if (!colorMenuGridEl) return;
     const t = i18n[currentLanguage] || i18n.en;
-    themeMenuGridEl.innerHTML = "";
-    Object.keys(themes).forEach(themeKey => {
-      const theme = themes[themeKey];
-      const option = document.createElement("button");
-      option.type = "button";
-      option.className = "theme-option";
-      option.setAttribute("role", "menuitemradio");
-      option.setAttribute("aria-checked", themeKey === currentThemeKey ? "true" : "false");
-      option.setAttribute("data-theme", themeKey);
-      option.innerHTML = [
-        `<div class="theme-option-legend">`,
-        `<span class="dot" style="background:${theme.proton};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${t.overlayLegendProton}</span>`,
-        `<span class="dot" style="background:${theme.neutron};box-shadow:inset 0 0 0 1px rgba(148,163,184,0.85)"></span><span>${t.overlayLegendNeutron}</span>`,
-        `<span class="dot" style="background:${theme.electronOuter};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${t.overlayLegendElectron}</span>`,
+    colorMenuGridEl.innerHTML = "";
+    const options = sharedColorOptions;
+    const label =
+      particle === "proton" ? t.overlayLegendProton :
+      particle === "neutron" ? t.overlayLegendNeutron :
+      t.overlayLegendElectron;
+
+    options.forEach(color => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "color-option";
+      btn.setAttribute("role", "menuitemradio");
+      btn.setAttribute("data-color", color);
+      btn.innerHTML = [
+        `<div class="color-option-content">`,
+        `<span class="dot" style="background:${color};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${label}</span>`,
         `</div>`
       ].join("");
-      if (themeKey === currentThemeKey) option.classList.add("selected");
-      option.addEventListener("click", () => {
-        applyTheme(themeKey);
-        closeThemeMenu();
+      btn.addEventListener("click", () => {
+        applyParticleColor(particle, color);
+        closeColorMenu();
       });
-      themeMenuGridEl.appendChild(option);
+      colorMenuGridEl.appendChild(btn);
     });
   }
 
-  function updateThemeMenuSelection() {
-    if (!themeMenuGridEl) return;
-    [...themeMenuGridEl.querySelectorAll(".theme-option")].forEach(el => {
-      const themeKey = el.getAttribute("data-theme");
-      const selected = themeKey === currentThemeKey;
-      el.classList.toggle("selected", selected);
-      el.setAttribute("aria-checked", selected ? "true" : "false");
-    });
+  function currentColorForParticle(particle) {
+    if (particle === "proton") return protonColor;
+    if (particle === "neutron") return neutronColor;
+    return electronColorOuter;
   }
 
-  function isThemeMenuOpen() {
-    return themeMenuEl?.getAttribute("data-open") === "true";
-  }
+  function openColorMenu(controlEl, particle) {
+    if (!colorMenuEl || !controlEl) return;
+    openParticle = particle;
+    openControl = controlEl;
+    rebuildColorMenu(particle);
 
-  function openThemeMenu() {
-    if (!themeMenuEl || !bottomLegendBtn) return;
     const wrapper = document.getElementById("canvasWrapper");
     if (wrapper) {
       const wrapperRect = wrapper.getBoundingClientRect();
-      const legendRect = bottomLegendBtn.getBoundingClientRect();
-      const left = legendRect.left - wrapperRect.left;
-      const top = legendRect.bottom - wrapperRect.top;
-      themeMenuEl.style.left = `${left}px`;
-      themeMenuEl.style.top = `${top}px`;
-      themeMenuEl.style.width = `${legendRect.width}px`;
+      const controlRect = controlEl.getBoundingClientRect();
+      const left = controlRect.left - wrapperRect.left;
+      const top = controlRect.bottom - wrapperRect.top + 8;
+      colorMenuEl.style.left = `${left}px`;
+      colorMenuEl.style.top = `${top}px`;
+      colorMenuEl.style.width = `${controlRect.width}px`;
     }
-    themeMenuEl.setAttribute("data-open", "true");
-    bottomLegendBtn.setAttribute("aria-expanded", "true");
-    const firstItem = themeMenuEl.querySelector(".theme-option");
-    if (firstItem instanceof HTMLElement) firstItem.focus();
+
+    colorMenuEl.setAttribute("data-open", "true");
+    protonControl?.setAttribute("aria-expanded", particle === "proton" ? "true" : "false");
+    neutronControl?.setAttribute("aria-expanded", particle === "neutron" ? "true" : "false");
+    electronControl?.setAttribute("aria-expanded", particle === "electron" ? "true" : "false");
+
+    const selectedColor = currentColorForParticle(particle);
+    const selectedItem = colorMenuEl.querySelector(`.color-option[data-color="${selectedColor}"]`);
+    const focusTarget = (selectedItem || colorMenuEl.querySelector(".color-option"));
+    if (focusTarget instanceof HTMLElement) focusTarget.focus();
   }
 
-  function closeThemeMenu() {
-    if (!themeMenuEl || !bottomLegendBtn) return;
-    themeMenuEl.setAttribute("data-open", "false");
-    bottomLegendBtn.setAttribute("aria-expanded", "false");
+  function toggleColorMenu(controlEl, particle) {
+    if (isColorMenuOpen() && openParticle === particle) closeColorMenu();
+    else openColorMenu(controlEl, particle);
   }
-
-  function toggleThemeMenu() {
-    if (isThemeMenuOpen()) closeThemeMenu();
-    else openThemeMenu();
-  }
-
-  rebuildThemeMenu();
 
   // --- periodic data -------------------------------------------------------
   const symbols = [
@@ -543,16 +651,13 @@
     updateSpeedUI();
   }
 
-  speedPlusBtn?.addEventListener("click", () => nudgeSpeed(1));
-  speedMinusBtn?.addEventListener("click", () => nudgeSpeed(-1));
-
   // Click-and-hold to continuously change speed.
   function attachHoldRepeat(btn, direction) {
     if (!btn) return;
     let timeoutId = null;
     let intervalId = null;
-    const initialDelayMs = 250;
-    const repeatMs = 55;
+    const initialDelayMs = 420;
+    const repeatMs = 120;
 
     const stop = () => {
       if (timeoutId != null) clearTimeout(timeoutId);
@@ -584,6 +689,16 @@
 
   attachHoldRepeat(speedPlusBtn, 1);
   attachHoldRepeat(speedMinusBtn, -1);
+
+  speedPlayPauseBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    const wasPaused = isPaused;
+    isPaused = !isPaused;
+    updatePlayPauseUI();
+    if (wasPaused && !isPaused) {
+      requestAnimationFrame(draw);
+    }
+  });
 
   canvas.addEventListener("wheel", (e) => {
     e.preventDefault();
@@ -1195,12 +1310,18 @@
         );
         gradEl.addColorStop(0, "#ffffff");
         gradEl.addColorStop(0.4, electronColorInner);
-        gradEl.addColorStop(1, electronColorOuter + "00");
+        if (electronOuterFadeAlpha !== "00") {
+          gradEl.addColorStop(0.82, electronColorOuter);
+          gradEl.addColorStop(1, electronColorOuter + electronOuterFadeAlpha);
+        } else {
+          gradEl.addColorStop(1, electronColorOuter + "00");
+        }
         ctx.globalAlpha = alpha;
         ctx.fillStyle = gradEl;
         ctx.beginPath();
         ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
         ctx.fill();
+        drawChargeSymbol(proj.x, proj.y, "−", r, "#0b1120");
         ctx.restore();
       });
     }
@@ -1255,13 +1376,15 @@
       ctx.fillStyle = gradN;
       ctx.arc(proj.x, proj.y, r, 0, Math.PI * 2);
       ctx.fill();
+      const chargeSymbol = p.type === "p" ? "+" : "0";
+      drawChargeSymbol(proj.x, proj.y, chargeSymbol, r, bestTextColorFor(baseColor));
       ctx.restore();
     });
 
     orbitFront.forEach(o => drawOrbitSegments([o.seg], o.style, o.width));
     drawElectronPoints(electronsFront);
 
-    requestAnimationFrame(draw);
+    if (!isPaused) requestAnimationFrame(draw);
   }
 
   function buildPeriodicGrid() {
@@ -1306,28 +1429,41 @@
     applyLanguage(currentLanguage);
     buildPeriodicGrid();
     updateDetails(currentSymbol);
+    if (isColorMenuOpen() && openParticle) {
+      rebuildColorMenu(openParticle);
+    }
   });
 
-  bottomLegendBtn?.addEventListener("click", (e) => {
+  protonControl?.addEventListener("click", (e) => {
     e.preventDefault();
-    toggleThemeMenu();
+    toggleColorMenu(protonControl, "proton");
+  });
+  neutronControl?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleColorMenu(neutronControl, "neutron");
+  });
+  electronControl?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleColorMenu(electronControl, "electron");
   });
 
   document.addEventListener("click", (e) => {
-    if (!isThemeMenuOpen()) return;
+    if (!isColorMenuOpen()) return;
     const target = e.target;
     if (!(target instanceof Node)) return;
-    if (themeMenuEl?.contains(target)) return;
-    if (bottomLegendBtn?.contains(target)) return;
-    closeThemeMenu();
+    if (colorMenuEl?.contains(target)) return;
+    if (protonControl?.contains(target)) return;
+    if (neutronControl?.contains(target)) return;
+    if (electronControl?.contains(target)) return;
+    closeColorMenu();
   });
 
   document.addEventListener("keydown", (e) => {
-    if (!isThemeMenuOpen()) return;
+    if (!isColorMenuOpen()) return;
     if (e.key === "Escape") {
       e.preventDefault();
-      closeThemeMenu();
-      bottomLegendBtn?.focus();
+      closeColorMenu();
+      openControl?.focus();
     }
   });
 
