@@ -18,6 +18,9 @@
   const currentElementNameEl = document.getElementById('currentElementName');
   const currentElementSymbolEl = document.getElementById('currentElementSymbol');
   const langSelect = document.getElementById('langSelect');
+  const bottomLegendBtn = document.getElementById('bottomLegend');
+  const themeMenuEl = document.getElementById('themeMenu');
+  const themeMenuGridEl = document.getElementById('themeMenuGrid');
   const controlCentralize = document.getElementById('controlCentralize');
   const controlZoomIn = document.getElementById('controlZoomIn');
   const controlZoomOut = document.getElementById('controlZoomOut');
@@ -78,7 +81,13 @@
       zoomInLabel: "Zoom in",
       zoomOutLabel: "Zoom out",
       speedUp: "Increase speed",
-      speedDown: "Decrease speed"
+      speedDown: "Decrease speed",
+      themeLabel: "Theme",
+      themeClassic: "Classic",
+      themeRBW: "RBW",
+      themeSolar: "Solar",
+      themeNeon: "Neon",
+      themeMono: "Monochrome"
     },
     pt: {
       panelTitle: "Explorador Atômico",
@@ -106,7 +115,13 @@
       zoomInLabel: "Aproximar",
       zoomOutLabel: "Afastar",
       speedUp: "Aumentar velocidade",
-      speedDown: "Diminuir velocidade"
+      speedDown: "Diminuir velocidade",
+      themeLabel: "Tema",
+      themeClassic: "Clássico",
+      themeRBW: "RBW",
+      themeSolar: "Solar",
+      themeNeon: "Neon",
+      themeMono: "Monocromático"
     },
     es: {
       panelTitle: "Explorador Atómico",
@@ -134,7 +149,13 @@
       zoomInLabel: "Acercar",
       zoomOutLabel: "Alejar",
       speedUp: "Aumentar velocidad",
-      speedDown: "Disminuir velocidad"
+      speedDown: "Disminuir velocidad",
+      themeLabel: "Tema",
+      themeClassic: "Clásico",
+      themeRBW: "RBW",
+      themeSolar: "Solar",
+      themeNeon: "Neón",
+      themeMono: "Monocromo"
     }
   };
 
@@ -184,6 +205,10 @@
     speedPlusBtn?.setAttribute("title", t.speedUp);
     speedMinusBtn?.setAttribute("aria-label", t.speedDown);
     speedMinusBtn?.setAttribute("title", t.speedDown);
+    bottomLegendBtn?.setAttribute("aria-label", t.themeLabel);
+    bottomLegendBtn?.setAttribute("title", t.themeLabel);
+    themeMenuEl?.setAttribute("aria-label", t.themeLabel);
+    rebuildThemeMenu();
   }
 
   // --- visual constants ----------------------------------------------------
@@ -192,14 +217,141 @@
   let cameraDistanceFactor = 1.0;
   let cameraDistance = baseCameraDistance * cameraDistanceFactor;
 
-  const protonColor = "#f97373";
-  const neutronColor = "#60a5fa";
-  const electronColorInner = "#a5f3fc";
-  const electronColorOuter = "#22d3ee";
+  const themes = {
+    classic: {
+      proton: "#ff4d6d",
+      neutron: "#3b82f6",
+      electronInner: "#67e8f9",
+      electronOuter: "#06b6d4"
+    },
+    // Electrons red, protons blue, neutrons white.
+    rbw: {
+      proton: "#007aff",
+      neutron: "#ffffff",
+      electronInner: "#ffb3ba",
+      electronOuter: "#ff3b30"
+    },
+    solar: {
+      proton: "#fbbf24",
+      neutron: "#e2e8f0",
+      electronInner: "#a5f3fc",
+      electronOuter: "#22d3ee"
+    },
+    neon: {
+      proton: "#e879f9",
+      neutron: "#a3e635",
+      electronInner: "#93c5fd",
+      electronOuter: "#3b82f6"
+    },
+    mono: {
+      proton: "#f8fafc",
+      neutron: "#cbd5e1",
+      electronInner: "#e2e8f0",
+      electronOuter: "#94a3b8"
+    }
+  };
 
-  legendProtonEl.style.backgroundColor = protonColor;
-  legendNeutronEl.style.backgroundColor = neutronColor;
-  legendElectronEl.style.backgroundColor = electronColorOuter;
+  let currentThemeKey = "classic";
+  try {
+    const savedTheme = localStorage.getItem("atomicExplorerTheme");
+    if (savedTheme && themes[savedTheme]) currentThemeKey = savedTheme;
+  } catch (_) {}
+
+  let protonColor = themes[currentThemeKey]?.proton || themes.classic.proton;
+  let neutronColor = themes[currentThemeKey]?.neutron || themes.classic.neutron;
+  let electronColorInner = themes[currentThemeKey]?.electronInner || themes.classic.electronInner;
+  let electronColorOuter = themes[currentThemeKey]?.electronOuter || themes.classic.electronOuter;
+
+  function applyTheme(themeKey) {
+    if (!themes[themeKey]) return;
+    currentThemeKey = themeKey;
+    protonColor = themes[themeKey].proton;
+    neutronColor = themes[themeKey].neutron;
+    electronColorInner = themes[themeKey].electronInner;
+    electronColorOuter = themes[themeKey].electronOuter;
+    if (legendProtonEl) legendProtonEl.style.backgroundColor = protonColor;
+    if (legendNeutronEl) legendNeutronEl.style.backgroundColor = neutronColor;
+    if (legendElectronEl) legendElectronEl.style.backgroundColor = electronColorOuter;
+    try {
+      localStorage.setItem("atomicExplorerTheme", themeKey);
+    } catch (_) {}
+    updateThemeMenuSelection();
+  }
+
+  applyTheme(currentThemeKey);
+
+  function rebuildThemeMenu() {
+    if (!themeMenuGridEl) return;
+    const t = i18n[currentLanguage] || i18n.en;
+    themeMenuGridEl.innerHTML = "";
+    Object.keys(themes).forEach(themeKey => {
+      const theme = themes[themeKey];
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "theme-option";
+      option.setAttribute("role", "menuitemradio");
+      option.setAttribute("aria-checked", themeKey === currentThemeKey ? "true" : "false");
+      option.setAttribute("data-theme", themeKey);
+      option.innerHTML = [
+        `<div class="theme-option-legend">`,
+        `<span class="dot" style="background:${theme.proton};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${t.overlayLegendProton}</span>`,
+        `<span class="dot" style="background:${theme.neutron};box-shadow:inset 0 0 0 1px rgba(148,163,184,0.85)"></span><span>${t.overlayLegendNeutron}</span>`,
+        `<span class="dot" style="background:${theme.electronOuter};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${t.overlayLegendElectron}</span>`,
+        `</div>`
+      ].join("");
+      if (themeKey === currentThemeKey) option.classList.add("selected");
+      option.addEventListener("click", () => {
+        applyTheme(themeKey);
+        closeThemeMenu();
+      });
+      themeMenuGridEl.appendChild(option);
+    });
+  }
+
+  function updateThemeMenuSelection() {
+    if (!themeMenuGridEl) return;
+    [...themeMenuGridEl.querySelectorAll(".theme-option")].forEach(el => {
+      const themeKey = el.getAttribute("data-theme");
+      const selected = themeKey === currentThemeKey;
+      el.classList.toggle("selected", selected);
+      el.setAttribute("aria-checked", selected ? "true" : "false");
+    });
+  }
+
+  function isThemeMenuOpen() {
+    return themeMenuEl?.getAttribute("data-open") === "true";
+  }
+
+  function openThemeMenu() {
+    if (!themeMenuEl || !bottomLegendBtn) return;
+    const wrapper = document.getElementById("canvasWrapper");
+    if (wrapper) {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const legendRect = bottomLegendBtn.getBoundingClientRect();
+      const left = legendRect.left - wrapperRect.left;
+      const top = legendRect.bottom - wrapperRect.top;
+      themeMenuEl.style.left = `${left}px`;
+      themeMenuEl.style.top = `${top}px`;
+      themeMenuEl.style.width = `${legendRect.width}px`;
+    }
+    themeMenuEl.setAttribute("data-open", "true");
+    bottomLegendBtn.setAttribute("aria-expanded", "true");
+    const firstItem = themeMenuEl.querySelector(".theme-option");
+    if (firstItem instanceof HTMLElement) firstItem.focus();
+  }
+
+  function closeThemeMenu() {
+    if (!themeMenuEl || !bottomLegendBtn) return;
+    themeMenuEl.setAttribute("data-open", "false");
+    bottomLegendBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleThemeMenu() {
+    if (isThemeMenuOpen()) closeThemeMenu();
+    else openThemeMenu();
+  }
+
+  rebuildThemeMenu();
 
   // --- periodic data -------------------------------------------------------
   const symbols = [
@@ -925,7 +1077,7 @@
     const occlusionRadiusWorld = nucleusRadius * 1.04;
     const occlusionRadiusScreen = nucleusR * 1.04;
 
-    shells.forEach((shell, i) => {
+    shells.forEach((shell) => {
       if (now < shell.startAt) return;
       // `speed` was tuned as rad/frame at ~60fps; convert to rad/s.
       shell.phase += shell.speed * globalSpeedFactor * dt * 60;
@@ -1154,6 +1306,29 @@
     applyLanguage(currentLanguage);
     buildPeriodicGrid();
     updateDetails(currentSymbol);
+  });
+
+  bottomLegendBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleThemeMenu();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!isThemeMenuOpen()) return;
+    const target = e.target;
+    if (!(target instanceof Node)) return;
+    if (themeMenuEl?.contains(target)) return;
+    if (bottomLegendBtn?.contains(target)) return;
+    closeThemeMenu();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (!isThemeMenuOpen()) return;
+    if (e.key === "Escape") {
+      e.preventDefault();
+      closeThemeMenu();
+      bottomLegendBtn?.focus();
+    }
   });
 
   searchInput?.addEventListener("input", () => {

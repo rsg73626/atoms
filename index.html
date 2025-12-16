@@ -29,11 +29,20 @@
       align-items: center;
       height: 44px;
       padding: 0 6px;
-      background: #020617;
-      border: 1px solid rgba(148,163,184,0.9);
+      background: rgba(15,23,42,0.6);
+      border: none;
       border-radius: 12px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.38);
       backdrop-filter: blur(10px);
+      transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+    }
+    #languageCorner:hover {
+      background: rgba(148,163,184,0.14);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.42);
+      transform: translateY(-1px);
+    }
+    #languageCorner:active {
+      transform: translateY(0);
     }
     #langSelect {
       padding: 0 14px;
@@ -61,12 +70,23 @@
       padding: 16px;
       box-sizing: border-box;
       background: #020617;
-      box-shadow: 4px 0 40px rgba(0,0,0,0.75);
-      border-right: 1px solid rgba(148,163,184,0.35);
+      box-shadow: none;
+      border-right: none;
+      position: relative;
       display: flex;
       flex-direction: column;
       gap: 10px;
       z-index: 10;
+    }
+    #panel::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: rgba(148,163,184,0.14);
+      pointer-events: none;
     }
     #panel-header {
       padding: 0;
@@ -98,8 +118,9 @@
     .section {
       padding: 10px 12px;
       border-radius: 10px;
-      background: #020617;
-      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.6);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
     }
     .section-title {
       font-size: 13px;
@@ -170,12 +191,12 @@
       width: 100%;
       padding: 10px 12px;
       border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.4);
-      background: rgba(2,6,23,0.9);
+      border: none;
+      background: rgba(148,163,184,0.10);
       color: #e5e7eb;
       font-size: 13px;
       outline: none;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
       margin-bottom: 0;
       box-sizing: border-box;
       padding-right: 38px;
@@ -233,13 +254,13 @@
     .element-cell {
       border-radius: 12px;
       padding: 6px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: #020617;
+      border: none;
+      background: rgba(148,163,184,0.07);
       color: #f9fafb;
       cursor: pointer;
       transition: transform 0.08s ease-out, box-shadow 0.08s ease-out,
-                  border-color 0.08s ease-out, background 0.12s ease-out;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+                  background 0.12s ease-out;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -247,14 +268,12 @@
     }
     .element-cell:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.7);
-      border-color: rgba(56,189,248,0.9);
-      background: #020617;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.26);
+      background: rgba(148,163,184,0.14);
     }
     .element-cell.active {
-      border-color: rgba(56,189,248,1);
-      box-shadow: 0 0 14px rgba(56,189,248,0.8);
-      background: #020617;
+      box-shadow: inset 0 0 0 2px rgba(56,189,248,0.75), 0 6px 16px rgba(0,0,0,0.26);
+      background: rgba(56,189,248,0.16);
     }
     .el-Z {
       display: none;
@@ -296,8 +315,9 @@
       column-gap: 10px;
       padding: 14px;
       border-radius: 10px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid rgba(148,163,184,0.8);
+      background: rgba(15,23,42,0.8);
+      border: none;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.38);
       color: #e5e7eb;
       font-size: 13px;
       pointer-events: auto;
@@ -313,7 +333,8 @@
       padding: 6px 10px;
       border-radius: 999px;
       background: rgba(15,23,42,0.8);
-      border: 1px solid rgba(148,163,184,0.5);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
       font-size: 12px;
     }
     #overlayZ {
@@ -377,22 +398,127 @@
       left: 50%;
       top: 14px;
       transform: translateX(-50%);
-      display: inline-flex;
-      gap: 12px;
+      display: flex;
+      gap: 10px;
       align-items: center;
       padding: 8px 12px;
-      background: rgba(2,6,23,0.85);
-      border: 1px solid rgba(148,163,184,0.5);
+      background: rgba(15,23,42,0.6);
+      border: none;
       border-radius: 999px;
       font-size: 12px;
       backdrop-filter: blur(12px);
+      cursor: pointer;
+      user-select: none;
+      color: #e5e7eb;
+      font-family: inherit;
+      -webkit-appearance: none;
+      appearance: none;
+      box-sizing: border-box;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
     }
-    #bottomLegend span.dot {
+    #bottomLegend:hover {
+      background: rgba(148,163,184,0.14);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+      transform: translate(-50%, -1px);
+    }
+    #bottomLegend:active {
+      transform: translate(-50%, 0);
+    }
+    #bottomLegend:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .dot {
       display: inline-block;
       width: 8px;
       height: 8px;
       border-radius: 999px;
       margin-right: 4px;
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,0.55);
+    }
+    #legendItems {
+      display: inline-flex;
+      gap: 12px;
+      align-items: center;
+      white-space: nowrap;
+    }
+    #bottomLegend .dot { box-shadow: inset 0 0 0 1px rgba(15,23,42,0.55); }
+    #legendThemeIcon {
+      width: 16px;
+      height: 16px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      opacity: 0.9;
+    }
+    #legendThemeIcon::before {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23e5e7eb' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M1 2l5 5 5-5'/></svg>");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 12px;
+      opacity: 0.9;
+    }
+
+    #themeMenu {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: none;
+      width: auto;
+      padding: 8px;
+      box-sizing: border-box;
+      background: rgba(2,6,23,0.92);
+      border: none;
+      border-radius: 14px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+      z-index: 40;
+      display: none;
+    }
+    #themeMenu[data-open="true"] { display: grid; }
+    #themeMenuGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .theme-option {
+      text-align: left;
+      width: 100%;
+      border: none;
+      background: rgba(148,163,184,0.07);
+      color: #e5e7eb;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+    }
+    .theme-option:hover {
+      background: rgba(148,163,184,0.14);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.26);
+    }
+    .theme-option.selected {
+      background: rgba(56,189,248,0.14);
+      box-shadow: inset 0 0 0 2px rgba(56,189,248,0.75), 0 6px 16px rgba(0,0,0,0.26);
+    }
+    .theme-option:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .theme-option-legend {
+      display: inline-flex;
+      gap: 12px;
+      align-items: center;
+      white-space: nowrap;
+      justify-content: flex-start;
+      font-size: 12px;
+      opacity: 0.95;
     }
     #bottomControls {
       position: absolute;
@@ -447,8 +573,8 @@
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(2,6,23,0.9);
+      border: none;
+      background: rgba(15,23,42,0.62);
       color: #e5e7eb;
       font-size: 18px;
       display: inline-flex;
@@ -457,10 +583,11 @@
       cursor: pointer;
       transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
       backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
     }
     .speed-btn:hover {
-      background: #0b1120;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      background: rgba(148,163,184,0.14);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.26);
       transform: translateY(-1px);
     }
     .speed-btn:active {
@@ -483,8 +610,8 @@
       width: 44px;
       height: 44px;
       border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(2,6,23,0.9);
+      border: none;
+      background: rgba(15,23,42,0.62);
       color: #e5e7eb;
       display: inline-flex;
       align-items: center;
@@ -492,10 +619,11 @@
       cursor: pointer;
       transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
       backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
     }
     .view-btn:hover {
-      background: #0b1120;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+      background: rgba(148,163,184,0.14);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.26);
       transform: translateY(-1px);
     }
     .view-btn:active {
@@ -535,7 +663,7 @@
         max-width: 100%;
         height: auto;
         border-right: none;
-        border-bottom: 1px solid rgba(148,163,184,0.35);
+        border-bottom: none;
       }
       #canvasWrapper {
         height: calc(100vh - 280px);
@@ -628,10 +756,16 @@
         <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
       </div>
     </div>
-    <div id="bottomLegend">
-      <span class="dot" id="legendProton"></span><span id="legendProtonText">Proton</span>
-      <span class="dot" id="legendNeutron"></span><span id="legendNeutronText">Neutron</span>
-      <span class="dot" id="legendElectron"></span><span id="legendElectronText">Electron</span>
+    <button id="bottomLegend" type="button" aria-haspopup="menu" aria-expanded="false">
+      <div id="legendItems">
+        <span class="dot" id="legendProton"></span><span id="legendProtonText">Proton</span>
+        <span class="dot" id="legendNeutron"></span><span id="legendNeutronText">Neutron</span>
+        <span class="dot" id="legendElectron"></span><span id="legendElectronText">Electron</span>
+      </div>
+      <span id="legendThemeIcon" aria-hidden="true"></span>
+    </button>
+    <div id="themeMenu" role="menu" aria-label="Themes" data-open="false">
+      <div id="themeMenuGrid"></div>
     </div>
   </div>
 
