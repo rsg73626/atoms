@@ -20,6 +20,50 @@
       display: flex;
       flex-direction: row;
     }
+
+    /* UI hide/show (cinema mode) */
+    #languageCorner,
+    #particleControllers,
+    #bottomControls,
+    #elementOverlay,
+    #colorMenu {
+      transition: opacity 220ms ease, filter 220ms ease;
+      will-change: opacity, filter;
+    }
+    body.ui-hidden #languageCorner {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    body.ui-hidden #particleControllers {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    body.ui-hidden #bottomControls {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    body.ui-hidden #elementOverlay {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    body.ui-hidden #colorMenu {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #languageCorner,
+      #particleControllers,
+      #bottomControls,
+      #elementOverlay,
+      #colorMenu {
+        transition: none !important;
+      }
+    }
     #languageCorner {
       position: fixed;
       top: 12px;

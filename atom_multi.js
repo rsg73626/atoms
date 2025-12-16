@@ -379,6 +379,15 @@
   let openParticle = null;
   let openControl = null;
 
+  function setUiHidden(hidden) {
+    document.body.classList.toggle("ui-hidden", !!hidden);
+    if (hidden) closeColorMenu();
+  }
+
+  function toggleUiHidden() {
+    setUiHidden(!document.body.classList.contains("ui-hidden"));
+  }
+
   function isColorMenuOpen() {
     return colorMenuEl?.getAttribute("data-open") === "true";
   }
@@ -712,6 +721,24 @@
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
   }, { passive: false });
 
+  // Toggle UI by clicking the canvas background (not UI controls).
+  const canvasWrapper = document.getElementById("canvasWrapper");
+  canvasWrapper?.addEventListener("click", (e) => {
+    if (didUserDrag) {
+      didUserDrag = false;
+      return;
+    }
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest("#panel")) return;
+    if (target.closest("#languageCorner")) return;
+    if (target.closest("#particleControllers")) return;
+    if (target.closest("#bottomControls")) return;
+    if (target.closest("#elementOverlay")) return;
+    if (target.closest("#colorMenu")) return;
+    toggleUiHidden();
+  });
+
   function buildShellsForElement(el) {
     const now = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
     const baseNucleusRadius = 40;
@@ -977,11 +1004,15 @@
   controlZoomOut?.addEventListener("click", () => adjustZoom(0.08));
 
   let isDragging = false;
+  let dragDistance = 0;
+  let didUserDrag = false;
   let lastX = 0;
   let lastY = 0;
 
   canvas.addEventListener("mousedown", (e) => {
     isDragging = true;
+    dragDistance = 0;
+    didUserDrag = false;
     lastX = e.clientX;
     lastY = e.clientY;
   });
@@ -994,6 +1025,8 @@
     const dy = e.clientY - lastY;
     lastX = e.clientX;
     lastY = e.clientY;
+    dragDistance += Math.hypot(dx, dy);
+    if (dragDistance > 6) didUserDrag = true;
     globalRotY += dx * 0.005;
     globalRotX += dy * 0.005;
   });
@@ -1001,6 +1034,8 @@
   canvas.addEventListener("touchstart", (e) => {
     if (e.touches.length === 1) {
       isDragging = true;
+      dragDistance = 0;
+      didUserDrag = false;
       lastX = e.touches[0].clientX;
       lastY = e.touches[0].clientY;
     }
@@ -1015,6 +1050,8 @@
     const dy = touch.clientY - lastY;
     lastX = touch.clientX;
     lastY = touch.clientY;
+    dragDistance += Math.hypot(dx, dy);
+    if (dragDistance > 10) didUserDrag = true;
     globalRotY += dx * 0.005;
     globalRotX += dy * 0.005;
   }, { passive: true });
