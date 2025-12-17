@@ -1413,13 +1413,7 @@
           ctx.stroke();
           ctx.restore();
 
-          ctx.save();
-          ctx.fillStyle = ax.color;
-          ctx.globalAlpha = 0.9;
-          ctx.font = "13px system-ui, -apple-system, Segoe UI, sans-serif";
-          ctx.fillText(`+${ax.name}`, pPos.x + 6, pPos.y - 6);
-          ctx.fillText(`-${ax.name}`, pNeg.x + 6, pNeg.y - 6);
-          ctx.restore();
+          // Labels removed to keep axes clean
         });
       }
     }
