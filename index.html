@@ -544,9 +544,12 @@
     }
     #colorMenu[data-open="true"] { display: grid; }
     #colorMenuGrid {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 8px;
+      align-items: stretch;
+      width: 100%;
+      box-sizing: border-box;
     }
     .color-option {
       text-align: left;
@@ -554,15 +557,16 @@
       border: none;
       background: rgba(148,163,184,0.07);
       color: #e5e7eb;
-      border-radius: 18px;
-      padding: 10px 12px;
-      min-height: 44px;
+      border-radius: 20px;
+      padding: 8px 12px;
+      min-height: 40px;
       display: flex;
       align-items: center;
       justify-content: flex-start;
       cursor: pointer;
       box-shadow: none;
       transition: background 0.12s ease;
+      box-sizing: border-box;
     }
     .color-option:hover {
       background: rgba(148,163,184,0.14);
@@ -574,7 +578,7 @@
     .color-option-content {
       display: inline-flex;
       width: 100%;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
       white-space: nowrap;
       justify-content: flex-start;
