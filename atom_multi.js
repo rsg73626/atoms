@@ -37,10 +37,11 @@
   const orbitLinesLabelEl = document.getElementById('orbitLinesLabel');
   const axesToggleLabelEl = document.getElementById('axesToggleLabel');
   const chargeToggleLabelEl = document.getElementById('chargeToggleLabel');
-  const shellVisibilityControlEl = document.getElementById('shellVisibilityControl');
-  const shellVisibilityLabelEl = document.getElementById('shellVisibilityLabel');
-  const shellVisibilityRange = document.getElementById('shellVisibilityRange');
-  const shellVisibilityValueEl = document.getElementById('shellVisibilityValue');
+  const shellVisibilityPanelEl = document.getElementById('shellVisibilityPanel');
+  const shellVisibilityTitleEl = document.getElementById('shellVisibilityTitle');
+  const shellButtonsEl = document.getElementById('shellButtons');
+  const shellAllBtn = document.getElementById('shellAllBtn');
+  const shellNoneBtn = document.getElementById('shellNoneBtn');
   const zoomHintEl = document.getElementById('zoomHint');
   const periodicTitleEl = document.getElementById('periodicTitle');
   const periodicIntroEl = document.getElementById('periodicIntro');
@@ -95,8 +96,10 @@
       neutronColorLabel: "Neutron color",
       electronColorLabel: "Electron color",
       chargeToggleLabel: "Show charges",
-      shellVisibilityLabel: "Shells shown",
-      shellVisibilityAriaLabel: "Shells shown (from core to outer)",
+      shellVisibilityLabel: "Shells",
+      shellVisibilityAriaLabel: "Select shells to display",
+      shellAllLabel: "All",
+      shellNoneLabel: "None",
       colorNames: {
         red: "Red",
         orange: "Orange",
@@ -146,8 +149,10 @@
       neutronColorLabel: "Cor do nêutron",
       electronColorLabel: "Cor do elétron",
       chargeToggleLabel: "Mostrar cargas",
-      shellVisibilityLabel: "Camadas exibidas",
-      shellVisibilityAriaLabel: "Camadas exibidas (do núcleo para fora)",
+      shellVisibilityLabel: "Camadas",
+      shellVisibilityAriaLabel: "Selecione as camadas para exibir",
+      shellAllLabel: "Todas",
+      shellNoneLabel: "Nenhuma",
       colorNames: {
         red: "Vermelho",
         orange: "Laranja",
@@ -197,8 +202,10 @@
       neutronColorLabel: "Color del neutrón",
       electronColorLabel: "Color del electrón",
       chargeToggleLabel: "Mostrar cargas",
-      shellVisibilityLabel: "Capas visibles",
-      shellVisibilityAriaLabel: "Capas visibles (del núcleo hacia fuera)",
+      shellVisibilityLabel: "Capas",
+      shellVisibilityAriaLabel: "Selecciona las capas a mostrar",
+      shellAllLabel: "Todas",
+      shellNoneLabel: "Ninguna",
       colorNames: {
         red: "Rojo",
         orange: "Naranja",
@@ -227,7 +234,7 @@
   let currentElement = null;
   let isPaused = false;
   let pausedRedrawPending = false;
-  let visibleShellCount = null;
+  let visibleShellSet = new Set();
 
   function updatePlayPauseUI() {
     if (!speedPlayPauseBtn) return;
@@ -257,12 +264,10 @@
     if (orbitLinesLabelEl) orbitLinesLabelEl.textContent = t.orbitLinesLabel;
     if (axesToggleLabelEl) axesToggleLabelEl.textContent = t.axesToggleLabel;
     if (chargeToggleLabelEl) chargeToggleLabelEl.textContent = t.chargeToggleLabel;
-    if (shellVisibilityLabelEl) shellVisibilityLabelEl.textContent = t.shellVisibilityLabel;
-    if (shellVisibilityControlEl) shellVisibilityControlEl.setAttribute("aria-label", t.shellVisibilityAriaLabel);
-    if (shellVisibilityRange) {
-      shellVisibilityRange.setAttribute("aria-label", t.shellVisibilityAriaLabel);
-      shellVisibilityRange.setAttribute("title", t.shellVisibilityAriaLabel);
-    }
+    if (shellVisibilityTitleEl) shellVisibilityTitleEl.textContent = t.shellVisibilityLabel;
+    if (shellVisibilityPanelEl) shellVisibilityPanelEl.setAttribute("aria-label", t.shellVisibilityAriaLabel);
+    if (shellAllBtn) shellAllBtn.textContent = t.shellAllLabel;
+    if (shellNoneBtn) shellNoneBtn.textContent = t.shellNoneLabel;
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
     if (periodicTitleEl) periodicTitleEl.textContent = t.periodicTitle;
     if (periodicIntroEl) periodicIntroEl.textContent = t.periodicIntro;
@@ -302,17 +307,42 @@
     electronControl?.setAttribute("title", t.electronColorLabel);
   }
 
+  function ensureVisibleShellSet(total) {
+    const next = new Set();
+    for (let i = 0; i < total; i++) {
+      if (visibleShellSet.has(i)) next.add(i);
+    }
+    visibleShellSet = next;
+  }
+
+  function rebuildShellButtons(total) {
+    if (!shellButtonsEl) return;
+    ensureVisibleShellSet(total);
+    shellButtonsEl.innerHTML = "";
+    for (let i = total - 1; i >= 0; i--) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "shell-btn";
+      btn.textContent = String(i + 1);
+      const selected = visibleShellSet.has(i);
+      if (selected) btn.classList.add("selected");
+      btn.setAttribute("aria-pressed", selected ? "true" : "false");
+      btn.setAttribute("data-shell-index", String(i));
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (visibleShellSet.has(i)) visibleShellSet.delete(i);
+        else visibleShellSet.add(i);
+        rebuildShellButtons(total);
+        requestPausedRedraw();
+      });
+      shellButtonsEl.appendChild(btn);
+    }
+  }
+
   function updateShellVisibilityUI(totalShellCountOverride) {
-    if (!shellVisibilityRange) return;
     const total = Math.max(1, Number(totalShellCountOverride ?? currentElement?.electrons?.length ?? 1));
-    if (visibleShellCount == null) visibleShellCount = total;
-    visibleShellCount = Math.max(0, Math.min(visibleShellCount, total));
-    shellVisibilityRange.min = "0";
-    shellVisibilityRange.max = String(total);
-    shellVisibilityRange.step = "1";
-    shellVisibilityRange.value = String(visibleShellCount);
-    shellVisibilityRange.disabled = total <= 0;
-    if (shellVisibilityValueEl) shellVisibilityValueEl.textContent = `${visibleShellCount}/${total}`;
+    ensureVisibleShellSet(total);
+    rebuildShellButtons(total);
   }
 
   // --- visual constants ----------------------------------------------------
@@ -712,6 +742,9 @@
   updateDetails(currentSymbol);
   updateShellVisibilityUI(currentElement?.electrons?.length);
 
+  if (shellAllBtn) shellAllBtn.addEventListener("click", (e) => { e.stopPropagation(); setAllShells(); });
+  if (shellNoneBtn) shellNoneBtn.addEventListener("click", (e) => { e.stopPropagation(); setNoShells(); });
+
   function updateSpeedUI() {
     const min = parseFloat(speedRange.min || "0");
     const max = parseFloat(speedRange.max || "3");
@@ -824,6 +857,7 @@
     if (target.closest("#languageCorner")) return;
     if (target.closest("#particleControllers")) return;
     if (target.closest("#bottomControls")) return;
+    if (target.closest("#shellVisibilityPanel")) return;
     if (target.closest("#elementOverlay")) return;
     if (target.closest("#colorMenu")) return;
     toggleUiHidden();
@@ -957,8 +991,21 @@
       }
     });
     // When switching elements, reset visibility to show all shells by default.
-    visibleShellCount = shells.length;
+    visibleShellSet = new Set(shells.map((_, i) => i));
     updateShellVisibilityUI(shells.length);
+  }
+
+  function setAllShells() {
+    const total = shells.length;
+    visibleShellSet = new Set(Array.from({ length: total }, (_, idx) => idx));
+    updateShellVisibilityUI(total);
+    requestPausedRedraw();
+  }
+
+  function setNoShells() {
+    visibleShellSet.clear();
+    updateShellVisibilityUI(shells.length);
+    requestPausedRedraw();
   }
 
   function buildStars() {
@@ -1268,8 +1315,9 @@
     ctx.globalAlpha = 1;
 
     const totalShellCount = shells.length;
-    const effectiveVisibleShellCount = Math.max(0, Math.min(visibleShellCount ?? totalShellCount, totalShellCount));
-    const visibleShells = shells.slice(0, effectiveVisibleShellCount);
+    ensureVisibleShellSet(totalShellCount);
+    const visibleShellIndexes = Array.from(visibleShellSet).filter(i => i < totalShellCount).sort((a, b) => a - b);
+    const visibleShells = visibleShellIndexes.map(i => shells[i]);
 
     // --- 3D axes (X/Y/Z) --------------------------------------------------
     // Optional overlay; draw after background, before atom.
@@ -1350,7 +1398,7 @@
     const orbitSweepSpin = (shells[0]?.phase ?? 0) % (Math.PI * 2);
 
     electrons.forEach(e => {
-      if (e.shellIndex >= effectiveVisibleShellCount) return;
+      if (!visibleShellSet.has(e.shellIndex)) return;
       const shell = shells[e.shellIndex];
       const ang = e.baseAngle + (now < shell.startAt ? 0 : shell.phase);
       let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
@@ -1564,14 +1612,6 @@
 
   buildPeriodicGrid();
   requestAnimationFrame(draw);
-
-  shellVisibilityRange?.addEventListener("input", () => {
-    const total = Math.max(1, currentElement?.electrons?.length ?? shells.length ?? 1);
-    const next = Math.max(0, Math.min(parseInt(shellVisibilityRange.value, 10) || 0, total));
-    visibleShellCount = next;
-    updateShellVisibilityUI(total);
-    requestPausedRedraw();
-  });
 
   langSelect.addEventListener("change", () => {
     currentLanguage = langSelect.value;

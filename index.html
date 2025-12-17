@@ -32,7 +32,8 @@
     #particleControllers,
     #bottomControls,
     #elementOverlay,
-    #colorMenu {
+    #colorMenu,
+    #shellVisibilityPanel {
       transition: opacity 220ms ease, filter 220ms ease;
       will-change: opacity, filter;
     }
@@ -56,7 +57,8 @@
       filter: blur(2px);
       pointer-events: none;
     }
-    body.ui-hidden #colorMenu {
+    body.ui-hidden #colorMenu,
+    body.ui-hidden #shellVisibilityPanel {
       opacity: 0;
       filter: blur(2px);
       pointer-events: none;
@@ -592,9 +594,9 @@
     }
 
     .particle-control {
-      width: 150px;
-      min-width: 150px;
-      max-width: 150px;
+      width: 140px;
+      min-width: 140px;
+      max-width: 140px;
     }
     #bottomControls {
       position: absolute;
@@ -701,39 +703,81 @@
       height: 16px;
       accent-color: #38bdf8;
     }
-    .shell-visibility {
-      display: grid;
-      grid-auto-flow: column;
-      grid-template-columns: max-content 120px max-content;
+    #shellVisibilityPanel {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(2,6,23,0.82);
+      border: 1px solid var(--ctrl-border);
+      border-radius: 16px;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.4);
+      backdrop-filter: var(--ctrl-blur);
+      min-width: 90px;
+      z-index: 14;
+    }
+    #shellVisibilityHeader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    #shellVisibilityTitle {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.82;
+      text-align: center;
+    }
+    .shell-link {
+      color: #60a5fa;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .shell-link:hover { color: #93c5fd; }
+    #shellButtons {
+      display: flex;
+      flex-direction: column;
       gap: 8px;
       align-items: center;
-      font-size: 13px;
-      padding: 8px 10px;
-      background: var(--ctrl-bg);
-      border: 1px solid var(--ctrl-border);
-      border-radius: 999px;
-      box-shadow: var(--ctrl-shadow);
-      backdrop-filter: var(--ctrl-blur);
-      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
     }
-    .shell-visibility:hover {
-      background: var(--ctrl-bg-hover);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+    .shell-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      border: 1px solid rgba(148,163,184,0.2);
+      background: rgba(15,23,42,0.6);
+      color: #e5e7eb;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
+    }
+    .shell-btn:hover {
+      background: rgba(148,163,184,0.14);
       transform: translateY(-1px);
     }
-    .shell-visibility:active {
+    .shell-btn:active {
       transform: translateY(0);
     }
-    .shell-visibility input[type="range"] {
-      width: 100%;
-      accent-color: #38bdf8;
+    .shell-btn.selected {
+      background: rgba(59,130,246,0.18);
+      border-color: rgba(59,130,246,0.55);
+      color: #bfdbfe;
     }
-    .shell-visibility-value {
-      min-width: 40px;
-      text-align: right;
-      user-select: none;
-      opacity: 0.9;
-      font-variant-numeric: tabular-nums;
+    #shellFooter {
+      display: flex;
+      justify-content: center;
     }
     .view-btn {
       width: 44px;
@@ -880,11 +924,6 @@
         <input type="checkbox" id="chargeToggle" />
         <span id="chargeToggleLabel">Show charges</span>
       </label>
-      <div class="shell-visibility" id="shellVisibilityControl" role="group" aria-label="Shell visibility">
-        <span id="shellVisibilityLabel">Shells shown</span>
-        <input id="shellVisibilityRange" type="range" min="0" max="7" step="1" value="7" />
-        <span class="shell-visibility-value" id="shellVisibilityValue">7/7</span>
-      </div>
       <div id="speedControl">
         <div class="speed-row">
           <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>
@@ -908,6 +947,16 @@
         <span class="dot" id="legendElectron"></span><span id="legendElectronText">Electron</span>
         <span class="particle-chevron" aria-hidden="true"></span>
       </button>
+    </div>
+    <div id="shellVisibilityPanel" aria-label="Shells">
+      <div id="shellVisibilityHeader">
+        <div id="shellVisibilityTitle">Shells</div>
+        <button class="shell-link" id="shellAllBtn" type="button">All</button>
+      </div>
+      <div id="shellButtons"></div>
+      <div id="shellFooter">
+        <button class="shell-link" id="shellNoneBtn" type="button">None</button>
+      </div>
     </div>
     <div id="colorMenu" role="menu" aria-label="Colors" data-open="false">
       <div id="colorMenuGrid"></div>
