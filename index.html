@@ -605,20 +605,41 @@
     }
     #bottomControls {
       position: absolute;
-      left: 14px;
-      right: 14px;
+      left: 0;
+      right: 0;
       bottom: 14px;
+      padding: 0 12px;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
       align-items: flex-end;
-      gap: 12px;
+      justify-content: space-between;
+      gap: 16px;
       z-index: 12;
+    }
+    .control-cluster {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      flex: 0 0 auto;
+    }
+    #togglesCluster {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: center;
+    }
+    #togglesCluster span { white-space: nowrap; }
+    #zoomControls {
+      display: grid;
+      grid-template-columns: repeat(3, 44px);
+      grid-template-rows: 44px;
+      gap: 8px;
+      justify-items: center;
+      align-items: center;
     }
     #viewportControls {
       display: grid;
       grid-template-columns: repeat(3, 44px);
-      grid-template-rows: repeat(3, 44px);
+      grid-template-rows: repeat(2, 44px);
       gap: 8px;
       justify-items: center;
       align-items: center;
@@ -639,6 +660,7 @@
       min-width: calc(40px * 3 + 56px + 10px * 3);
       align-items: center;
     }
+    #speedCluster { justify-content: flex-start; }
     #speedControl label {
       width: 100%;
     }
@@ -931,37 +953,45 @@
     </div>
   </div>
       <div id="bottomControls">
-        <div id="viewportControls">
+        <div class="control-cluster" id="speedCluster">
+          <div id="speedControl">
+            <div class="speed-row">
+              <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>
+              <button class="speed-btn speed-icon" id="speedMinus" aria-label="Slow down">&lt;&lt;</button>
+              <span id="speedValue">1.0×</span>
+              <button class="speed-btn speed-icon" id="speedPlus" aria-label="Speed up">&gt;&gt;</button>
+            </div>
+            <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
+          </div>
+        </div>
+        <div class="control-cluster" id="togglesCluster">
+          <label class="view-toggle" for="orbitLinesToggle">
+            <input type="checkbox" id="orbitLinesToggle" />
+            <span id="orbitLinesLabel">Show orbits</span>
+          </label>
+          <label class="view-toggle" for="axesToggle">
+            <input type="checkbox" id="axesToggle" />
+            <span id="axesToggleLabel">Show axes</span>
+          </label>
+          <label class="view-toggle" for="chargeToggle">
+            <input type="checkbox" id="chargeToggle" />
+            <span id="chargeToggleLabel">Show charges</span>
+          </label>
+        </div>
+        <div class="control-cluster" id="zoomCluster">
+          <div id="zoomControls">
+            <button class="view-btn" id="controlZoomIn" aria-label="Zoom in"><span class="icon zoom-icon zoom-in" aria-hidden="true"></span></button>
+            <button class="view-btn" id="controlZoomOut" aria-label="Zoom out"><span class="icon zoom-icon zoom-out" aria-hidden="true"></span></button>
+            <button class="view-btn" id="controlCentralize" aria-label="Centralize"><span class="restore-icon" aria-hidden="true"></span></button>
+          </div>
+        </div>
+        <div class="control-cluster" id="viewportControls">
           <button class="view-btn arrow-btn" id="viewArrowUp" aria-label="Rotate up" style="grid-column:2;grid-row:1;">↑</button>
           <button class="view-btn arrow-btn" id="viewArrowLeft" aria-label="Rotate left" style="grid-column:1;grid-row:2;">←</button>
           <button class="view-btn arrow-btn" id="viewArrowDown" aria-label="Rotate down" style="grid-column:2;grid-row:2;">↓</button>
           <button class="view-btn arrow-btn" id="viewArrowRight" aria-label="Rotate right" style="grid-column:3;grid-row:2;">→</button>
-          <button class="view-btn" id="controlZoomIn" aria-label="Zoom in" style="grid-column:1;grid-row:3;"><span class="icon zoom-icon zoom-in" aria-hidden="true"></span></button>
-          <button class="view-btn" id="controlZoomOut" aria-label="Zoom out" style="grid-column:2;grid-row:3;"><span class="icon zoom-icon zoom-out" aria-hidden="true"></span></button>
-          <button class="view-btn" id="controlCentralize" aria-label="Centralize" style="grid-column:3;grid-row:3;"><span class="restore-icon" aria-hidden="true"></span></button>
         </div>
-      <label class="view-toggle" for="orbitLinesToggle">
-        <input type="checkbox" id="orbitLinesToggle" />
-        <span id="orbitLinesLabel">Show orbits</span>
-      </label>
-      <label class="view-toggle" for="axesToggle">
-        <input type="checkbox" id="axesToggle" />
-        <span id="axesToggleLabel">Show axes</span>
-      </label>
-      <label class="view-toggle" for="chargeToggle">
-        <input type="checkbox" id="chargeToggle" />
-        <span id="chargeToggleLabel">Show charges</span>
-      </label>
-      <div id="speedControl">
-        <div class="speed-row">
-          <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>
-          <button class="speed-btn speed-icon" id="speedMinus" aria-label="Slow down">&lt;&lt;</button>
-          <span id="speedValue">1.0×</span>
-          <button class="speed-btn speed-icon" id="speedPlus" aria-label="Speed up">&gt;&gt;</button>
-        </div>
-        <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
       </div>
-    </div>
     <div id="particleControllers">
       <button class="particle-control" id="protonControl" type="button" aria-haspopup="menu" aria-expanded="false">
         <span class="dot" id="legendProton"></span><span id="legendProtonText">Proton</span>
@@ -979,11 +1009,11 @@
     <div id="shellVisibilityPanel" aria-label="Shells">
       <div id="shellVisibilityHeader">
         <div id="shellVisibilityTitle">Shells</div>
-        <button class="shell-link" id="shellAllBtn" type="button">All</button>
+        <button class="shell-link" id="shellNoneBtn" type="button">None</button>
       </div>
       <div id="shellButtons"></div>
       <div id="shellFooter">
-        <button class="shell-link" id="shellNoneBtn" type="button">None</button>
+        <button class="shell-link" id="shellAllBtn" type="button">All</button>
       </div>
     </div>
     <div id="colorMenu" role="menu" aria-label="Colors" data-open="false">

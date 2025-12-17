@@ -247,6 +247,7 @@
   let visibleSymbols = [];
   let focusContext = "scene"; // "scene" or "elements"
   let viewHoldTimer = null;
+  const shellLetters = ["K","L","M","N","O","P","Q","R","S"];
 
   function stopViewHold() {
     if (viewHoldTimer) {
@@ -345,11 +346,11 @@
     if (!shellButtonsEl) return;
     ensureVisibleShellSet(total);
     shellButtonsEl.innerHTML = "";
-    for (let i = total - 1; i >= 0; i--) {
+    for (let i = 0; i < total; i++) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "shell-btn";
-      btn.textContent = String(i + 1);
+      btn.textContent = shellLetters[i] || String(i + 1);
       const selected = visibleShellSet.has(i);
       if (selected) btn.classList.add("selected");
       btn.setAttribute("aria-pressed", selected ? "true" : "false");
