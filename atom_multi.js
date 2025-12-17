@@ -28,6 +28,10 @@
   const controlCentralize = document.getElementById('controlCentralize');
   const controlZoomIn = document.getElementById('controlZoomIn');
   const controlZoomOut = document.getElementById('controlZoomOut');
+  const viewArrowUp = document.getElementById('viewArrowUp');
+  const viewArrowDown = document.getElementById('viewArrowDown');
+  const viewArrowLeft = document.getElementById('viewArrowLeft');
+  const viewArrowRight = document.getElementById('viewArrowRight');
 
   const panelTitleEl = document.getElementById('panelTitle');
   const panelSubtitleEl = document.getElementById('panelSubtitle');
@@ -39,6 +43,7 @@
   const chargeToggleLabelEl = document.getElementById('chargeToggleLabel');
   const shellVisibilityPanelEl = document.getElementById('shellVisibilityPanel');
   const shellVisibilityTitleEl = document.getElementById('shellVisibilityTitle');
+  const navigationHintEl = document.getElementById('navigationHint');
   const shellButtonsEl = document.getElementById('shellButtons');
   const shellAllBtn = document.getElementById('shellAllBtn');
   const shellNoneBtn = document.getElementById('shellNoneBtn');
@@ -100,6 +105,7 @@
       shellVisibilityAriaLabel: "Select shells to display",
       shellAllLabel: "All",
       shellNoneLabel: "None",
+      navigationHint: "Use arrow keys to navigate the element menu and the view.",
       colorNames: {
         red: "Red",
         orange: "Orange",
@@ -153,6 +159,7 @@
       shellVisibilityAriaLabel: "Selecione as camadas para exibir",
       shellAllLabel: "Todas",
       shellNoneLabel: "Nenhuma",
+      navigationHint: "Use as setas para navegar no menu de elementos e na visualização.",
       colorNames: {
         red: "Vermelho",
         orange: "Laranja",
@@ -206,6 +213,7 @@
       shellVisibilityAriaLabel: "Selecciona las capas a mostrar",
       shellAllLabel: "Todas",
       shellNoneLabel: "Ninguna",
+      navigationHint: "Usa las flechas para navegar el menú y la vista.",
       colorNames: {
         red: "Rojo",
         orange: "Naranja",
@@ -235,6 +243,23 @@
   let isPaused = false;
   let pausedRedrawPending = false;
   let visibleShellSet = new Set();
+  let cellsBySymbol = {};
+  let visibleSymbols = [];
+  let focusContext = "scene"; // "scene" or "elements"
+  let viewHoldTimer = null;
+
+  function stopViewHold() {
+    if (viewHoldTimer) {
+      clearInterval(viewHoldTimer);
+      viewHoldTimer = null;
+    }
+  }
+
+  function startViewHold(action) {
+    stopViewHold();
+    action();
+    viewHoldTimer = setInterval(action, 90);
+  }
 
   function updatePlayPauseUI() {
     if (!speedPlayPauseBtn) return;
@@ -266,6 +291,7 @@
     if (chargeToggleLabelEl) chargeToggleLabelEl.textContent = t.chargeToggleLabel;
     if (shellVisibilityTitleEl) shellVisibilityTitleEl.textContent = t.shellVisibilityLabel;
     if (shellVisibilityPanelEl) shellVisibilityPanelEl.setAttribute("aria-label", t.shellVisibilityAriaLabel);
+    if (navigationHintEl) navigationHintEl.textContent = t.navigationHint;
     if (shellAllBtn) shellAllBtn.textContent = t.shellAllLabel;
     if (shellNoneBtn) shellNoneBtn.textContent = t.shellNoneLabel;
     if (zoomHintEl) zoomHintEl.textContent = t.zoomHint;
@@ -1008,6 +1034,21 @@
     requestPausedRedraw();
   }
 
+  function moveElementSelection(delta) {
+    if (!visibleSymbols.length) return;
+    const idx = visibleSymbols.indexOf(currentSymbol);
+    const startIdx = idx === -1 ? 0 : idx;
+    const nextIdx = (startIdx + delta + visibleSymbols.length) % visibleSymbols.length;
+    setCurrentElement(visibleSymbols[nextIdx], { focus: true });
+  }
+
+  function nudgeView(dx, dy) {
+    const step = 0.14;
+    globalRotY += dx * step;
+    globalRotX += dy * step;
+    requestPausedRedraw();
+  }
+
   function buildStars() {
     stars = [];
     for (let i = 0; i < 260; i++) {
@@ -1142,8 +1183,20 @@
   }
 
   controlCentralize?.addEventListener("click", resetView);
-  controlZoomIn?.addEventListener("click", () => adjustZoom(-0.08));
-  controlZoomOut?.addEventListener("click", () => adjustZoom(0.08));
+  controlZoomIn?.addEventListener("click", () => { focusContext = "scene"; adjustZoom(-0.08); });
+  controlZoomOut?.addEventListener("click", () => { focusContext = "scene"; adjustZoom(0.08); });
+  viewArrowLeft?.addEventListener("mousedown", (e) => { e.stopPropagation(); focusContext = "scene"; startViewHold(() => nudgeView(-1, 0)); });
+  viewArrowRight?.addEventListener("mousedown", (e) => { e.stopPropagation(); focusContext = "scene"; startViewHold(() => nudgeView(1, 0)); });
+  viewArrowUp?.addEventListener("mousedown", (e) => { e.stopPropagation(); focusContext = "scene"; startViewHold(() => nudgeView(0, -1)); });
+  viewArrowDown?.addEventListener("mousedown", (e) => { e.stopPropagation(); focusContext = "scene"; startViewHold(() => nudgeView(0, 1)); });
+  viewArrowLeft?.addEventListener("mouseup", stopViewHold);
+  viewArrowRight?.addEventListener("mouseup", stopViewHold);
+  viewArrowUp?.addEventListener("mouseup", stopViewHold);
+  viewArrowDown?.addEventListener("mouseup", stopViewHold);
+  viewArrowLeft?.addEventListener("mouseleave", stopViewHold);
+  viewArrowRight?.addEventListener("mouseleave", stopViewHold);
+  viewArrowUp?.addEventListener("mouseleave", stopViewHold);
+  viewArrowDown?.addEventListener("mouseleave", stopViewHold);
 
   let isDragging = false;
   let dragDistance = 0;
@@ -1152,6 +1205,7 @@
   let lastY = 0;
 
   canvas.addEventListener("mousedown", (e) => {
+    focusContext = "scene";
     isDragging = true;
     dragDistance = 0;
     didUserDrag = false;
@@ -1175,6 +1229,7 @@
   });
 
   canvas.addEventListener("touchstart", (e) => {
+    focusContext = "scene";
     if (e.touches.length === 1) {
       isDragging = true;
       dragDistance = 0;
@@ -1575,9 +1630,26 @@
     if (!isPaused) requestAnimationFrame(draw);
   }
 
+  function setCurrentElement(symbol, opts = {}) {
+    if (!elements[symbol]) return;
+    currentSymbol = symbol;
+    currentElement = elements[symbol];
+    Object.values(cellsBySymbol).forEach(c => c.classList.remove("active"));
+    const activeCell = cellsBySymbol[symbol];
+    if (activeCell) {
+      activeCell.classList.add("active");
+      if (opts.focus) activeCell.focus();
+    }
+    rebuildShellsAndElectrons();
+    rebuildNucleusNucleons();
+    updateDetails(currentSymbol);
+    requestPausedRedraw();
+  }
+
   function buildPeriodicGrid() {
     periodicGrid.innerHTML = "";
-    const cellsBySymbol = {};
+    cellsBySymbol = {};
+    visibleSymbols = [];
     const term = (searchInput?.value || "").trim().toLowerCase();
     periodicElements.forEach(d => {
       const elMeta = elements[d.symbol];
@@ -1592,17 +1664,13 @@
       cell.setAttribute("title", `${d.symbol} – ${nameDisplay}`);
       periodicGrid.appendChild(cell);
       cellsBySymbol[d.symbol] = cell;
+      visibleSymbols.push(d.symbol);
       cell.addEventListener("click", () => {
-        if (!elements[d.symbol]) return;
-        currentSymbol = d.symbol;
-        currentElement = elements[d.symbol];
-        Object.values(cellsBySymbol).forEach(c => c.classList.remove("active"));
-        cell.classList.add("active");
-        rebuildShellsAndElectrons();
-        rebuildNucleusNucleons();
-        updateDetails(currentSymbol);
-        // Keep current zoom/rotation when switching elements.
-        requestPausedRedraw();
+        focusContext = "elements";
+        setCurrentElement(d.symbol);
+      });
+      cell.addEventListener("focus", () => {
+        focusContext = "elements";
       });
     });
     if (cellsBySymbol[currentSymbol]) {
@@ -1648,11 +1716,26 @@
   });
 
   document.addEventListener("keydown", (e) => {
-    if (!isColorMenuOpen()) return;
-    if (e.key === "Escape") {
+    if (isColorMenuOpen() && e.key === "Escape") {
       e.preventDefault();
       closeColorMenu();
       openControl?.focus();
+      return;
+    }
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown") {
+      const isTyping = ["INPUT", "TEXTAREA"].includes((e.target && e.target.nodeName) || "");
+      if (isTyping) return;
+      if (focusContext === "elements") {
+        e.preventDefault();
+        const delta = (e.key === "ArrowLeft" || e.key === "ArrowUp") ? -1 : 1;
+        moveElementSelection(delta);
+      } else {
+        e.preventDefault();
+        if (e.key === "ArrowLeft") nudgeView(-1, 0);
+        if (e.key === "ArrowRight") nudgeView(1, 0);
+        if (e.key === "ArrowUp") nudgeView(0, -1);
+        if (e.key === "ArrowDown") nudgeView(0, 1);
+      }
     }
   });
 
@@ -1661,6 +1744,7 @@
       searchInput.parentElement.classList.toggle("has-text", !!searchInput.value);
     }
     buildPeriodicGrid();
+    focusContext = "elements";
   });
   clearSearchBtn?.addEventListener("click", () => {
     if (!searchInput) return;
@@ -1670,6 +1754,7 @@
     }
     buildPeriodicGrid();
     searchInput.focus();
+    focusContext = "elements";
   });
 
   updateSpeedUI();
