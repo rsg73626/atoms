@@ -97,6 +97,21 @@
       chargeToggleLabel: "Show charges",
       shellVisibilityLabel: "Shells shown",
       shellVisibilityAriaLabel: "Shells shown (from core to outer)",
+      colorNames: {
+        red: "Red",
+        orange: "Orange",
+        yellow: "Yellow",
+        green: "Green",
+        cyan: "Cyan",
+        blue: "Blue",
+        indigo: "Indigo",
+        violet: "Violet",
+        black: "Black",
+        darkGray: "Dark gray",
+        mediumGray: "Gray",
+        lightGray: "Light gray",
+        white: "White"
+      },
       playLabel: "Play",
       pauseLabel: "Pause"
     },
@@ -133,6 +148,21 @@
       chargeToggleLabel: "Mostrar cargas",
       shellVisibilityLabel: "Camadas exibidas",
       shellVisibilityAriaLabel: "Camadas exibidas (do núcleo para fora)",
+      colorNames: {
+        red: "Vermelho",
+        orange: "Laranja",
+        yellow: "Amarelo",
+        green: "Verde",
+        cyan: "Ciano",
+        blue: "Azul",
+        indigo: "Índigo",
+        violet: "Violeta",
+        black: "Preto",
+        darkGray: "Cinza escuro",
+        mediumGray: "Cinza",
+        lightGray: "Cinza claro",
+        white: "Branco"
+      },
       playLabel: "Reproduzir",
       pauseLabel: "Pausar"
     },
@@ -169,6 +199,21 @@
       chargeToggleLabel: "Mostrar cargas",
       shellVisibilityLabel: "Capas visibles",
       shellVisibilityAriaLabel: "Capas visibles (del núcleo hacia fuera)",
+      colorNames: {
+        red: "Rojo",
+        orange: "Naranja",
+        yellow: "Amarillo",
+        green: "Verde",
+        cyan: "Cian",
+        blue: "Azul",
+        indigo: "Índigo",
+        violet: "Violeta",
+        black: "Negro",
+        darkGray: "Gris oscuro",
+        mediumGray: "Gris",
+        lightGray: "Gris claro",
+        white: "Blanco"
+      },
       playLabel: "Reproducir",
       pauseLabel: "Pausar"
     }
@@ -381,23 +426,20 @@
 
   const sharedColorOptions = [
     // Rainbow (high saturation)
-    "#ff0000", // red
-    "#ff7a00", // orange
-    "#ffd400", // yellow
-    "#22c55e", // green
-    "#00d5ff", // cyan
-    "#0047ff", // blue
-    "#7c3aed", // indigo
-    "#d946ef", // violet
+    { value: "#ff0000", nameKey: "red" },
+    { value: "#ff7a00", nameKey: "orange" },
+    { value: "#ffd400", nameKey: "yellow" },
+    { value: "#22c55e", nameKey: "green" },
+    { value: "#00d5ff", nameKey: "cyan" },
+    { value: "#0047ff", nameKey: "blue" },
+    { value: "#7c3aed", nameKey: "indigo" },
+    { value: "#d946ef", nameKey: "violet" },
     // Neutrals
-    "#000000", // black
-    "#111827", // gray 900
-    "#334155", // slate 700
-    "#64748b", // slate 500
-    "#94a3b8", // slate 400
-    "#cbd5e1", // slate 300
-    "#e2e8f0", // slate 200
-    "#ffffff"  // white
+    { value: "#000000", nameKey: "black" },
+    { value: "#1f2937", nameKey: "darkGray" },
+    { value: "#4b5563", nameKey: "mediumGray" },
+    { value: "#9ca3af", nameKey: "lightGray" },
+    { value: "#ffffff", nameKey: "white" }
   ];
 
   function persistParticleColor(particle, color) {
@@ -452,20 +494,19 @@
     const t = i18n[currentLanguage] || i18n.en;
     colorMenuGridEl.innerHTML = "";
     const options = sharedColorOptions;
-    const label =
-      particle === "proton" ? t.overlayLegendProton :
-      particle === "neutron" ? t.overlayLegendNeutron :
-      t.overlayLegendElectron;
+    const selectedColor = currentColorForParticle(particle);
 
-    options.forEach(color => {
+    options.forEach(({ value: color, nameKey }) => {
+      const colorName = (t.colorNames && t.colorNames[nameKey]) || (i18n.en.colorNames && i18n.en.colorNames[nameKey]) || color;
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "color-option";
       btn.setAttribute("role", "menuitemradio");
       btn.setAttribute("data-color", color);
+      btn.setAttribute("aria-checked", color === selectedColor ? "true" : "false");
       btn.innerHTML = [
         `<div class="color-option-content">`,
-        `<span class="dot" style="background:${color};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span>${label}</span>`,
+        `<span class="dot" style="background:${color};box-shadow:inset 0 0 0 1px rgba(15,23,42,0.55)"></span><span class="color-option-label">${colorName}</span>`,
         `</div>`
       ].join("");
       btn.addEventListener("click", () => {
@@ -494,9 +535,10 @@
       const controlRect = controlEl.getBoundingClientRect();
       const left = controlRect.left - wrapperRect.left;
       const top = controlRect.bottom - wrapperRect.top + 8;
+      const menuWidth = controlRect.width;
       colorMenuEl.style.left = `${left}px`;
       colorMenuEl.style.top = `${top}px`;
-      colorMenuEl.style.width = `${controlRect.width}px`;
+      colorMenuEl.style.width = `${menuWidth}px`;
     }
 
     colorMenuEl.setAttribute("data-open", "true");
