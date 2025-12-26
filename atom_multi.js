@@ -67,6 +67,7 @@
   const legendProtonTextEl = document.getElementById('legendProtonText');
   const legendNeutronTextEl = document.getElementById('legendNeutronText');
   const legendElectronTextEl = document.getElementById('legendElectronText');
+  const referenceBtn = document.getElementById('referenceBtn');
 
   // --- i18n strings --------------------------------------------------------
   const i18n = {
@@ -238,7 +239,7 @@
   // i18n<->details functions don't explode due to TDZ.
   let currentLanguage = "pt";
   let currentSymbol = "Ca"; // default
-  let elements = {};        // will be filled after periodicElements
+  let elementMap = {};      // will be filled after periodicElements
   let currentElement = null;
   let isPaused = false;
   let pausedRedrawPending = false;
@@ -615,69 +616,20 @@
   }
 
   // --- periodic data -------------------------------------------------------
-  const symbols = [
-    "H","He","Li","Be","B","C","N","O","F","Ne",
-    "Na","Mg","Al","Si","P","S","Cl","Ar","K","Ca",
-    "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn",
-    "Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
-    "Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn",
-    "Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd",
-    "Pm","Sm","Eu","Gd","Tb","Dy","Ho","Er","Tm","Yb",
-    "Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
-    "Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th",
-    "Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm",
-    "Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Ds",
-    "Rg","Cn","Nh","Fl","Mc","Lv","Ts","Og"
-  ];
-  const namesEN = [
-    "Hydrogen","Helium","Lithium","Beryllium","Boron","Carbon","Nitrogen","Oxygen","Fluorine","Neon",
-    "Sodium","Magnesium","Aluminium","Silicon","Phosphorus","Sulfur","Chlorine","Argon","Potassium","Calcium",
-    "Scandium","Titanium","Vanadium","Chromium","Manganese","Iron","Cobalt","Nickel","Copper","Zinc",
-    "Gallium","Germanium","Arsenic","Selenium","Bromine","Krypton","Rubidium","Strontium","Yttrium","Zirconium",
-    "Niobium","Molybdenum","Technetium","Ruthenium","Rhodium","Palladium","Silver","Cadmium","Indium","Tin",
-    "Antimony","Tellurium","Iodine","Xenon","Cesium","Barium","Lanthanum","Cerium","Praseodymium","Neodymium",
-    "Promethium","Samarium","Europium","Gadolinium","Terbium","Dysprosium","Holmium","Erbium","Thulium","Ytterbium",
-    "Lutetium","Hafnium","Tantalum","Tungsten","Rhenium","Osmium","Iridium","Platinum","Gold","Mercury",
-    "Thallium","Lead","Bismuth","Polonium","Astatine","Radon","Francium","Radium","Actinium","Thorium",
-    "Protactinium","Uranium","Neptunium","Plutonium","Americium","Curium","Berkelium","Californium","Einsteinium","Fermium",
-    "Mendelevium","Nobelium","Lawrencium","Rutherfordium","Dubnium","Seaborgium","Bohrium","Hassium","Meitnerium","Darmstadtium",
-    "Roentgenium","Copernicium","Nihonium","Flerovium","Moscovium","Livermorium","Tennessine","Oganesson"
-  ];
-  const namesPT = [
-    "Hidrogênio","Hélio","Lítio","Berílio","Boro","Carbono","Nitrogênio","Oxigênio","Flúor","Neônio",
-    "Sódio","Magnésio","Alumínio","Silício","Fósforo","Enxofre","Cloro","Argônio","Potássio","Cálcio",
-    "Escândio","Titânio","Vanádio","Cromo","Manganês","Ferro","Cobalto","Níquel","Cobre","Zinco",
-    "Gálio","Germânio","Arsênio","Selênio","Bromo","Criptônio","Rubídio","Estrôncio","Ítrio","Zircônio",
-    "Nióbio","Molibdênio","Tecnécio","Rutênio","Ródio","Paládio","Prata","Cádmio","Índio","Estanho",
-    "Antimônio","Telúrio","Iodo","Xenônio","Césio","Bário","Lantânio","Cério","Praseodímio","Neodímio",
-    "Promécio","Samário","Európio","Gadolínio","Térbio","Disprósio","Hólmio","Érbio","Túlio","Itérbio",
-    "Lutécio","Háfnio","Tântalo","Tungstênio","Rênio","Ósmio","Irídio","Platina","Ouro","Mercúrio",
-    "Tálio","Chumbo","Bismuto","Polônio","Astato","Radônio","Frâncio","Rádio","Actínio","Tório",
-    "Protactínio","Urânio","Netúnio","Plutônio","Amerício","Cúrio","Berquélio","Califórnio","Einstênio","Férmio",
-    "Mendelévio","Nobélio","Laurêncio","Rutherfórdio","Dúbnio","Seabórgio","Bóhrio","Hássio","Meitnério","Darmstádio",
-    "Roentgênio","Copernício","Nihônio","Fleróvio","Moscóvio","Livermório","Tenessino","Oganessônio"
-  ];
-  const namesES = [
-    "Hidrógeno","Helio","Litio","Berilio","Boro","Carbono","Nitrógeno","Oxígeno","Flúor","Neón",
-    "Sodio","Magnesio","Aluminio","Silicio","Fósforo","Azufre","Cloro","Argón","Potasio","Calcio",
-    "Escandio","Titanio","Vanadio","Cromo","Manganeso","Hierro","Cobalto","Níquel","Cobre","Zinc",
-    "Galio","Germanio","Arsénico","Selenio","Bromo","Criptón","Rubidio","Estroncio","Itrio","Circonio",
-    "Niobio","Molibdeno","Tecnecio","Rutenio","Rodio","Paladio","Plata","Cadmio","Indio","Estaño",
-    "Antimonio","Telurio","Yodo","Xenón","Cesio","Bario","Lantano","Cerio","Praseodimio","Neodimio",
-    "Prometio","Samario","Europio","Gadolinio","Terbio","Disprosio","Holmio","Erbio","Tulio","Iterbio",
-    "Lutecio","Hafnio","Tántalo","Wolframio","Renio","Osmio","Iridio","Platino","Oro","Mercurio",
-    "Talio","Plomo","Bismuto","Polonio","Astato","Radón","Francio","Radio","Actinio","Torio",
-    "Protactinio","Uranio","Neptunio","Plutonio","Americio","Curio","Berkelio","Californio","Einstenio","Fermio",
-    "Mendelevio","Nobelio","Laurencio","Rutherfordio","Dubnio","Seaborgio","Bohrio","Hassio","Meitnerio","Darmstadtio",
-    "Roentgenio","Copernicio","Nihonio","Flerovio","Moscovio","Livermorio","Tenesino","Oganesón"
-  ];
-  const periodicElements = symbols.map((symbol, idx) => ({
-    Z: idx + 1,
-    symbol,
-    nameEN: namesEN[idx] || symbol,
-    namePT: namesPT[idx] || namesEN[idx] || symbol,
-    nameES: namesES[idx] || namesEN[idx] || symbol
-  }));
+  const loadedElements = (typeof elements !== "undefined" && Array.isArray(elements)) ? elements : [];
+  const periodicElements = loadedElements.map((el) => {
+    const Z = el.atomic_number ?? el.protons ?? 0;
+    return {
+      Z,
+      symbol: el.symbol,
+      nameEN: el.name?.en || el.symbol,
+      namePT: el.name?.pt || el.name?.en || el.symbol,
+      nameES: el.name?.es || el.name?.en || el.symbol,
+      electronShells: el.electron_shells || {},
+      neutrons: typeof el.neutrons === "number" ? el.neutrons : null,
+      reference: el.reference || ""
+    };
+  });
 
   function bohrShells(Z) {
     const capacities = [2, 8, 18, 32, 32, 18, 8];
@@ -702,22 +654,45 @@
     return ["#e0f2fe", "#38bdf8"];
   }
 
+  function electronsFromShells(shellDict, Z) {
+    const shells = [];
+    shellLetters.forEach(letter => {
+      const val = shellDict?.[letter];
+      if (typeof val === "number" && val > 0) shells.push(val);
+    });
+    if (!shells.length && Z) return bohrShells(Z);
+    return shells;
+  }
+
   // Build element map
-  elements = {};
+  elementMap = {};
   periodicElements.forEach(d => {
-    const shells = bohrShells(d.Z);
+    const shells = electronsFromShells(d.electronShells, d.Z);
     const [nucleusColor, coreColor] = paletteForZ(d.Z);
-    elements[d.symbol] = {
+    elementMap[d.symbol] = {
       Z: d.Z,
       symbol: d.symbol,
       namePT: d.namePT,
       nameEN: d.nameEN,
+      nameES: d.nameES,
       electrons: shells,
+      neutrons: d.neutrons,
+      reference: d.reference,
       colorNucleus: nucleusColor,
       colorCore: coreColor
     };
   });
-  currentElement = elements[currentSymbol];
+  if (!elementMap[currentSymbol]) {
+    currentSymbol = periodicElements[0]?.symbol || currentSymbol;
+  }
+  currentElement = elementMap[currentSymbol] || null;
+  if (!currentElement) {
+    const first = Object.values(elementMap)[0];
+    if (first) {
+      currentElement = first;
+      currentSymbol = first.symbol;
+    }
+  }
 
   function approximateNeutrons(Z) {
     return Z;
@@ -731,12 +706,13 @@
   }
 
   function updateDetails(symbol) {
-    const el = elements[symbol];
+    const el = elementMap[symbol];
     if (!el) return;
     const eConfig = el.electrons.join(", ");
-    const N = approximateNeutrons(el.Z);
+    const N = (typeof el.neutrons === "number") ? el.neutrons : approximateNeutrons(el.Z);
     const totalNucleons = el.Z + N;
     const t = i18n[currentLanguage] || i18n.en;
+    const reference = el.reference || "";
 
     if (detailsDiv) {
       detailsDiv.innerHTML = [
@@ -758,6 +734,14 @@
     overlayProtonsEl.textContent = el.Z;
     overlayNeutronsEl.textContent = N;
     overlayShellsEl.textContent = eConfig;
+
+    if (referenceBtn) {
+      referenceBtn.style.visibility = reference ? "visible" : "hidden";
+      referenceBtn.disabled = !reference;
+      referenceBtn.setAttribute("aria-label", reference ? `Open reference for ${el.symbol}` : "Reference unavailable");
+      referenceBtn.setAttribute("title", reference ? reference : "");
+      referenceBtn.dataset.href = reference;
+    }
   }
 
   // Apply initial language AFTER we have elements + symbol ready
@@ -771,6 +755,13 @@
 
   if (shellAllBtn) shellAllBtn.addEventListener("click", (e) => { e.stopPropagation(); setAllShells(); });
   if (shellNoneBtn) shellNoneBtn.addEventListener("click", (e) => { e.stopPropagation(); setNoShells(); });
+  if (referenceBtn) {
+    referenceBtn.addEventListener("click", () => {
+      const href = referenceBtn.dataset.href || currentElement?.reference;
+      if (!href) return;
+      window.open(href, "_blank", "noopener,noreferrer");
+    });
+  }
 
   function updateSpeedUI() {
     const min = parseFloat(speedRange.min || "0");
@@ -917,7 +908,7 @@
     return shells;
   }
 
-  let shells = buildShellsForElement(currentElement);
+  let shells = currentElement ? buildShellsForElement(currentElement) : [];
   let electrons = [];
   let stars = [];
   let nucleusNucleons = [];
@@ -1007,6 +998,11 @@
   }
 
   function rebuildShellsAndElectrons() {
+    if (!currentElement) {
+      shells = [];
+      electrons = [];
+      return;
+    }
     shells = buildShellsForElement(currentElement);
     electrons = [];
     shells.forEach((shell, shellIndex) => {
@@ -1065,10 +1061,14 @@
   }
 
   function rebuildNucleusNucleons() {
+    if (!currentElement) {
+      nucleusNucleons = [];
+      return;
+    }
     nucleusNucleons = [];
     const el = currentElement;
     const Z = el.Z;
-    const N = approximateNeutrons(Z);
+    const N = (typeof el.neutrons === "number") ? el.neutrons : approximateNeutrons(Z);
     const desired = Z + N;
 
     const layout = getNucleusLayoutPoints();
@@ -1627,9 +1627,9 @@
   }
 
   function setCurrentElement(symbol, opts = {}) {
-    if (!elements[symbol]) return;
+    if (!elementMap[symbol]) return;
     currentSymbol = symbol;
-    currentElement = elements[symbol];
+    currentElement = elementMap[symbol];
     Object.values(cellsBySymbol).forEach(c => c.classList.remove("active"));
     const activeCell = cellsBySymbol[symbol];
     if (activeCell) {
@@ -1648,7 +1648,7 @@
     visibleSymbols = [];
     const term = (searchInput?.value || "").trim().toLowerCase();
     periodicElements.forEach(d => {
-      const elMeta = elements[d.symbol];
+      const elMeta = elementMap[d.symbol];
       if (!elMeta) return;
       const nameDisplay = getElementName(elMeta);
       const haystack = (d.symbol + " " + nameDisplay).toLowerCase();

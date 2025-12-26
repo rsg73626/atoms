@@ -455,21 +455,34 @@
       font-size: 12px;
     }
     .reference-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 34px;
+      height: 34px;
       border: 1px solid rgba(148,163,184,0.4);
-      background: rgba(15,23,42,0.6);
+      background: rgba(15,23,42,0.75);
       color: #e5e7eb;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      padding: 0;
       cursor: pointer;
-      transition: background 0.12s ease, box-shadow 0.12s ease;
+      transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
       box-shadow: 0 4px 10px rgba(0,0,0,0.22);
-      white-space: nowrap;
     }
-    .reference-btn:hover { background: rgba(148,163,184,0.12); }
+    .reference-btn:hover { background: rgba(148,163,184,0.12); transform: translateY(-1px); }
+    .reference-btn:active { transform: translateY(0); }
     .reference-btn:focus-visible {
       outline: 2px solid rgba(56,189,248,0.7);
       outline-offset: 2px;
+    }
+    .reference-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #e5e7eb;
+      stroke-width: 1.8;
+      fill: none;
     }
     #particleControllers {
       position: absolute;
@@ -958,6 +971,13 @@
   <div id="canvasWrapper">
     <canvas id="atomCanvas"></canvas>
     <div id="elementOverlay">
+      <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
       <div id="overlayTop">
         <span class="overlayLabel" id="overlayAtomicLabel">Atomic #</span>
         <span id="overlayZ">Z = 20</span>
@@ -977,7 +997,6 @@
     <div id="overlayBottom">
       <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
       <span id="overlayShells">2, 8, 8, 2</span>
-      <button id="referenceBtn" class="reference-btn" type="button">Reference</button>
     </div>
   </div>
       <div id="bottomControls">
@@ -1049,6 +1068,7 @@
     </div>
   </div>
 
+  <script src="data/elements.js"></script>
   <script src="atom_multi.js"></script>
 </body>
 </html>

@@ -1,0 +1,2273 @@
+const elements = [
+  {
+    "symbol": "H",
+    "name": {
+      "en": "Hydrogen",
+      "pt": "Hidrogênio",
+      "es": "Hidrógeno"
+    },
+    "atomic_number": 1,
+    "protons": 1,
+    "neutrons": 0,
+    "electron_shells": {
+      "K": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/1"
+  },
+  {
+    "symbol": "He",
+    "name": {
+      "en": "Helium",
+      "pt": "Hélio",
+      "es": "Helio"
+    },
+    "atomic_number": 2,
+    "protons": 2,
+    "neutrons": 2,
+    "electron_shells": {
+      "K": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/2"
+  },
+  {
+    "symbol": "Li",
+    "name": {
+      "en": "Lithium",
+      "pt": "Lítio",
+      "es": "Litio"
+    },
+    "atomic_number": 3,
+    "protons": 3,
+    "neutrons": 4,
+    "electron_shells": {
+      "K": 2,
+      "L": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/3"
+  },
+  {
+    "symbol": "Be",
+    "name": {
+      "en": "Beryllium",
+      "pt": "Berílio",
+      "es": "Berilio"
+    },
+    "atomic_number": 4,
+    "protons": 4,
+    "neutrons": 5,
+    "electron_shells": {
+      "K": 2,
+      "L": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/4"
+  },
+  {
+    "symbol": "B",
+    "name": {
+      "en": "Boron",
+      "pt": "Boro",
+      "es": "Boro"
+    },
+    "atomic_number": 5,
+    "protons": 5,
+    "neutrons": 6,
+    "electron_shells": {
+      "K": 2,
+      "L": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/5"
+  },
+  {
+    "symbol": "C",
+    "name": {
+      "en": "Carbon",
+      "pt": "Carbono",
+      "es": "Carbono"
+    },
+    "atomic_number": 6,
+    "protons": 6,
+    "neutrons": 6,
+    "electron_shells": {
+      "K": 2,
+      "L": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/6"
+  },
+  {
+    "symbol": "N",
+    "name": {
+      "en": "Nitrogen",
+      "pt": "Nitrogênio",
+      "es": "Nitrógeno"
+    },
+    "atomic_number": 7,
+    "protons": 7,
+    "neutrons": 7,
+    "electron_shells": {
+      "K": 2,
+      "L": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/7"
+  },
+  {
+    "symbol": "O",
+    "name": {
+      "en": "Oxygen",
+      "pt": "Oxigênio",
+      "es": "Oxígeno"
+    },
+    "atomic_number": 8,
+    "protons": 8,
+    "neutrons": 8,
+    "electron_shells": {
+      "K": 2,
+      "L": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/8"
+  },
+  {
+    "symbol": "F",
+    "name": {
+      "en": "Fluorine",
+      "pt": "Flúor",
+      "es": "Flúor"
+    },
+    "atomic_number": 9,
+    "protons": 9,
+    "neutrons": 10,
+    "electron_shells": {
+      "K": 2,
+      "L": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/9"
+  },
+  {
+    "symbol": "Ne",
+    "name": {
+      "en": "Neon",
+      "pt": "Neônio",
+      "es": "Neón"
+    },
+    "atomic_number": 10,
+    "protons": 10,
+    "neutrons": 10,
+    "electron_shells": {
+      "K": 2,
+      "L": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/10"
+  },
+  {
+    "symbol": "Na",
+    "name": {
+      "en": "Sodium",
+      "pt": "Sódio",
+      "es": "Sodio"
+    },
+    "atomic_number": 11,
+    "protons": 11,
+    "neutrons": 12,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/11"
+  },
+  {
+    "symbol": "Mg",
+    "name": {
+      "en": "Magnesium",
+      "pt": "Magnésio",
+      "es": "Magnesio"
+    },
+    "atomic_number": 12,
+    "protons": 12,
+    "neutrons": 12,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/12"
+  },
+  {
+    "symbol": "Al",
+    "name": {
+      "en": "Aluminium",
+      "pt": "Alumínio",
+      "es": "Aluminio"
+    },
+    "atomic_number": 13,
+    "protons": 13,
+    "neutrons": 14,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/13"
+  },
+  {
+    "symbol": "Si",
+    "name": {
+      "en": "Silicon",
+      "pt": "Silício",
+      "es": "Silicio"
+    },
+    "atomic_number": 14,
+    "protons": 14,
+    "neutrons": 14,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/14"
+  },
+  {
+    "symbol": "P",
+    "name": {
+      "en": "Phosphorus",
+      "pt": "Fósforo",
+      "es": "Fósforo"
+    },
+    "atomic_number": 15,
+    "protons": 15,
+    "neutrons": 16,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/15"
+  },
+  {
+    "symbol": "S",
+    "name": {
+      "en": "Sulfur",
+      "pt": "Enxofre",
+      "es": "Azufre"
+    },
+    "atomic_number": 16,
+    "protons": 16,
+    "neutrons": 16,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/16"
+  },
+  {
+    "symbol": "Cl",
+    "name": {
+      "en": "Chlorine",
+      "pt": "Cloro",
+      "es": "Cloro"
+    },
+    "atomic_number": 17,
+    "protons": 17,
+    "neutrons": 18,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/17"
+  },
+  {
+    "symbol": "Ar",
+    "name": {
+      "en": "Argon",
+      "pt": "Argônio",
+      "es": "Argón"
+    },
+    "atomic_number": 18,
+    "protons": 18,
+    "neutrons": 22,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/18"
+  },
+  {
+    "symbol": "K",
+    "name": {
+      "en": "Potassium",
+      "pt": "Potássio",
+      "es": "Potasio"
+    },
+    "atomic_number": 19,
+    "protons": 19,
+    "neutrons": 20,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 8,
+      "N": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/19"
+  },
+  {
+    "symbol": "Ca",
+    "name": {
+      "en": "Calcium",
+      "pt": "Cálcio",
+      "es": "Calcio"
+    },
+    "atomic_number": 20,
+    "protons": 20,
+    "neutrons": 20,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 8,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/20"
+  },
+  {
+    "symbol": "Sc",
+    "name": {
+      "en": "Scandium",
+      "pt": "Escândio",
+      "es": "Escandio"
+    },
+    "atomic_number": 21,
+    "protons": 21,
+    "neutrons": 24,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 9,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/21"
+  },
+  {
+    "symbol": "Ti",
+    "name": {
+      "en": "Titanium",
+      "pt": "Titânio",
+      "es": "Titanio"
+    },
+    "atomic_number": 22,
+    "protons": 22,
+    "neutrons": 26,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 10,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/22"
+  },
+  {
+    "symbol": "V",
+    "name": {
+      "en": "Vanadium",
+      "pt": "Vanádio",
+      "es": "Vanadio"
+    },
+    "atomic_number": 23,
+    "protons": 23,
+    "neutrons": 28,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 11,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/23"
+  },
+  {
+    "symbol": "Cr",
+    "name": {
+      "en": "Chromium",
+      "pt": "Cromo",
+      "es": "Cromo"
+    },
+    "atomic_number": 24,
+    "protons": 24,
+    "neutrons": 28,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 13,
+      "N": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/24"
+  },
+  {
+    "symbol": "Mn",
+    "name": {
+      "en": "Manganese",
+      "pt": "Manganês",
+      "es": "Manganeso"
+    },
+    "atomic_number": 25,
+    "protons": 25,
+    "neutrons": 30,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 13,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/25"
+  },
+  {
+    "symbol": "Fe",
+    "name": {
+      "en": "Iron",
+      "pt": "Ferro",
+      "es": "Hierro"
+    },
+    "atomic_number": 26,
+    "protons": 26,
+    "neutrons": 30,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 14,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/26"
+  },
+  {
+    "symbol": "Co",
+    "name": {
+      "en": "Cobalt",
+      "pt": "Cobalto",
+      "es": "Cobalto"
+    },
+    "atomic_number": 27,
+    "protons": 27,
+    "neutrons": 32,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 15,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/27"
+  },
+  {
+    "symbol": "Ni",
+    "name": {
+      "en": "Nickel",
+      "pt": "Níquel",
+      "es": "Níquel"
+    },
+    "atomic_number": 28,
+    "protons": 28,
+    "neutrons": 31,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 16,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/28"
+  },
+  {
+    "symbol": "Cu",
+    "name": {
+      "en": "Copper",
+      "pt": "Cobre",
+      "es": "Cobre"
+    },
+    "atomic_number": 29,
+    "protons": 29,
+    "neutrons": 35,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/29"
+  },
+  {
+    "symbol": "Zn",
+    "name": {
+      "en": "Zinc",
+      "pt": "Zinco",
+      "es": "Zinc"
+    },
+    "atomic_number": 30,
+    "protons": 30,
+    "neutrons": 35,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/30"
+  },
+  {
+    "symbol": "Ga",
+    "name": {
+      "en": "Gallium",
+      "pt": "Gálio",
+      "es": "Galio"
+    },
+    "atomic_number": 31,
+    "protons": 31,
+    "neutrons": 39,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/31"
+  },
+  {
+    "symbol": "Ge",
+    "name": {
+      "en": "Germanium",
+      "pt": "Germânio",
+      "es": "Germanio"
+    },
+    "atomic_number": 32,
+    "protons": 32,
+    "neutrons": 41,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/32"
+  },
+  {
+    "symbol": "As",
+    "name": {
+      "en": "Arsenic",
+      "pt": "Arsênio",
+      "es": "Arsénico"
+    },
+    "atomic_number": 33,
+    "protons": 33,
+    "neutrons": 42,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/33"
+  },
+  {
+    "symbol": "Se",
+    "name": {
+      "en": "Selenium",
+      "pt": "Selênio",
+      "es": "Selenio"
+    },
+    "atomic_number": 34,
+    "protons": 34,
+    "neutrons": 45,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/34"
+  },
+  {
+    "symbol": "Br",
+    "name": {
+      "en": "Bromine",
+      "pt": "Bromo",
+      "es": "Bromo"
+    },
+    "atomic_number": 35,
+    "protons": 35,
+    "neutrons": 45,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/35"
+  },
+  {
+    "symbol": "Kr",
+    "name": {
+      "en": "Krypton",
+      "pt": "Criptônio",
+      "es": "Criptón"
+    },
+    "atomic_number": 36,
+    "protons": 36,
+    "neutrons": 48,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/36"
+  },
+  {
+    "symbol": "Rb",
+    "name": {
+      "en": "Rubidium",
+      "pt": "Rubídio",
+      "es": "Rubidio"
+    },
+    "atomic_number": 37,
+    "protons": 37,
+    "neutrons": 48,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 8,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/37"
+  },
+  {
+    "symbol": "Sr",
+    "name": {
+      "en": "Strontium",
+      "pt": "Estrôncio",
+      "es": "Estroncio"
+    },
+    "atomic_number": 38,
+    "protons": 38,
+    "neutrons": 50,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 8,
+      "O": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/38"
+  },
+  {
+    "symbol": "Y",
+    "name": {
+      "en": "Yttrium",
+      "pt": "Ítrio",
+      "es": "Itrio"
+    },
+    "atomic_number": 39,
+    "protons": 39,
+    "neutrons": 50,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 9,
+      "O": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/39"
+  },
+  {
+    "symbol": "Zr",
+    "name": {
+      "en": "Zirconium",
+      "pt": "Zircônio",
+      "es": "Circonio"
+    },
+    "atomic_number": 40,
+    "protons": 40,
+    "neutrons": 51,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 10,
+      "O": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/40"
+  },
+  {
+    "symbol": "Nb",
+    "name": {
+      "en": "Niobium",
+      "pt": "Nióbio",
+      "es": "Niobio"
+    },
+    "atomic_number": 41,
+    "protons": 41,
+    "neutrons": 52,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 12,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/41"
+  },
+  {
+    "symbol": "Mo",
+    "name": {
+      "en": "Molybdenum",
+      "pt": "Molibdênio",
+      "es": "Molibdeno"
+    },
+    "atomic_number": 42,
+    "protons": 42,
+    "neutrons": 54,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 13,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/42"
+  },
+  {
+    "symbol": "Tc",
+    "name": {
+      "en": "Technetium",
+      "pt": "Tecnécio",
+      "es": "Tecnecio"
+    },
+    "atomic_number": 43,
+    "protons": 43,
+    "neutrons": 55,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 13,
+      "O": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/43"
+  },
+  {
+    "symbol": "Ru",
+    "name": {
+      "en": "Ruthenium",
+      "pt": "Rutênio",
+      "es": "Rutenio"
+    },
+    "atomic_number": 44,
+    "protons": 44,
+    "neutrons": 57,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 15,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/44"
+  },
+  {
+    "symbol": "Rh",
+    "name": {
+      "en": "Rhodium",
+      "pt": "Ródio",
+      "es": "Rodio"
+    },
+    "atomic_number": 45,
+    "protons": 45,
+    "neutrons": 58,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 16,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/45"
+  },
+  {
+    "symbol": "Pd",
+    "name": {
+      "en": "Palladium",
+      "pt": "Paládio",
+      "es": "Paladio"
+    },
+    "atomic_number": 46,
+    "protons": 46,
+    "neutrons": 60,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/46"
+  },
+  {
+    "symbol": "Ag",
+    "name": {
+      "en": "Silver",
+      "pt": "Prata",
+      "es": "Plata"
+    },
+    "atomic_number": 47,
+    "protons": 47,
+    "neutrons": 61,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/47"
+  },
+  {
+    "symbol": "Cd",
+    "name": {
+      "en": "Cadmium",
+      "pt": "Cádmio",
+      "es": "Cadmio"
+    },
+    "atomic_number": 48,
+    "protons": 48,
+    "neutrons": 64,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/48"
+  },
+  {
+    "symbol": "In",
+    "name": {
+      "en": "Indium",
+      "pt": "Índio",
+      "es": "Indio"
+    },
+    "atomic_number": 49,
+    "protons": 49,
+    "neutrons": 66,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/49"
+  },
+  {
+    "symbol": "Sn",
+    "name": {
+      "en": "Tin",
+      "pt": "Estanho",
+      "es": "Estaño"
+    },
+    "atomic_number": 50,
+    "protons": 50,
+    "neutrons": 69,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/50"
+  },
+  {
+    "symbol": "Sb",
+    "name": {
+      "en": "Antimony",
+      "pt": "Antimônio",
+      "es": "Antimonio"
+    },
+    "atomic_number": 51,
+    "protons": 51,
+    "neutrons": 71,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/51"
+  },
+  {
+    "symbol": "Te",
+    "name": {
+      "en": "Tellurium",
+      "pt": "Telúrio",
+      "es": "Telurio"
+    },
+    "atomic_number": 52,
+    "protons": 52,
+    "neutrons": 76,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/52"
+  },
+  {
+    "symbol": "I",
+    "name": {
+      "en": "Iodine",
+      "pt": "Iodo",
+      "es": "Yodo"
+    },
+    "atomic_number": 53,
+    "protons": 53,
+    "neutrons": 74,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/53"
+  },
+  {
+    "symbol": "Xe",
+    "name": {
+      "en": "Xenon",
+      "pt": "Xenônio",
+      "es": "Xenón"
+    },
+    "atomic_number": 54,
+    "protons": 54,
+    "neutrons": 77,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/54"
+  },
+  {
+    "symbol": "Cs",
+    "name": {
+      "en": "Cesium",
+      "pt": "Césio",
+      "es": "Cesio"
+    },
+    "atomic_number": 55,
+    "protons": 55,
+    "neutrons": 78,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 8,
+      "P": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/55"
+  },
+  {
+    "symbol": "Ba",
+    "name": {
+      "en": "Barium",
+      "pt": "Bário",
+      "es": "Bario"
+    },
+    "atomic_number": 56,
+    "protons": 56,
+    "neutrons": 81,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/56"
+  },
+  {
+    "symbol": "La",
+    "name": {
+      "en": "Lanthanum",
+      "pt": "Lantânio",
+      "es": "Lantano"
+    },
+    "atomic_number": 57,
+    "protons": 57,
+    "neutrons": 82,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 18,
+      "O": 9,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/57"
+  },
+  {
+    "symbol": "Ce",
+    "name": {
+      "en": "Cerium",
+      "pt": "Cério",
+      "es": "Cerio"
+    },
+    "atomic_number": 58,
+    "protons": 58,
+    "neutrons": 82,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 19,
+      "O": 9,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/58"
+  },
+  {
+    "symbol": "Pr",
+    "name": {
+      "en": "Praseodymium",
+      "pt": "Praseodímio",
+      "es": "Praseodimio"
+    },
+    "atomic_number": 59,
+    "protons": 59,
+    "neutrons": 82,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 21,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/59"
+  },
+  {
+    "symbol": "Nd",
+    "name": {
+      "en": "Neodymium",
+      "pt": "Neodímio",
+      "es": "Neodimio"
+    },
+    "atomic_number": 60,
+    "protons": 60,
+    "neutrons": 84,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 22,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/60"
+  },
+  {
+    "symbol": "Pm",
+    "name": {
+      "en": "Promethium",
+      "pt": "Promécio",
+      "es": "Prometio"
+    },
+    "atomic_number": 61,
+    "protons": 61,
+    "neutrons": 84,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 23,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/61"
+  },
+  {
+    "symbol": "Sm",
+    "name": {
+      "en": "Samarium",
+      "pt": "Samário",
+      "es": "Samario"
+    },
+    "atomic_number": 62,
+    "protons": 62,
+    "neutrons": 88,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 24,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/62"
+  },
+  {
+    "symbol": "Eu",
+    "name": {
+      "en": "Europium",
+      "pt": "Európio",
+      "es": "Europio"
+    },
+    "atomic_number": 63,
+    "protons": 63,
+    "neutrons": 89,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 25,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/63"
+  },
+  {
+    "symbol": "Gd",
+    "name": {
+      "en": "Gadolinium",
+      "pt": "Gadolínio",
+      "es": "Gadolinio"
+    },
+    "atomic_number": 64,
+    "protons": 64,
+    "neutrons": 93,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 25,
+      "O": 9,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/64"
+  },
+  {
+    "symbol": "Tb",
+    "name": {
+      "en": "Terbium",
+      "pt": "Térbio",
+      "es": "Terbio"
+    },
+    "atomic_number": 65,
+    "protons": 65,
+    "neutrons": 94,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 27,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/65"
+  },
+  {
+    "symbol": "Dy",
+    "name": {
+      "en": "Dysprosium",
+      "pt": "Disprósio",
+      "es": "Disprosio"
+    },
+    "atomic_number": 66,
+    "protons": 66,
+    "neutrons": 97,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 28,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/66"
+  },
+  {
+    "symbol": "Ho",
+    "name": {
+      "en": "Holmium",
+      "pt": "Hólmio",
+      "es": "Holmio"
+    },
+    "atomic_number": 67,
+    "protons": 67,
+    "neutrons": 98,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 29,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/67"
+  },
+  {
+    "symbol": "Er",
+    "name": {
+      "en": "Erbium",
+      "pt": "Érbio",
+      "es": "Erbio"
+    },
+    "atomic_number": 68,
+    "protons": 68,
+    "neutrons": 99,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 30,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/68"
+  },
+  {
+    "symbol": "Tm",
+    "name": {
+      "en": "Thulium",
+      "pt": "Túlio",
+      "es": "Tulio"
+    },
+    "atomic_number": 69,
+    "protons": 69,
+    "neutrons": 100,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 31,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/69"
+  },
+  {
+    "symbol": "Yb",
+    "name": {
+      "en": "Ytterbium",
+      "pt": "Itérbio",
+      "es": "Iterbio"
+    },
+    "atomic_number": 70,
+    "protons": 70,
+    "neutrons": 103,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 8,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/70"
+  },
+  {
+    "symbol": "Lu",
+    "name": {
+      "en": "Lutetium",
+      "pt": "Lutécio",
+      "es": "Lutecio"
+    },
+    "atomic_number": 71,
+    "protons": 71,
+    "neutrons": 104,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 9,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/71"
+  },
+  {
+    "symbol": "Hf",
+    "name": {
+      "en": "Hafnium",
+      "pt": "Háfnio",
+      "es": "Hafnio"
+    },
+    "atomic_number": 72,
+    "protons": 72,
+    "neutrons": 106,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 10,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/72"
+  },
+  {
+    "symbol": "Ta",
+    "name": {
+      "en": "Tantalum",
+      "pt": "Tântalo",
+      "es": "Tántalo"
+    },
+    "atomic_number": 73,
+    "protons": 73,
+    "neutrons": 108,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 11,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/73"
+  },
+  {
+    "symbol": "W",
+    "name": {
+      "en": "Tungsten",
+      "pt": "Tungstênio",
+      "es": "Wolframio"
+    },
+    "atomic_number": 74,
+    "protons": 74,
+    "neutrons": 110,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 12,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/74"
+  },
+  {
+    "symbol": "Re",
+    "name": {
+      "en": "Rhenium",
+      "pt": "Rênio",
+      "es": "Renio"
+    },
+    "atomic_number": 75,
+    "protons": 75,
+    "neutrons": 111,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 13,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/75"
+  },
+  {
+    "symbol": "Os",
+    "name": {
+      "en": "Osmium",
+      "pt": "Ósmio",
+      "es": "Osmio"
+    },
+    "atomic_number": 76,
+    "protons": 76,
+    "neutrons": 114,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 14,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/76"
+  },
+  {
+    "symbol": "Ir",
+    "name": {
+      "en": "Iridium",
+      "pt": "Irídio",
+      "es": "Iridio"
+    },
+    "atomic_number": 77,
+    "protons": 77,
+    "neutrons": 115,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 15,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/77"
+  },
+  {
+    "symbol": "Pt",
+    "name": {
+      "en": "Platinum",
+      "pt": "Platina",
+      "es": "Platino"
+    },
+    "atomic_number": 78,
+    "protons": 78,
+    "neutrons": 117,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 17,
+      "P": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/78"
+  },
+  {
+    "symbol": "Au",
+    "name": {
+      "en": "Gold",
+      "pt": "Ouro",
+      "es": "Oro"
+    },
+    "atomic_number": 79,
+    "protons": 79,
+    "neutrons": 118,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/79"
+  },
+  {
+    "symbol": "Hg",
+    "name": {
+      "en": "Mercury",
+      "pt": "Mercúrio",
+      "es": "Mercurio"
+    },
+    "atomic_number": 80,
+    "protons": 80,
+    "neutrons": 121,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/80"
+  },
+  {
+    "symbol": "Tl",
+    "name": {
+      "en": "Thallium",
+      "pt": "Tálio",
+      "es": "Talio"
+    },
+    "atomic_number": 81,
+    "protons": 81,
+    "neutrons": 123,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/81"
+  },
+  {
+    "symbol": "Pb",
+    "name": {
+      "en": "Lead",
+      "pt": "Chumbo",
+      "es": "Plomo"
+    },
+    "atomic_number": 82,
+    "protons": 82,
+    "neutrons": 125,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/82"
+  },
+  {
+    "symbol": "Bi",
+    "name": {
+      "en": "Bismuth",
+      "pt": "Bismuto",
+      "es": "Bismuto"
+    },
+    "atomic_number": 83,
+    "protons": 83,
+    "neutrons": 126,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/83"
+  },
+  {
+    "symbol": "Po",
+    "name": {
+      "en": "Polonium",
+      "pt": "Polônio",
+      "es": "Polonio"
+    },
+    "atomic_number": 84,
+    "protons": 84,
+    "neutrons": 125,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/84"
+  },
+  {
+    "symbol": "At",
+    "name": {
+      "en": "Astatine",
+      "pt": "Astato",
+      "es": "Astato"
+    },
+    "atomic_number": 85,
+    "protons": 85,
+    "neutrons": 125,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/85"
+  },
+  {
+    "symbol": "Rn",
+    "name": {
+      "en": "Radon",
+      "pt": "Radônio",
+      "es": "Radón"
+    },
+    "atomic_number": 86,
+    "protons": 86,
+    "neutrons": 136,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/86"
+  },
+  {
+    "symbol": "Fr",
+    "name": {
+      "en": "Francium",
+      "pt": "Frâncio",
+      "es": "Francio"
+    },
+    "atomic_number": 87,
+    "protons": 87,
+    "neutrons": 136,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 8,
+      "Q": 1
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/87"
+  },
+  {
+    "symbol": "Ra",
+    "name": {
+      "en": "Radium",
+      "pt": "Rádio",
+      "es": "Radio"
+    },
+    "atomic_number": 88,
+    "protons": 88,
+    "neutrons": 138,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/88"
+  },
+  {
+    "symbol": "Ac",
+    "name": {
+      "en": "Actinium",
+      "pt": "Actínio",
+      "es": "Actinio"
+    },
+    "atomic_number": 89,
+    "protons": 89,
+    "neutrons": 138,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 9,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/89"
+  },
+  {
+    "symbol": "Th",
+    "name": {
+      "en": "Thorium",
+      "pt": "Tório",
+      "es": "Torio"
+    },
+    "atomic_number": 90,
+    "protons": 90,
+    "neutrons": 142,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 18,
+      "P": 10,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/90"
+  },
+  {
+    "symbol": "Pa",
+    "name": {
+      "en": "Protactinium",
+      "pt": "Protactínio",
+      "es": "Protactinio"
+    },
+    "atomic_number": 91,
+    "protons": 91,
+    "neutrons": 140,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 20,
+      "P": 9,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/91"
+  },
+  {
+    "symbol": "U",
+    "name": {
+      "en": "Uranium",
+      "pt": "Urânio",
+      "es": "Uranio"
+    },
+    "atomic_number": 92,
+    "protons": 92,
+    "neutrons": 146,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 21,
+      "P": 9,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/92"
+  },
+  {
+    "symbol": "Np",
+    "name": {
+      "en": "Neptunium",
+      "pt": "Netúnio",
+      "es": "Neptunio"
+    },
+    "atomic_number": 93,
+    "protons": 93,
+    "neutrons": 144,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 22,
+      "P": 9,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/93"
+  },
+  {
+    "symbol": "Pu",
+    "name": {
+      "en": "Plutonium",
+      "pt": "Plutônio",
+      "es": "Plutonio"
+    },
+    "atomic_number": 94,
+    "protons": 94,
+    "neutrons": 150,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 24,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/94"
+  },
+  {
+    "symbol": "Am",
+    "name": {
+      "en": "Americium",
+      "pt": "Amerício",
+      "es": "Americio"
+    },
+    "atomic_number": 95,
+    "protons": 95,
+    "neutrons": 148,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 25,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/95"
+  },
+  {
+    "symbol": "Cm",
+    "name": {
+      "en": "Curium",
+      "pt": "Cúrio",
+      "es": "Curio"
+    },
+    "atomic_number": 96,
+    "protons": 96,
+    "neutrons": 151,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 25,
+      "P": 9,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/96"
+  },
+  {
+    "symbol": "Bk",
+    "name": {
+      "en": "Berkelium",
+      "pt": "Berquélio",
+      "es": "Berkelio"
+    },
+    "atomic_number": 97,
+    "protons": 97,
+    "neutrons": 150,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 27,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/97"
+  },
+  {
+    "symbol": "Cf",
+    "name": {
+      "en": "Californium",
+      "pt": "Califórnio",
+      "es": "Californio"
+    },
+    "atomic_number": 98,
+    "protons": 98,
+    "neutrons": 153,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 28,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/98"
+  },
+  {
+    "symbol": "Es",
+    "name": {
+      "en": "Einsteinium",
+      "pt": "Einstênio",
+      "es": "Einstenio"
+    },
+    "atomic_number": 99,
+    "protons": 99,
+    "neutrons": 153,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 29,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/99"
+  },
+  {
+    "symbol": "Fm",
+    "name": {
+      "en": "Fermium",
+      "pt": "Férmio",
+      "es": "Fermio"
+    },
+    "atomic_number": 100,
+    "protons": 100,
+    "neutrons": 157,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 30,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/100"
+  },
+  {
+    "symbol": "Md",
+    "name": {
+      "en": "Mendelevium",
+      "pt": "Mendelévio",
+      "es": "Mendelevio"
+    },
+    "atomic_number": 101,
+    "protons": 101,
+    "neutrons": 157,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 31,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/101"
+  },
+  {
+    "symbol": "No",
+    "name": {
+      "en": "Nobelium",
+      "pt": "Nobélio",
+      "es": "Nobelio"
+    },
+    "atomic_number": 102,
+    "protons": 102,
+    "neutrons": 157,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 8,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/102"
+  },
+  {
+    "symbol": "Lr",
+    "name": {
+      "en": "Lawrencium",
+      "pt": "Laurêncio",
+      "es": "Laurencio"
+    },
+    "atomic_number": 103,
+    "protons": 103,
+    "neutrons": 163,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 8,
+      "Q": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/103"
+  },
+  {
+    "symbol": "Rf",
+    "name": {
+      "en": "Rutherfordium",
+      "pt": "Rutherfórdio",
+      "es": "Rutherfordio"
+    },
+    "atomic_number": 104,
+    "protons": 104,
+    "neutrons": 163,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 10,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/104"
+  },
+  {
+    "symbol": "Db",
+    "name": {
+      "en": "Dubnium",
+      "pt": "Dúbnio",
+      "es": "Dubnio"
+    },
+    "atomic_number": 105,
+    "protons": 105,
+    "neutrons": 163,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 11,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/105"
+  },
+  {
+    "symbol": "Sg",
+    "name": {
+      "en": "Seaborgium",
+      "pt": "Seabórgio",
+      "es": "Seaborgio"
+    },
+    "atomic_number": 106,
+    "protons": 106,
+    "neutrons": 163,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 12,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/106"
+  },
+  {
+    "symbol": "Bh",
+    "name": {
+      "en": "Bohrium",
+      "pt": "Bóhrio",
+      "es": "Bohrio"
+    },
+    "atomic_number": 107,
+    "protons": 107,
+    "neutrons": 163,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 13,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/107"
+  },
+  {
+    "symbol": "Hs",
+    "name": {
+      "en": "Hassium",
+      "pt": "Hássio",
+      "es": "Hassio"
+    },
+    "atomic_number": 108,
+    "protons": 108,
+    "neutrons": 161,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 14,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/108"
+  },
+  {
+    "symbol": "Mt",
+    "name": {
+      "en": "Meitnerium",
+      "pt": "Meitnério",
+      "es": "Meitnerio"
+    },
+    "atomic_number": 109,
+    "protons": 109,
+    "neutrons": 169,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 15,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/109"
+  },
+  {
+    "symbol": "Ds",
+    "name": {
+      "en": "Darmstadtium",
+      "pt": "Darmstádio",
+      "es": "Darmstadtio"
+    },
+    "atomic_number": 110,
+    "protons": 110,
+    "neutrons": 171,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 16,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/110"
+  },
+  {
+    "symbol": "Rg",
+    "name": {
+      "en": "Roentgenium",
+      "pt": "Roentgênio",
+      "es": "Roentgenio"
+    },
+    "atomic_number": 111,
+    "protons": 111,
+    "neutrons": 171,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 17,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/111"
+  },
+  {
+    "symbol": "Cn",
+    "name": {
+      "en": "Copernicium",
+      "pt": "Copernício",
+      "es": "Copernicio"
+    },
+    "atomic_number": 112,
+    "protons": 112,
+    "neutrons": 173,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 2
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/112"
+  },
+  {
+    "symbol": "Nh",
+    "name": {
+      "en": "Nihonium",
+      "pt": "Nihônio",
+      "es": "Nihonio"
+    },
+    "atomic_number": 113,
+    "protons": 113,
+    "neutrons": 173,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 3
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/113"
+  },
+  {
+    "symbol": "Fl",
+    "name": {
+      "en": "Flerovium",
+      "pt": "Fleróvio",
+      "es": "Flerovio"
+    },
+    "atomic_number": 114,
+    "protons": 114,
+    "neutrons": 175,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 4
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/114"
+  },
+  {
+    "symbol": "Mc",
+    "name": {
+      "en": "Moscovium",
+      "pt": "Moscóvio",
+      "es": "Moscovio"
+    },
+    "atomic_number": 115,
+    "protons": 115,
+    "neutrons": 174,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 5
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/115"
+  },
+  {
+    "symbol": "Lv",
+    "name": {
+      "en": "Livermorium",
+      "pt": "Livermório",
+      "es": "Livermorio"
+    },
+    "atomic_number": 116,
+    "protons": 116,
+    "neutrons": 177,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 6
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/116"
+  },
+  {
+    "symbol": "Ts",
+    "name": {
+      "en": "Tennessine",
+      "pt": "Tenessino",
+      "es": "Tenesino"
+    },
+    "atomic_number": 117,
+    "protons": 117,
+    "neutrons": 177,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 7
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/117"
+  },
+  {
+    "symbol": "Og",
+    "name": {
+      "en": "Oganesson",
+      "pt": "Oganessônio",
+      "es": "Oganesón"
+    },
+    "atomic_number": 118,
+    "protons": 118,
+    "neutrons": 176,
+    "electron_shells": {
+      "K": 2,
+      "L": 8,
+      "M": 18,
+      "N": 32,
+      "O": 32,
+      "P": 18,
+      "Q": 8
+    },
+    "reference": "https://www.rsc.org/periodic-table/element/118"
+  }
+];
