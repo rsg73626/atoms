@@ -899,7 +899,8 @@
     const baseRadius = nucleusRadius + minGap;
     const shells = [];
     const layerCount = el.electrons.length;
-    const layerAngleStep = (Math.PI * 2) / Math.max(1, layerCount);
+    // Use a half-turn span so opposite shells are not co-planar (e.g., 2 shells become perpendicular).
+    const layerAngleStep = Math.PI / Math.max(1, layerCount);
     for (let i = 0; i < layerCount; i++) {
       const count = el.electrons[i];
       const radius = baseRadius + i * 60;
@@ -1454,7 +1455,7 @@
       let v = { x: Math.cos(ang) * shell.radius, y: 0, z: Math.sin(ang) * shell.radius };
 
       // "Sphere sweep" motion: rotate the ring around a fixed axis (Z), creating a sphere surface.
-      // Each shell gets a fixed offset (evenly spaced around 360°) so starts at a different inclination.
+      // Each shell gets a fixed offset (evenly spaced over 180°) so paired shells become perpendicular instead of co-planar.
       v = rotateAroundAxis(v, firstOrbitSpinAxis, orbitSweepSpin + (shell.spinOffset || 0));
 
       v = rotateY(v, globalRotY);

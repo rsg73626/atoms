@@ -431,7 +431,15 @@
     }
     #overlayLeft { grid-area: left; align-items: flex-start; justify-content: center; }
     #overlayRight { grid-area: right; align-items: flex-end; justify-content: center; text-align: right; }
-    #overlayBottom { grid-area: bottom; text-align: center; align-items: center; margin-top: 2px; }
+    #overlayBottom {
+      grid-area: bottom;
+      text-align: center;
+      align-items: center;
+      margin-top: 2px;
+      gap: 6px;
+      flex-direction: row;
+      justify-content: center;
+    }
     .overlayLabel {
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -445,6 +453,23 @@
     #overlayShells {
       font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
       font-size: 12px;
+    }
+    .reference-btn {
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.6);
+      color: #e5e7eb;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.12s ease, box-shadow 0.12s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+      white-space: nowrap;
+    }
+    .reference-btn:hover { background: rgba(148,163,184,0.12); }
+    .reference-btn:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
     }
     #particleControllers {
       position: absolute;
@@ -609,7 +634,9 @@
       right: 0;
       bottom: 14px;
       padding: 0 12px;
-      display: flex;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
       align-items: flex-end;
       justify-content: space-between;
       gap: 16px;
@@ -950,6 +977,7 @@
     <div id="overlayBottom">
       <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
       <span id="overlayShells">2, 8, 8, 2</span>
+      <button id="referenceBtn" class="reference-btn" type="button">Reference</button>
     </div>
   </div>
       <div id="bottomControls">
