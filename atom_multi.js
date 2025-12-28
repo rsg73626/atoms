@@ -23,6 +23,7 @@
   const protonControl = document.getElementById('protonControl');
   const neutronControl = document.getElementById('neutronControl');
   const electronControl = document.getElementById('electronControl');
+  const backgroundControl = document.getElementById('backgroundControl');
   const colorMenuEl = document.getElementById('colorMenu');
   const colorMenuGridEl = document.getElementById('colorMenuGrid');
   const controlCentralize = document.getElementById('controlCentralize');
@@ -65,9 +66,11 @@
   const legendProtonEl = document.getElementById('legendProton');
   const legendNeutronEl = document.getElementById('legendNeutron');
   const legendElectronEl = document.getElementById('legendElectron');
+  const legendBackgroundEl = document.getElementById('legendBackground');
   const legendProtonTextEl = document.getElementById('legendProtonText');
   const legendNeutronTextEl = document.getElementById('legendNeutronText');
   const legendElectronTextEl = document.getElementById('legendElectronText');
+  const legendBackgroundTextEl = document.getElementById('legendBackgroundText');
   const referenceBtn = document.getElementById('referenceBtn');
   const overlayToggleBtn = document.getElementById('overlayToggle');
   const elementOverlayEl = document.getElementById('elementOverlay');
@@ -112,6 +115,8 @@
       protonColorLabel: "Proton color",
       neutronColorLabel: "Neutron color",
       electronColorLabel: "Electron color",
+      backgroundColorLabel: "Background color",
+      backgroundLabel: "Background",
       chargeToggleLabel: "Show charges",
       shellVisibilityLabel: "Shells",
       shellVisibilityAriaLabel: "Select shells to display",
@@ -177,6 +182,8 @@
       protonColorLabel: "Cor do próton",
       neutronColorLabel: "Cor do nêutron",
       electronColorLabel: "Cor do elétron",
+      backgroundColorLabel: "Cor do fundo",
+      backgroundLabel: "Fundo",
       chargeToggleLabel: "Mostrar cargas",
       shellVisibilityLabel: "Camadas",
       shellVisibilityAriaLabel: "Selecione as camadas para exibir",
@@ -242,6 +249,8 @@
       protonColorLabel: "Color del protón",
       neutronColorLabel: "Color del neutrón",
       electronColorLabel: "Color del electrón",
+      backgroundColorLabel: "Color de fondo",
+      backgroundLabel: "Fondo",
       chargeToggleLabel: "Mostrar cargas",
       shellVisibilityLabel: "Capas",
       shellVisibilityAriaLabel: "Selecciona las capas a mostrar",
@@ -330,6 +339,7 @@
       elementOverlayEl.classList.toggle("collapsed", !overlayExpanded);
     }
   }
+
 
   function getCopyPayload() {
     const el = currentElement || elementMap[currentSymbol];
@@ -508,6 +518,7 @@
     legendProtonTextEl.textContent = t.overlayLegendProton;
     legendNeutronTextEl.textContent = t.overlayLegendNeutron;
     legendElectronTextEl.textContent = t.overlayLegendElectron;
+    if (legendBackgroundTextEl) legendBackgroundTextEl.textContent = t.backgroundLabel;
     overlayAtomicLabelEl.textContent = t.overlayAtomicLabel;
     overlayProtonsLabelEl.textContent = t.overlayProtonsLabel;
     overlayNeutronsLabelEl.textContent = t.overlayNeutronsLabel;
@@ -541,6 +552,8 @@
     neutronControl?.setAttribute("title", t.neutronColorLabel);
     electronControl?.setAttribute("aria-label", t.electronColorLabel);
     electronControl?.setAttribute("title", t.electronColorLabel);
+    backgroundControl?.setAttribute("aria-label", t.backgroundColorLabel);
+    backgroundControl?.setAttribute("title", t.backgroundColorLabel);
   }
 
   function ensureVisibleShellSet(total) {
@@ -599,10 +612,11 @@
   orbitLinesToggle?.addEventListener("change", requestPausedRedraw);
   axesToggle?.addEventListener("change", requestPausedRedraw);
 
-  let protonColor = "#ff4d6d";
-  let neutronColor = "#3b82f6";
-  let electronColorOuter = "#06b6d4";
-  let electronColorInner = "#67e8f9";
+  let protonColor = "#2563eb";
+  let neutronColor = "#ffffff";
+  let electronColorOuter = "#ff0000";
+  let electronColorInner = "#ff8080";
+  let backgroundColor = "#000000";
   // Keep electrons more "solid" by default (less fade-out).
   let electronOuterFadeAlpha = "66";
 
@@ -654,10 +668,18 @@
     return mixHex(outerHex, "#ffffff", 0.55);
   }
 
+  electronColorInner = computeElectronInner(electronColorOuter);
+
+  function applyBackgroundColor(color) {
+    if (!color) return;
+    document.documentElement.style.setProperty("--bg-solid", color);
+  }
+
   function setLegendColors() {
     if (legendProtonEl) legendProtonEl.style.backgroundColor = protonColor;
     if (legendNeutronEl) legendNeutronEl.style.backgroundColor = neutronColor;
     if (legendElectronEl) legendElectronEl.style.backgroundColor = electronColorOuter;
+    if (legendBackgroundEl) legendBackgroundEl.style.backgroundColor = backgroundColor;
   }
 
   // Load saved colors (disabled-by-default, just restores when present).
@@ -665,15 +687,18 @@
     const savedProton = localStorage.getItem("atomicExplorerColorProton");
     const savedNeutron = localStorage.getItem("atomicExplorerColorNeutron");
     const savedElectron = localStorage.getItem("atomicExplorerColorElectron");
+    const savedBackground = localStorage.getItem("atomicExplorerColorBackground");
     if (savedProton) protonColor = savedProton;
     if (savedNeutron) neutronColor = savedNeutron;
     if (savedElectron) {
       electronColorOuter = savedElectron;
       electronColorInner = computeElectronInner(savedElectron);
     }
+    if (savedBackground) backgroundColor = savedBackground;
   } catch (_) {}
 
   setLegendColors();
+  applyBackgroundColor(backgroundColor);
 
   function drawChargeSymbol(x, y, symbol, radiusPx, textColor) {
     if (!showCharges) return;
@@ -713,6 +738,7 @@
       if (particle === "proton") localStorage.setItem("atomicExplorerColorProton", color);
       if (particle === "neutron") localStorage.setItem("atomicExplorerColorNeutron", color);
       if (particle === "electron") localStorage.setItem("atomicExplorerColorElectron", color);
+      if (particle === "background") localStorage.setItem("atomicExplorerColorBackground", color);
     } catch (_) {}
   }
 
@@ -723,6 +749,10 @@
     if (particle === "electron") {
       electronColorOuter = color;
       electronColorInner = computeElectronInner(color);
+    }
+    if (particle === "background") {
+      backgroundColor = color;
+      applyBackgroundColor(color);
     }
     persistParticleColor(particle, color);
     setLegendColors();
@@ -751,6 +781,7 @@
     protonControl?.setAttribute("aria-expanded", "false");
     neutronControl?.setAttribute("aria-expanded", "false");
     electronControl?.setAttribute("aria-expanded", "false");
+    backgroundControl?.setAttribute("aria-expanded", "false");
     openParticle = null;
     openControl = null;
   }
@@ -786,6 +817,7 @@
   function currentColorForParticle(particle) {
     if (particle === "proton") return protonColor;
     if (particle === "neutron") return neutronColor;
+    if (particle === "background") return backgroundColor;
     return electronColorOuter;
   }
 
@@ -811,6 +843,7 @@
     protonControl?.setAttribute("aria-expanded", particle === "proton" ? "true" : "false");
     neutronControl?.setAttribute("aria-expanded", particle === "neutron" ? "true" : "false");
     electronControl?.setAttribute("aria-expanded", particle === "electron" ? "true" : "false");
+    backgroundControl?.setAttribute("aria-expanded", particle === "background" ? "true" : "false");
 
     const selectedColor = currentColorForParticle(particle);
     const selectedItem = colorMenuEl.querySelector(`.color-option[data-color="${selectedColor}"]`);
@@ -1938,6 +1971,10 @@
     e.preventDefault();
     toggleColorMenu(electronControl, "electron");
   });
+  backgroundControl?.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleColorMenu(backgroundControl, "background");
+  });
 
   document.addEventListener("click", (e) => {
     const target = e.target;
@@ -1948,6 +1985,7 @@
       if (protonControl?.contains(target)) return;
       if (neutronControl?.contains(target)) return;
       if (electronControl?.contains(target)) return;
+      if (backgroundControl?.contains(target)) return;
       closeColorMenu();
     }
 

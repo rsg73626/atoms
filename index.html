@@ -18,7 +18,7 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at top, #111827 0, #020617 55%, #000 100%);
+      background: var(--bg-solid, #111827);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #f9fafb;
     }
@@ -73,9 +73,7 @@
       }
     }
     #languageCorner {
-      position: fixed;
-      top: 12px;
-      right: 12px;
+      position: relative;
       z-index: 30;
       display: inline-flex;
       align-items: center;
@@ -349,10 +347,23 @@
       width: 100%;
       height: 100%;
     }
-    #elementOverlay {
+    #topControls {
       position: absolute;
       top: 14px;
       left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      z-index: 25;
+      pointer-events: none;
+    }
+    #topControls > * {
+      pointer-events: auto;
+    }
+    #elementOverlay {
+      position: relative;
       width: clamp(240px, 32vw, 340px);
       height: clamp(240px, 32vw, 340px);
       aspect-ratio: 1 / 1;
@@ -608,10 +619,7 @@
       display: block;
     }
     #particleControllers {
-      position: absolute;
-      left: 50%;
-      top: 14px;
-      transform: translateX(-50%);
+      position: relative;
       display: flex;
       gap: 10px;
       align-items: center;
@@ -1049,9 +1057,12 @@
       #canvasWrapper {
         height: calc(100vh - 280px);
       }
-      #elementOverlay {
+      #topControls {
         top: 10px;
         left: 10px;
+        right: 10px;
+      }
+      #elementOverlay {
         width: 220px;
         height: 220px;
       }
@@ -1065,13 +1076,6 @@
   </style>
 </head>
 <body>
-  <div id="languageCorner">
-    <select id="langSelect">
-      <option value="en">🇺🇸 English</option>
-      <option value="pt" selected>🇧🇷 Português</option>
-      <option value="es">🇪🇸 Español</option>
-    </select>
-  </div>
   <aside id="panel">
     <div id="panel-header">
       <div id="panel-header-top">
@@ -1093,49 +1097,76 @@
 
     <div id="canvasWrapper">
     <canvas id="atomCanvas"></canvas>
-    <div id="elementOverlay">
-      <div id="overlayTop">
-        <button id="overlayToggle" class="overlay-toggle" type="button" aria-expanded="true" aria-label="Collapse element details">
-          <span class="overlay-toggle-icon" aria-hidden="true"></span>
-        </button>
-        <div class="overlay-top-center">
-          <div class="overlay-top-number">
-            <span class="overlayLabel" id="overlayAtomicLabel">Atomic #</span>
-            <span id="overlayZ">Z = 20</span>
+    <div id="topControls">
+      <div id="elementOverlay">
+        <div id="overlayTop">
+          <button id="overlayToggle" class="overlay-toggle" type="button" aria-expanded="true" aria-label="Collapse element details">
+            <span class="overlay-toggle-icon" aria-hidden="true"></span>
+          </button>
+          <div class="overlay-top-center">
+            <div class="overlay-top-number">
+              <span class="overlayLabel" id="overlayAtomicLabel">Atomic #</span>
+              <span id="overlayZ">Z = 20</span>
+            </div>
+            <span class="overlay-top-name" id="overlayTopName">Cálcio</span>
           </div>
-          <span class="overlay-top-name" id="overlayTopName">Cálcio</span>
+          <div class="overlay-actions">
+            <button id="copyBtn" class="copy-btn" type="button" aria-label="Copy element details" title="Copy element details">
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <rect x="2" y="6" width="12" height="12" rx="2.8" ry="2.8"></rect>
+                <rect x="6" y="2" width="12" height="12" rx="2.8" ry="2.8"></rect>
+              </svg>
+            </button>
+            <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="overlay-actions">
-          <button id="copyBtn" class="copy-btn" type="button" aria-label="Copy element details" title="Copy element details">
-            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-              <rect x="2" y="6" width="12" height="12" rx="2.8" ry="2.8"></rect>
-              <rect x="6" y="2" width="12" height="12" rx="2.8" ry="2.8"></rect>
-            </svg>
-          </button>
-          <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
-            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-              <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
-              <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
-              <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-          </button>
+        <div id="overlayLeft">
+          <span class="overlayLabel" id="overlayProtonsLabel">Protons</span>
+          <span class="overlayValue" id="overlayProtons">20</span>
+        </div>
+        <div id="overlayCenter">
+          <div id="overlaySymbol">Ca</div>
+          <div id="overlayName">Cálcio</div>
+        </div>
+        <div id="overlayRight">
+          <span class="overlayLabel" id="overlayNeutronsLabel">Neutrons</span>
+          <span class="overlayValue" id="overlayNeutrons">20</span>
+        </div>
+        <div id="overlayBottom">
+        <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
+        <span id="overlayShells">2, 8, 8, 2</span>
         </div>
       </div>
-      <div id="overlayLeft">
-        <span class="overlayLabel" id="overlayProtonsLabel">Protons</span>
-        <span class="overlayValue" id="overlayProtons">20</span>
+      <div id="particleControllers">
+        <button class="particle-control" id="backgroundControl" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="dot" id="legendBackground"></span><span id="legendBackgroundText">Background</span>
+          <span class="particle-chevron" aria-hidden="true"></span>
+        </button>
+        <button class="particle-control" id="protonControl" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="dot" id="legendProton"></span><span id="legendProtonText">Proton</span>
+          <span class="particle-chevron" aria-hidden="true"></span>
+        </button>
+        <button class="particle-control" id="neutronControl" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="dot" id="legendNeutron"></span><span id="legendNeutronText">Neutron</span>
+          <span class="particle-chevron" aria-hidden="true"></span>
+        </button>
+        <button class="particle-control" id="electronControl" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="dot" id="legendElectron"></span><span id="legendElectronText">Electron</span>
+          <span class="particle-chevron" aria-hidden="true"></span>
+        </button>
       </div>
-      <div id="overlayCenter">
-        <div id="overlaySymbol">Ca</div>
-        <div id="overlayName">Cálcio</div>
-      </div>
-      <div id="overlayRight">
-        <span class="overlayLabel" id="overlayNeutronsLabel">Neutrons</span>
-        <span class="overlayValue" id="overlayNeutrons">20</span>
-      </div>
-      <div id="overlayBottom">
-      <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
-      <span id="overlayShells">2, 8, 8, 2</span>
+      <div id="languageCorner">
+        <select id="langSelect">
+          <option value="en">🇺🇸 English</option>
+          <option value="pt" selected>🇧🇷 Português</option>
+          <option value="es">🇪🇸 Español</option>
+        </select>
       </div>
     </div>
     <div id="copyMenu" class="copy-menu" role="menu" aria-label="Copy content as" data-open="false">
@@ -1148,59 +1179,45 @@
         <button class="copy-option" id="copyOptionCsv" type="button" data-format="csv">CSV</button>
       </div>
     </div>
-      <div id="bottomControls">
-        <div class="control-cluster" id="speedCluster">
-          <div id="speedControl">
-            <div class="speed-row">
-              <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>
-              <button class="speed-btn speed-icon" id="speedMinus" aria-label="Slow down">&lt;&lt;</button>
-              <span id="speedValue">1.0×</span>
-              <button class="speed-btn speed-icon" id="speedPlus" aria-label="Speed up">&gt;&gt;</button>
-            </div>
-            <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
+    <div id="bottomControls">
+      <div class="control-cluster" id="speedCluster">
+        <div id="speedControl">
+          <div class="speed-row">
+            <button class="speed-btn" id="speedPlayPause" aria-label="Pause">⏸</button>
+            <button class="speed-btn speed-icon" id="speedMinus" aria-label="Slow down">&lt;&lt;</button>
+            <span id="speedValue">1.0×</span>
+            <button class="speed-btn speed-icon" id="speedPlus" aria-label="Speed up">&gt;&gt;</button>
           </div>
-        </div>
-        <div class="control-cluster" id="togglesCluster">
-          <label class="view-toggle" for="orbitLinesToggle">
-            <input type="checkbox" id="orbitLinesToggle" />
-            <span id="orbitLinesLabel">Show orbits</span>
-          </label>
-          <label class="view-toggle" for="axesToggle">
-            <input type="checkbox" id="axesToggle" />
-            <span id="axesToggleLabel">Show axes</span>
-          </label>
-          <label class="view-toggle" for="chargeToggle">
-            <input type="checkbox" id="chargeToggle" />
-            <span id="chargeToggleLabel">Show charges</span>
-          </label>
-        </div>
-        <div class="control-cluster" id="zoomCluster">
-          <div id="zoomControls">
-            <button class="view-btn" id="controlZoomIn" aria-label="Zoom in"><span class="icon zoom-icon zoom-in" aria-hidden="true"></span></button>
-            <button class="view-btn" id="controlZoomOut" aria-label="Zoom out"><span class="icon zoom-icon zoom-out" aria-hidden="true"></span></button>
-            <button class="view-btn" id="controlCentralize" aria-label="Centralize"><span class="restore-icon" aria-hidden="true"></span></button>
-          </div>
-        </div>
-        <div class="control-cluster" id="viewportControls">
-          <button class="view-btn arrow-btn" id="viewArrowUp" aria-label="Rotate up" style="grid-column:2;grid-row:1;">↑</button>
-          <button class="view-btn arrow-btn" id="viewArrowLeft" aria-label="Rotate left" style="grid-column:1;grid-row:2;">←</button>
-          <button class="view-btn arrow-btn" id="viewArrowDown" aria-label="Rotate down" style="grid-column:2;grid-row:2;">↓</button>
-          <button class="view-btn arrow-btn" id="viewArrowRight" aria-label="Rotate right" style="grid-column:3;grid-row:2;">→</button>
+          <input id="speedRange" type="range" min="0" max="5" step="0.1" value="1" />
         </div>
       </div>
-    <div id="particleControllers">
-      <button class="particle-control" id="protonControl" type="button" aria-haspopup="menu" aria-expanded="false">
-        <span class="dot" id="legendProton"></span><span id="legendProtonText">Proton</span>
-        <span class="particle-chevron" aria-hidden="true"></span>
-      </button>
-      <button class="particle-control" id="neutronControl" type="button" aria-haspopup="menu" aria-expanded="false">
-        <span class="dot" id="legendNeutron"></span><span id="legendNeutronText">Neutron</span>
-        <span class="particle-chevron" aria-hidden="true"></span>
-      </button>
-      <button class="particle-control" id="electronControl" type="button" aria-haspopup="menu" aria-expanded="false">
-        <span class="dot" id="legendElectron"></span><span id="legendElectronText">Electron</span>
-        <span class="particle-chevron" aria-hidden="true"></span>
-      </button>
+      <div class="control-cluster" id="togglesCluster">
+        <label class="view-toggle" for="orbitLinesToggle">
+          <input type="checkbox" id="orbitLinesToggle" />
+          <span id="orbitLinesLabel">Show orbits</span>
+        </label>
+        <label class="view-toggle" for="axesToggle">
+          <input type="checkbox" id="axesToggle" />
+          <span id="axesToggleLabel">Show axes</span>
+        </label>
+        <label class="view-toggle" for="chargeToggle">
+          <input type="checkbox" id="chargeToggle" />
+          <span id="chargeToggleLabel">Show charges</span>
+        </label>
+      </div>
+      <div class="control-cluster" id="zoomCluster">
+        <div id="zoomControls">
+          <button class="view-btn" id="controlZoomIn" aria-label="Zoom in"><span class="icon zoom-icon zoom-in" aria-hidden="true"></span></button>
+          <button class="view-btn" id="controlZoomOut" aria-label="Zoom out"><span class="icon zoom-icon zoom-out" aria-hidden="true"></span></button>
+          <button class="view-btn" id="controlCentralize" aria-label="Centralize"><span class="restore-icon" aria-hidden="true"></span></button>
+        </div>
+      </div>
+      <div class="control-cluster" id="viewportControls">
+        <button class="view-btn arrow-btn" id="viewArrowUp" aria-label="Rotate up" style="grid-column:2;grid-row:1;">↑</button>
+        <button class="view-btn arrow-btn" id="viewArrowLeft" aria-label="Rotate left" style="grid-column:1;grid-row:2;">←</button>
+        <button class="view-btn arrow-btn" id="viewArrowDown" aria-label="Rotate down" style="grid-column:2;grid-row:2;">↓</button>
+        <button class="view-btn arrow-btn" id="viewArrowRight" aria-label="Rotate right" style="grid-column:3;grid-row:2;">→</button>
+      </div>
     </div>
     <div id="shellVisibilityPanel" aria-label="Shells">
       <div id="shellVisibilityHeader">
