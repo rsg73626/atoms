@@ -61,6 +61,7 @@
   const overlayProtonsLabelEl = document.getElementById('overlayProtonsLabel');
   const overlayNeutronsLabelEl = document.getElementById('overlayNeutronsLabel');
   const overlayShellsLabelEl = document.getElementById('overlayShellsLabel');
+  const overlayTopNameEl = document.getElementById('overlayTopName');
   const legendProtonEl = document.getElementById('legendProton');
   const legendNeutronEl = document.getElementById('legendNeutron');
   const legendElectronEl = document.getElementById('legendElectron');
@@ -68,6 +69,8 @@
   const legendNeutronTextEl = document.getElementById('legendNeutronText');
   const legendElectronTextEl = document.getElementById('legendElectronText');
   const referenceBtn = document.getElementById('referenceBtn');
+  const overlayToggleBtn = document.getElementById('overlayToggle');
+  const elementOverlayEl = document.getElementById('elementOverlay');
 
   // --- i18n strings --------------------------------------------------------
   const i18n = {
@@ -248,6 +251,7 @@
   let visibleSymbols = [];
   let focusContext = "scene"; // "scene" or "elements"
   let viewHoldTimer = null;
+  let overlayExpanded = true;
   const shellLetters = ["K","L","M","N","O","P","Q","R","S"];
 
   function stopViewHold() {
@@ -270,6 +274,20 @@
     speedPlayPauseBtn.textContent = isPaused ? "▶" : "⏸";
     speedPlayPauseBtn.setAttribute("aria-label", label);
     speedPlayPauseBtn.setAttribute("title", label);
+  }
+
+  function setOverlayExpanded(expanded, { skipClassUpdate } = {}) {
+    if (!elementOverlayEl) return;
+    const nextExpanded = Boolean(expanded);
+    overlayExpanded = nextExpanded;
+    const label = overlayExpanded ? "Collapse element details" : "Expand element details";
+    overlayToggleBtn?.setAttribute("aria-expanded", overlayExpanded ? "true" : "false");
+    overlayToggleBtn?.setAttribute("aria-label", label);
+    overlayToggleBtn?.setAttribute("title", label);
+    overlayToggleBtn?.classList.toggle("expanded", overlayExpanded);
+    if (!skipClassUpdate) {
+      elementOverlayEl.classList.toggle("collapsed", !overlayExpanded);
+    }
   }
 
   function requestPausedRedraw() {
@@ -714,9 +732,10 @@
     const t = i18n[currentLanguage] || i18n.en;
     const reference = el.reference || "";
 
+    const elementName = getElementName(el);
     if (detailsDiv) {
       detailsDiv.innerHTML = [
-        `<b>${getElementName(el)} (${el.symbol})</b>`,
+        `<b>${elementName} (${el.symbol})</b>`,
         `Z (atomic number): <b>${el.Z}</b>`,
         `Protons: <b>${el.Z}</b> · Neutrons: <b>${N}</b>`,
         `Nucleons (≈ mass number): <b>${totalNucleons}</b>`,
@@ -725,11 +744,12 @@
       ].join("<br>");
     }
 
-    if (currentElementNameEl) currentElementNameEl.textContent = getElementName(el);
+    if (currentElementNameEl) currentElementNameEl.textContent = elementName;
     if (currentElementSymbolEl) currentElementSymbolEl.textContent = el.symbol;
 
     overlaySymbolEl.textContent = el.symbol;
-    overlayNameEl.textContent = getElementName(el);
+    overlayNameEl.textContent = elementName;
+    if (overlayTopNameEl) overlayTopNameEl.textContent = elementName;
     overlayZEl.textContent = "Z = " + el.Z;
     overlayProtonsEl.textContent = el.Z;
     overlayNeutronsEl.textContent = N;
@@ -751,6 +771,7 @@
     searchInput.parentElement.classList.remove("has-text");
   }
   updateDetails(currentSymbol);
+  setOverlayExpanded(true, { skipClassUpdate: true });
   updateShellVisibilityUI(currentElement?.electrons?.length);
 
   if (shellAllBtn) shellAllBtn.addEventListener("click", (e) => { e.stopPropagation(); setAllShells(); });
@@ -760,6 +781,11 @@
       const href = referenceBtn.dataset.href || currentElement?.reference;
       if (!href) return;
       window.open(href, "_blank", "noopener,noreferrer");
+    });
+  }
+  if (overlayToggleBtn) {
+    overlayToggleBtn.addEventListener("click", () => {
+      setOverlayExpanded(!overlayExpanded);
     });
   }
 

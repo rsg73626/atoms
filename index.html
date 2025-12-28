@@ -351,7 +351,7 @@
     }
     #elementOverlay {
       position: absolute;
-      top: 18px;
+      top: 14px;
       left: 20px;
       width: clamp(240px, 32vw, 340px);
       height: clamp(240px, 32vw, 340px);
@@ -379,20 +379,92 @@
     }
     #overlayTop {
       grid-area: top;
-      justify-self: center;
-      display: inline-flex;
-      gap: 6px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
       align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.8);
-      border: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.22);
-      font-size: 12px;
+      gap: 12px;
+      padding: 4px 0;
     }
-    #overlayZ {
+    .overlay-toggle,
+    .reference-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 14px;
+      border: none;
+      background: transparent;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: none;
+    }
+    .overlay-toggle:focus-visible,
+    .reference-btn:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .reference-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .reference-btn svg path {
+      stroke: #e5e7eb;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .overlay-toggle-icon {
+      width: 14px;
+      height: 8px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23e5e7eb' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M1 2l5 5 5-5'/></svg>");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      transition: transform 0.2s ease;
+      display: block;
+    }
+    .overlay-toggle.expanded .overlay-toggle-icon {
+      transform: rotate(180deg);
+    }
+    .overlay-top-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      width: 100%;
+    }
+    .overlay-top-number,
+    .overlay-top-name {
+      display: block;
+      width: 100%;
+      text-align: center;
+    }
+    .overlay-top-number {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .overlay-top-number span:last-child {
+      font-size: 15px;
       font-weight: 600;
-      opacity: 0.95;
+      letter-spacing: 0.04em;
+      text-transform: none;
+    }
+    .overlay-top-name {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #fff;
+      display: none;
     }
     #overlayCenter {
       grid-area: center;
@@ -400,9 +472,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 4px;
+      gap: 6px;
       text-align: center;
-      padding: 0 8px;
+      padding: 0 8px 4px;
     }
     #overlaySymbol {
       font-size: clamp(34px, 5vw, 44px);
@@ -454,35 +526,28 @@
       font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
       font-size: 12px;
     }
-    .reference-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 34px;
-      height: 34px;
-      border: 1px solid rgba(148,163,184,0.4);
-      background: rgba(15,23,42,0.75);
-      color: #e5e7eb;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      padding: 0;
-      cursor: pointer;
-      transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+    #elementOverlay.collapsed {
+      min-height: 44px;
+      max-height: 44px;
+      grid-template-areas: "top top top";
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      row-gap: 0;
+      column-gap: 0;
+      padding: 0 14px;
+      overflow: hidden;
     }
-    .reference-btn:hover { background: rgba(148,163,184,0.12); transform: translateY(-1px); }
-    .reference-btn:active { transform: translateY(0); }
-    .reference-btn:focus-visible {
-      outline: 2px solid rgba(56,189,248,0.7);
-      outline-offset: 2px;
+    #elementOverlay.collapsed #overlayLeft,
+    #elementOverlay.collapsed #overlayCenter,
+    #elementOverlay.collapsed #overlayRight,
+    #elementOverlay.collapsed #overlayBottom {
+      display: none;
     }
-    .reference-btn svg {
-      width: 16px;
-      height: 16px;
-      stroke: #e5e7eb;
-      stroke-width: 1.8;
-      fill: none;
+    #elementOverlay.collapsed .overlay-top-number {
+      display: none;
+    }
+    #elementOverlay.collapsed .overlay-top-name {
+      display: block;
     }
     #particleControllers {
       position: absolute;
@@ -968,19 +1033,27 @@
     </div>
   </aside>
 
-  <div id="canvasWrapper">
+    <div id="canvasWrapper">
     <canvas id="atomCanvas"></canvas>
     <div id="elementOverlay">
-      <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
-        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-          <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
-          <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
-          <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
       <div id="overlayTop">
-        <span class="overlayLabel" id="overlayAtomicLabel">Atomic #</span>
-        <span id="overlayZ">Z = 20</span>
+        <button id="overlayToggle" class="overlay-toggle" type="button" aria-expanded="true" aria-label="Collapse element details">
+          <span class="overlay-toggle-icon" aria-hidden="true"></span>
+        </button>
+        <div class="overlay-top-center">
+          <div class="overlay-top-number">
+            <span class="overlayLabel" id="overlayAtomicLabel">Atomic #</span>
+            <span id="overlayZ">Z = 20</span>
+          </div>
+          <span class="overlay-top-name" id="overlayTopName">Cálcio</span>
+        </div>
+        <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
       </div>
       <div id="overlayLeft">
         <span class="overlayLabel" id="overlayProtonsLabel">Protons</span>
@@ -994,11 +1067,11 @@
         <span class="overlayLabel" id="overlayNeutronsLabel">Neutrons</span>
         <span class="overlayValue" id="overlayNeutrons">20</span>
       </div>
-    <div id="overlayBottom">
+      <div id="overlayBottom">
       <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
       <span id="overlayShells">2, 8, 8, 2</span>
+      </div>
     </div>
-  </div>
       <div id="bottomControls">
         <div class="control-cluster" id="speedCluster">
           <div id="speedControl">
