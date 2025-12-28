@@ -116,7 +116,7 @@
       neutronColorLabel: "Neutron color",
       electronColorLabel: "Electron color",
       backgroundColorLabel: "Background color",
-      backgroundLabel: "Background",
+      backgroundLabel: "Scene",
       chargeToggleLabel: "Show charges",
       shellVisibilityLabel: "Shells",
       shellVisibilityAriaLabel: "Select shells to display",
