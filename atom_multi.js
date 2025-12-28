@@ -288,10 +288,38 @@
     }
   };
 
+  function parseBooleanParam(value) {
+    if (value == null) return null;
+    const raw = String(value).trim().toLowerCase();
+    if (["1","true","yes","on"].includes(raw)) return true;
+    if (["0","false","no","off"].includes(raw)) return false;
+    return null;
+  }
+
+  function parseIndexParam(value) {
+    if (value == null) return null;
+    const idx = Number.parseInt(String(value), 10);
+    return Number.isNaN(idx) ? null : idx;
+  }
+
+  const queryParams = new URLSearchParams(window.location.search || "");
+  const queryElementRaw = (queryParams.get("element") || queryParams.get("symbol") || "").trim();
+  const queryLanguage = (queryParams.get("lang") || queryParams.get("language") || "").trim().toLowerCase();
+  const queryOrbits = parseBooleanParam(queryParams.get("orbits"));
+  const queryAxes = parseBooleanParam(queryParams.get("axes"));
+  const queryCharges = parseBooleanParam(queryParams.get("charges"));
+  const queryPaused = parseBooleanParam(queryParams.get("paused"));
+  const queryColorIndexes = {
+    proton: parseIndexParam(queryParams.get("proton") ?? queryParams.get("protonColor")),
+    neutron: parseIndexParam(queryParams.get("neutron") ?? queryParams.get("neutronColor")),
+    electron: parseIndexParam(queryParams.get("electron") ?? queryParams.get("electronColor")),
+    background: parseIndexParam(queryParams.get("background") ?? queryParams.get("backgroundColor"))
+  };
+
   // Will be defined a bit later, but we need declarations now so that
   // i18n<->details functions don't explode due to TDZ.
-  let currentLanguage = "pt";
-  let currentSymbol = "Ca"; // default
+  let currentLanguage = (i18n[queryLanguage] ? queryLanguage : "pt");
+  let currentSymbol = "H"; // default
   let elementMap = {};      // will be filled after periodicElements
   let currentElement = null;
   let isPaused = false;
@@ -612,6 +640,16 @@
   orbitLinesToggle?.addEventListener("change", requestPausedRedraw);
   axesToggle?.addEventListener("change", requestPausedRedraw);
 
+  if (queryOrbits != null && orbitLinesToggle) orbitLinesToggle.checked = queryOrbits;
+  if (queryAxes != null && axesToggle) axesToggle.checked = queryAxes;
+  if (queryCharges != null && chargeToggle) {
+    chargeToggle.checked = queryCharges;
+    showCharges = queryCharges;
+  }
+  if (queryPaused != null) {
+    isPaused = queryPaused;
+  }
+
   let protonColor = "#2563eb";
   let neutronColor = "#ffffff";
   let electronColorOuter = "#ff0000";
@@ -697,8 +735,6 @@
     if (savedBackground) backgroundColor = savedBackground;
   } catch (_) {}
 
-  setLegendColors();
-  applyBackgroundColor(backgroundColor);
 
   function drawChargeSymbol(x, y, symbol, radiusPx, textColor) {
     if (!showCharges) return;
@@ -732,6 +768,47 @@
     { value: "#9ca3af", nameKey: "lightGray" },
     { value: "#ffffff", nameKey: "white" }
   ];
+
+  function resolveColorFromIndex(index) {
+    if (index == null) return null;
+    const safeIndex = Math.max(0, Math.min(sharedColorOptions.length - 1, index));
+    return sharedColorOptions[safeIndex]?.value || null;
+  }
+
+  const queryProtonColor = resolveColorFromIndex(queryColorIndexes.proton);
+  const queryNeutronColor = resolveColorFromIndex(queryColorIndexes.neutron);
+  const queryElectronColor = resolveColorFromIndex(queryColorIndexes.electron);
+  const queryBackgroundColor = resolveColorFromIndex(queryColorIndexes.background);
+  if (queryProtonColor) protonColor = queryProtonColor;
+  if (queryNeutronColor) neutronColor = queryNeutronColor;
+  if (queryElectronColor) {
+    electronColorOuter = queryElectronColor;
+    electronColorInner = computeElectronInner(queryElectronColor);
+  }
+  if (queryBackgroundColor) backgroundColor = queryBackgroundColor;
+
+  setLegendColors();
+  applyBackgroundColor(backgroundColor);
+
+  function normalizeSymbol(raw) {
+    const cleaned = String(raw || "").trim();
+    if (!cleaned) return "";
+    return cleaned[0].toUpperCase() + cleaned.slice(1).toLowerCase();
+  }
+
+  function resolveSymbolFromQuery(raw, elements) {
+    if (!raw) return "";
+    const trimmed = String(raw).trim();
+    const lowered = trimmed.toLowerCase();
+    if (lowered === "first") return elements[0]?.symbol || "";
+    if (lowered === "last") return elements[elements.length - 1]?.symbol || "";
+    const num = Number.parseInt(trimmed, 10);
+    if (!Number.isNaN(num)) {
+      const matchByNumber = elements.find((el) => el.Z === num);
+      return matchByNumber?.symbol || "";
+    }
+    return normalizeSymbol(trimmed);
+  }
 
   function persistParticleColor(particle, color) {
     try {
@@ -872,6 +949,9 @@
     };
   });
 
+  const querySymbol = resolveSymbolFromQuery(queryElementRaw, periodicElements);
+  if (querySymbol) currentSymbol = querySymbol;
+
   function bohrShells(Z) {
     const capacities = [2, 8, 18, 32, 32, 18, 8];
     const shells = [];
@@ -924,7 +1004,7 @@
     };
   });
   if (!elementMap[currentSymbol]) {
-    currentSymbol = periodicElements[0]?.symbol || currentSymbol;
+    currentSymbol = elementMap["H"] ? "H" : (periodicElements[0]?.symbol || currentSymbol);
   }
   currentElement = elementMap[currentSymbol] || null;
   if (!currentElement) {
@@ -987,6 +1067,10 @@
     }
   }
 
+  if (langSelect && i18n[currentLanguage]) {
+    langSelect.value = currentLanguage;
+  }
+
   // Apply initial language AFTER we have elements + symbol ready
   applyLanguage(currentLanguage);
   if (searchInput) searchInput.value = "";
@@ -994,6 +1078,10 @@
     searchInput.parentElement.classList.remove("has-text");
   }
   updateDetails(currentSymbol);
+  updatePlayPauseUI();
+  if (queryOrbits != null || queryAxes != null || queryCharges != null) {
+    requestPausedRedraw();
+  }
   setOverlayExpanded(true, { skipClassUpdate: true });
   updateShellVisibilityUI(currentElement?.electrons?.length);
 
