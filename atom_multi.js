@@ -19,7 +19,11 @@
   const clearSearchBtn = document.getElementById('clearSearch');
   const currentElementNameEl = document.getElementById('currentElementName');
   const currentElementSymbolEl = document.getElementById('currentElementSymbol');
-  const langSelect = document.getElementById('langSelect');
+  const languageBtn = document.getElementById('languageBtn');
+  const languageFlagEl = document.getElementById('languageFlag');
+  const languageLabelEl = document.getElementById('languageLabel');
+  const languageMenuEl = document.getElementById('languageMenu');
+  const languageMenuTitleEl = document.getElementById('languageMenuTitle');
   const protonControl = document.getElementById('protonControl');
   const neutronControl = document.getElementById('neutronControl');
   const electronControl = document.getElementById('electronControl');
@@ -108,6 +112,8 @@
       overlayShellsLabel: "Shells",
       zTooltip: "Atomic number (count of protons)",
       centralizeLabel: "Centralize view",
+      languageMenuTitle: "Language:",
+      languageMenuLabel: "Language",
       zoomInLabel: "Zoom in",
       zoomOutLabel: "Zoom out",
       speedUp: "Increase speed",
@@ -175,6 +181,8 @@
       overlayShellsLabel: "Camadas",
       zTooltip: "Número atômico (contagem de prótons)",
       centralizeLabel: "Centralizar visão",
+      languageMenuTitle: "Idioma:",
+      languageMenuLabel: "Idioma",
       zoomInLabel: "Aproximar",
       zoomOutLabel: "Afastar",
       speedUp: "Aumentar velocidade",
@@ -242,6 +250,8 @@
       overlayShellsLabel: "Capas",
       zTooltip: "Número atómico (cantidad de protones)",
       centralizeLabel: "Centralizar vista",
+      languageMenuTitle: "Idioma:",
+      languageMenuLabel: "Idioma",
       zoomInLabel: "Acercar",
       zoomOutLabel: "Alejar",
       speedUp: "Aumentar velocidad",
@@ -331,6 +341,11 @@
   let viewHoldTimer = null;
   let overlayExpanded = true;
   const shellLetters = ["K","L","M","N","O","P","Q","R","S"];
+  const languageOptions = [
+    { code: "en", label: "English", flag: "🇺🇸" },
+    { code: "pt", label: "Português", flag: "🇧🇷" },
+    { code: "es", label: "Español", flag: "🇪🇸" }
+  ];
 
   function stopViewHold() {
     if (viewHoldTimer) {
@@ -352,6 +367,12 @@
     speedPlayPauseBtn.textContent = isPaused ? "▶" : "⏸";
     speedPlayPauseBtn.setAttribute("aria-label", label);
     speedPlayPauseBtn.setAttribute("title", label);
+  }
+
+  function updateLanguageButton(lang) {
+    const choice = languageOptions.find((opt) => opt.code === lang) || languageOptions[0];
+    if (languageFlagEl) languageFlagEl.textContent = choice.flag;
+    if (languageLabelEl) languageLabelEl.textContent = choice.label;
   }
 
   function setOverlayExpanded(expanded, { skipClassUpdate } = {}) {
@@ -491,20 +512,12 @@
 
   function openCopyMenu() {
     if (!copyMenuEl || !copyBtn) return;
-    const wrapper = document.getElementById("canvasWrapper");
-    if (wrapper) {
-      const wrapperRect = wrapper.getBoundingClientRect();
-      const btnRect = copyBtn.getBoundingClientRect();
-      const left = btnRect.left - wrapperRect.left;
-      const top = btnRect.bottom - wrapperRect.top + 8;
-      copyMenuEl.style.left = `${left}px`;
-      copyMenuEl.style.top = `${top}px`;
-    }
-    copyMenuEl.setAttribute("data-open", "true");
+    openMenu(copyMenuEl, copyBtn);
   }
 
   function closeCopyMenu() {
-    copyMenuEl?.setAttribute("data-open", "false");
+    if (!copyMenuEl) return;
+    closeMenu(copyMenuEl, copyBtn);
   }
 
   function requestPausedRedraw() {
@@ -552,6 +565,12 @@
     overlayNeutronsLabelEl.textContent = t.overlayNeutronsLabel;
     overlayShellsLabelEl.textContent = t.overlayShellsLabel;
     overlayZEl.setAttribute("title", t.zTooltip);
+    if (languageBtn) {
+      languageBtn.setAttribute("aria-label", t.languageMenuLabel);
+      languageBtn.setAttribute("title", t.languageMenuLabel);
+    }
+    if (languageMenuEl) languageMenuEl.setAttribute("aria-label", t.languageMenuLabel);
+    if (languageMenuTitleEl) languageMenuTitleEl.textContent = t.languageMenuTitle;
     if (copyBtn) {
       copyBtn.setAttribute("aria-label", t.copyButtonLabel);
       copyBtn.setAttribute("title", t.copyButtonLabel);
@@ -582,6 +601,7 @@
     electronControl?.setAttribute("title", t.electronColorLabel);
     backgroundControl?.setAttribute("aria-label", t.backgroundColorLabel);
     backgroundControl?.setAttribute("title", t.backgroundColorLabel);
+    updateLanguageButton(currentLanguage);
   }
 
   function ensureVisibleShellSet(total) {
@@ -648,6 +668,51 @@
   }
   if (queryPaused != null) {
     isPaused = queryPaused;
+  }
+
+  function openLanguageMenu() {
+    if (!languageMenuEl || !languageBtn) return;
+    openMenu(languageMenuEl, languageBtn, languageBtn);
+  }
+
+  function closeLanguageMenu() {
+    if (!languageMenuEl || !languageBtn) return;
+    closeMenu(languageMenuEl, languageBtn);
+  }
+
+  function setLanguage(lang) {
+    if (!i18n[lang]) return;
+    currentLanguage = lang;
+    applyLanguage(currentLanguage);
+    buildPeriodicGrid();
+    updateDetails(currentSymbol);
+    if (isColorMenuOpen() && openParticle) {
+      rebuildColorMenu(openParticle);
+    }
+  }
+
+  function openMenu(menuEl, anchorEl, toggleEl = anchorEl) {
+    if (!menuEl || !anchorEl) return;
+    const wrapper = document.getElementById("canvasWrapper");
+    if (!wrapper) return;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const btnRect = anchorEl.getBoundingClientRect();
+    const top = btnRect.bottom - wrapperRect.top + 8;
+    menuEl.style.top = `${top}px`;
+    menuEl.setAttribute("data-open", "true");
+    if (toggleEl) toggleEl.setAttribute("aria-expanded", "true");
+    const menuRect = menuEl.getBoundingClientRect();
+    let left = btnRect.left - wrapperRect.left;
+    const maxLeft = wrapperRect.width - menuRect.width - 8;
+    if (left > maxLeft) left = Math.max(8, maxLeft);
+    if (left < 8) left = 8;
+    menuEl.style.left = `${left}px`;
+  }
+
+  function closeMenu(menuEl, toggleEl) {
+    if (!menuEl) return;
+    menuEl.setAttribute("data-open", "false");
+    toggleEl?.setAttribute("aria-expanded", "false");
   }
 
   let protonColor = "#2563eb";
@@ -1067,10 +1132,6 @@
     }
   }
 
-  if (langSelect && i18n[currentLanguage]) {
-    langSelect.value = currentLanguage;
-  }
-
   // Apply initial language AFTER we have elements + symbol ready
   applyLanguage(currentLanguage);
   if (searchInput) searchInput.value = "";
@@ -1236,6 +1297,7 @@
     if (target.closest("#bottomControls")) return;
     if (target.closest("#shellVisibilityPanel")) return;
     if (target.closest("#elementOverlay")) return;
+    if (target.closest("#languageMenu")) return;
     if (target.closest("#copyMenu")) return;
     if (target.closest("#colorMenu")) return;
     toggleUiHidden();
@@ -2037,14 +2099,23 @@
   buildPeriodicGrid();
   requestAnimationFrame(draw);
 
-  langSelect.addEventListener("change", () => {
-    currentLanguage = langSelect.value;
-    applyLanguage(currentLanguage);
-    buildPeriodicGrid();
-    updateDetails(currentSymbol);
-    if (isColorMenuOpen() && openParticle) {
-      rebuildColorMenu(openParticle);
-    }
+  if (languageBtn) {
+    languageBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (languageMenuEl?.getAttribute("data-open") === "true") closeLanguageMenu();
+      else openLanguageMenu();
+    });
+  }
+
+  languageMenuEl?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    const lang = target.getAttribute("data-lang");
+    if (!lang) return;
+    setLanguage(lang);
+    closeLanguageMenu();
   });
 
   protonControl?.addEventListener("click", (e) => {
@@ -2082,6 +2153,12 @@
       if (copyBtn?.contains(target)) return;
       closeCopyMenu();
     }
+
+    if (languageMenuEl?.getAttribute("data-open") === "true") {
+      if (languageMenuEl?.contains(target)) return;
+      if (languageBtn?.contains(target)) return;
+      closeLanguageMenu();
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -2095,6 +2172,12 @@
       e.preventDefault();
       closeCopyMenu();
       copyBtn?.focus();
+      return;
+    }
+    if (languageMenuEl?.getAttribute("data-open") === "true" && e.key === "Escape") {
+      e.preventDefault();
+      closeLanguageMenu();
+      languageBtn?.focus();
       return;
     }
     if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown") {

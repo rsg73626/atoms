@@ -77,42 +77,51 @@
       z-index: 30;
       display: inline-flex;
       align-items: center;
+    }
+    .language-btn {
       height: 44px;
       padding: 0 12px;
       gap: 8px;
-      background: var(--ctrl-bg);
       border: 1px solid var(--ctrl-border);
       border-radius: 999px;
+      background: var(--ctrl-bg);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
       box-shadow: var(--ctrl-shadow);
       backdrop-filter: var(--ctrl-blur);
       transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
     }
-    #languageCorner:hover {
+    .language-btn:hover {
       background: var(--ctrl-bg-hover);
       box-shadow: 0 10px 22px rgba(0,0,0,0.42);
       transform: translateY(-1px);
     }
-    #languageCorner:active {
+    .language-btn:active {
       transform: translateY(0);
     }
-    #langSelect {
-      padding: 0 12px;
-      height: 100%;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      color: #e5e7eb;
-      font-size: 13px;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      outline: none;
-      box-shadow: none;
-      padding-right: 34px;
+    .language-btn:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .language-flag {
+      font-size: 16px;
+      line-height: 1;
+    }
+    .language-label {
+      font-weight: 600;
+    }
+    .language-chevron {
+      width: 16px;
+      height: 16px;
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23e5e7eb' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><path d='M1 2l5 5 5-5'/></svg>");
       background-repeat: no-repeat;
-      background-position: right 12px center;
+      background-position: center;
       background-size: 12px;
+      opacity: 0.9;
     }
     #panel {
       width: 380px;
@@ -1167,11 +1176,11 @@
         </button>
       </div>
       <div id="languageCorner">
-        <select id="langSelect">
-          <option value="en">🇺🇸 English</option>
-          <option value="pt" selected>🇧🇷 Português</option>
-          <option value="es">🇪🇸 Español</option>
-        </select>
+        <button id="languageBtn" class="language-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Language">
+          <span class="language-flag" id="languageFlag" aria-hidden="true">🇧🇷</span>
+          <span class="language-label" id="languageLabel">Português</span>
+          <span class="language-chevron" aria-hidden="true"></span>
+        </button>
       </div>
     </div>
     <div id="copyMenu" class="copy-menu" role="menu" aria-label="Copy content as" data-open="false">
@@ -1182,6 +1191,14 @@
         <button class="copy-option" id="copyOptionHtml" type="button" data-format="html">HTML</button>
         <button class="copy-option" id="copyOptionJson" type="button" data-format="json">JSON</button>
         <button class="copy-option" id="copyOptionCsv" type="button" data-format="csv">CSV</button>
+      </div>
+    </div>
+    <div id="languageMenu" class="copy-menu" role="menu" aria-label="Language" data-open="false">
+      <div class="copy-menu-title" id="languageMenuTitle">Language:</div>
+      <div class="copy-menu-options">
+        <button class="copy-option" type="button" data-lang="en">🇺🇸 English</button>
+        <button class="copy-option" type="button" data-lang="pt">🇧🇷 Português</button>
+        <button class="copy-option" type="button" data-lang="es">🇪🇸 Español</button>
       </div>
     </div>
     <div id="bottomControls">
