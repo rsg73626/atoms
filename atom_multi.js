@@ -71,6 +71,14 @@
   const referenceBtn = document.getElementById('referenceBtn');
   const overlayToggleBtn = document.getElementById('overlayToggle');
   const elementOverlayEl = document.getElementById('elementOverlay');
+  const copyBtn = document.getElementById('copyBtn');
+  const copyMenuEl = document.getElementById('copyMenu');
+  const copyMenuTitleEl = document.getElementById('copyMenuTitle');
+  const copyOptionTextEl = document.getElementById('copyOptionText');
+  const copyOptionMarkdownEl = document.getElementById('copyOptionMarkdown');
+  const copyOptionHtmlEl = document.getElementById('copyOptionHtml');
+  const copyOptionJsonEl = document.getElementById('copyOptionJson');
+  const copyOptionCsvEl = document.getElementById('copyOptionCsv');
 
   // --- i18n strings --------------------------------------------------------
   const i18n = {
@@ -110,6 +118,17 @@
       shellAllLabel: "All",
       shellNoneLabel: "None",
       navigationHint: "Use arrow keys to navigate the element menu and the view.",
+      copyButtonLabel: "Copy element details",
+      copyMenuTitle: "Copy content as:",
+      copyMenuAriaLabel: "Copy content as",
+      copyOptionText: "Plain text",
+      copyOptionMarkdown: "Markdown",
+      copyOptionHtml: "HTML",
+      copyOptionJson: "JSON",
+      copyOptionCsv: "CSV",
+      referenceLabel: "Reference",
+      nameLabel: "Name",
+      symbolLabel: "Symbol",
       colorNames: {
         red: "Red",
         orange: "Orange",
@@ -164,6 +183,17 @@
       shellAllLabel: "Todas",
       shellNoneLabel: "Nenhuma",
       navigationHint: "Use as setas para navegar no menu de elementos e na visualização.",
+      copyButtonLabel: "Copiar detalhes do elemento",
+      copyMenuTitle: "Copiar conteúdo como:",
+      copyMenuAriaLabel: "Copiar conteúdo como",
+      copyOptionText: "Texto simples",
+      copyOptionMarkdown: "Markdown",
+      copyOptionHtml: "HTML",
+      copyOptionJson: "JSON",
+      copyOptionCsv: "CSV",
+      referenceLabel: "Referência",
+      nameLabel: "Nome",
+      symbolLabel: "Símbolo",
       colorNames: {
         red: "Vermelho",
         orange: "Laranja",
@@ -218,6 +248,17 @@
       shellAllLabel: "Todas",
       shellNoneLabel: "Ninguna",
       navigationHint: "Usa las flechas para navegar el menú y la vista.",
+      copyButtonLabel: "Copiar detalles del elemento",
+      copyMenuTitle: "Copiar contenido como:",
+      copyMenuAriaLabel: "Copiar contenido como",
+      copyOptionText: "Texto plano",
+      copyOptionMarkdown: "Markdown",
+      copyOptionHtml: "HTML",
+      copyOptionJson: "JSON",
+      copyOptionCsv: "CSV",
+      referenceLabel: "Referencia",
+      nameLabel: "Nombre",
+      symbolLabel: "Símbolo",
       colorNames: {
         red: "Rojo",
         orange: "Naranja",
@@ -290,6 +331,144 @@
     }
   }
 
+  function getCopyPayload() {
+    const el = currentElement || elementMap[currentSymbol];
+    if (!el) return null;
+    const elementName = getElementName(el);
+    const shells = (el.electrons || []).join(", ");
+    const neutrons = (typeof el.neutrons === "number") ? el.neutrons : approximateNeutrons(el.Z);
+    return {
+      name: elementName,
+      symbol: el.symbol,
+      atomicNumber: el.Z,
+      protons: el.Z,
+      neutrons,
+      shells,
+      reference: el.reference || ""
+    };
+  }
+
+  function toCsvRow(value) {
+    const text = String(value ?? "");
+    if (/[",\n]/.test(text)) {
+      return `"${text.replace(/"/g, "\"\"")}"`;
+    }
+    return text;
+  }
+
+  function buildCopyContent(format) {
+    const payload = getCopyPayload();
+    if (!payload) return "";
+    const { name, symbol, atomicNumber, protons, neutrons, shells, reference } = payload;
+    const t = i18n[currentLanguage] || i18n.en;
+    const atomicLabel = t.overlayAtomicLabel || "Atomic #";
+    const protonsLabel = t.overlayProtonsLabel || "Protons";
+    const neutronsLabel = t.overlayNeutronsLabel || "Neutrons";
+    const shellsLabel = t.overlayShellsLabel || "Shells";
+    const referenceLabel = t.referenceLabel || "Reference";
+
+    if (format === "markdown") {
+      return [
+        `## ${name} (${symbol})`,
+        `- ${atomicLabel}: ${atomicNumber}`,
+        `- ${protonsLabel}: ${protons}`,
+        `- ${neutronsLabel}: ${neutrons}`,
+        `- ${shellsLabel}: \`${shells}\``,
+        reference ? `- ${referenceLabel}: ${reference}` : null
+      ].filter(Boolean).join("\n");
+    }
+
+    if (format === "html") {
+      const referenceHtml = reference ? `<dt>${referenceLabel}</dt><dd><a href="${reference}">${reference}</a></dd>` : "";
+      return [
+        `<article>`,
+        `<header>`,
+        `<h2>${name} (${symbol})</h2>`,
+        `<p><strong>${atomicLabel}:</strong> ${atomicNumber}</p>`,
+        `</header>`,
+        `<section>`,
+        `<dl>`,
+        `<dt>${protonsLabel}</dt><dd>${protons}</dd>`,
+        `<dt>${neutronsLabel}</dt><dd>${neutrons}</dd>`,
+        `<dt>${shellsLabel}</dt><dd><code>${shells}</code></dd>`,
+        referenceHtml,
+        `</dl>`,
+        `</section>`,
+        `</article>`
+      ].filter(Boolean).join("");
+    }
+
+    if (format === "json") {
+      const jsonLabels = {
+        name: t.nameLabel || "Name",
+        symbol: t.symbolLabel || "Symbol",
+        atomic: atomicLabel,
+        protons: protonsLabel,
+        neutrons: neutronsLabel,
+        shells: shellsLabel,
+        reference: referenceLabel
+      };
+      return JSON.stringify({
+        [jsonLabels.name]: name,
+        [jsonLabels.symbol]: symbol,
+        [jsonLabels.atomic]: atomicNumber,
+        [jsonLabels.protons]: protons,
+        [jsonLabels.neutrons]: neutrons,
+        [jsonLabels.shells]: shells.split(", ").filter(Boolean),
+        [jsonLabels.reference]: reference || null
+      }, null, 2);
+    }
+
+    if (format === "csv") {
+      const header = [
+        t.nameLabel || "Name",
+        t.symbolLabel || "Symbol",
+        atomicLabel,
+        protonsLabel,
+        neutronsLabel,
+        shellsLabel,
+        referenceLabel
+      ].map(toCsvRow);
+      const row = [
+        toCsvRow(name),
+        toCsvRow(symbol),
+        toCsvRow(atomicNumber),
+        toCsvRow(protons),
+        toCsvRow(neutrons),
+        toCsvRow(shells),
+        toCsvRow(reference)
+      ].join(",");
+      return `${header.join(",")}\n${row}`;
+    }
+
+    return [
+      `${name} (${symbol})`,
+      `${atomicLabel}: ${atomicNumber}`,
+      `${protonsLabel}: ${protons}`,
+      `${neutronsLabel}: ${neutrons}`,
+      `${shellsLabel}: ${shells}`,
+      reference ? `${referenceLabel}: ${reference}` : null
+    ].filter(Boolean).join("\n");
+  }
+
+  function openCopyMenu() {
+    if (!copyMenuEl || !copyBtn) return;
+    const wrapper = document.getElementById("canvasWrapper");
+    if (wrapper) {
+      const wrapperRect = wrapper.getBoundingClientRect();
+      const btnRect = copyBtn.getBoundingClientRect();
+      const left = btnRect.left - wrapperRect.left;
+      const top = btnRect.bottom - wrapperRect.top + 8;
+      copyMenuEl.style.left = `${left}px`;
+      copyMenuEl.style.top = `${top}px`;
+    }
+    copyMenuEl.setAttribute("data-open", "true");
+  }
+
+  function closeCopyMenu() {
+    copyMenuEl?.setAttribute("data-open", "false");
+  }
+
   function requestPausedRedraw() {
     if (!isPaused || pausedRedrawPending) return;
     pausedRedrawPending = true;
@@ -334,6 +513,17 @@
     overlayNeutronsLabelEl.textContent = t.overlayNeutronsLabel;
     overlayShellsLabelEl.textContent = t.overlayShellsLabel;
     overlayZEl.setAttribute("title", t.zTooltip);
+    if (copyBtn) {
+      copyBtn.setAttribute("aria-label", t.copyButtonLabel);
+      copyBtn.setAttribute("title", t.copyButtonLabel);
+    }
+    if (copyMenuEl) copyMenuEl.setAttribute("aria-label", t.copyMenuAriaLabel);
+    if (copyMenuTitleEl) copyMenuTitleEl.textContent = t.copyMenuTitle;
+    if (copyOptionTextEl) copyOptionTextEl.textContent = t.copyOptionText;
+    if (copyOptionMarkdownEl) copyOptionMarkdownEl.textContent = t.copyOptionMarkdown;
+    if (copyOptionHtmlEl) copyOptionHtmlEl.textContent = t.copyOptionHtml;
+    if (copyOptionJsonEl) copyOptionJsonEl.textContent = t.copyOptionJson;
+    if (copyOptionCsvEl) copyOptionCsvEl.textContent = t.copyOptionCsv;
     controlCentralize?.setAttribute("aria-label", t.centralizeLabel);
     controlCentralize?.setAttribute("title", t.centralizeLabel);
     controlZoomIn?.setAttribute("aria-label", t.zoomInLabel);
@@ -788,6 +978,28 @@
       setOverlayExpanded(!overlayExpanded);
     });
   }
+  if (copyBtn) {
+    copyBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (copyMenuEl?.getAttribute("data-open") === "true") closeCopyMenu();
+      else openCopyMenu();
+    });
+  }
+  copyMenuEl?.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    const format = target.getAttribute("data-format");
+    if (!format) return;
+    const content = buildCopyContent(format);
+    try {
+      await navigator.clipboard.writeText(content);
+    } catch (err) {
+      console.error("Clipboard write failed", err);
+    }
+    closeCopyMenu();
+  });
 
   function updateSpeedUI() {
     const min = parseFloat(speedRange.min || "0");
@@ -903,6 +1115,7 @@
     if (target.closest("#bottomControls")) return;
     if (target.closest("#shellVisibilityPanel")) return;
     if (target.closest("#elementOverlay")) return;
+    if (target.closest("#copyMenu")) return;
     if (target.closest("#colorMenu")) return;
     toggleUiHidden();
   });
@@ -1727,14 +1940,22 @@
   });
 
   document.addEventListener("click", (e) => {
-    if (!isColorMenuOpen()) return;
     const target = e.target;
     if (!(target instanceof Node)) return;
-    if (colorMenuEl?.contains(target)) return;
-    if (protonControl?.contains(target)) return;
-    if (neutronControl?.contains(target)) return;
-    if (electronControl?.contains(target)) return;
-    closeColorMenu();
+
+    if (isColorMenuOpen()) {
+      if (colorMenuEl?.contains(target)) return;
+      if (protonControl?.contains(target)) return;
+      if (neutronControl?.contains(target)) return;
+      if (electronControl?.contains(target)) return;
+      closeColorMenu();
+    }
+
+    if (copyMenuEl?.getAttribute("data-open") === "true") {
+      if (copyMenuEl?.contains(target)) return;
+      if (copyBtn?.contains(target)) return;
+      closeCopyMenu();
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -1742,6 +1963,12 @@
       e.preventDefault();
       closeColorMenu();
       openControl?.focus();
+      return;
+    }
+    if (copyMenuEl?.getAttribute("data-open") === "true" && e.key === "Escape") {
+      e.preventDefault();
+      closeCopyMenu();
+      copyBtn?.focus();
       return;
     }
     if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown") {

@@ -385,7 +385,13 @@
       gap: 12px;
       padding: 4px 0;
     }
+    .overlay-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
     .overlay-toggle,
+    .copy-btn,
     .reference-btn {
       width: 34px;
       height: 34px;
@@ -400,20 +406,72 @@
       box-shadow: none;
     }
     .overlay-toggle:focus-visible,
+    .copy-btn:focus-visible,
     .reference-btn:focus-visible {
       outline: 2px solid rgba(56,189,248,0.7);
       outline-offset: 2px;
     }
-    .reference-btn svg {
+    .reference-btn svg,
+    .copy-btn svg {
       width: 16px;
       height: 16px;
     }
-    .reference-btn svg path {
+    .reference-btn svg path,
+    .copy-btn svg path,
+    .copy-btn svg rect {
       stroke: #e5e7eb;
       stroke-width: 1.8;
       stroke-linecap: round;
       stroke-linejoin: round;
       fill: none;
+    }
+    .copy-menu {
+      --copy-menu-space: 8px;
+      position: absolute;
+      display: none;
+      min-width: 180px;
+      padding: var(--copy-menu-space);
+      background: rgba(2,6,23,0.92);
+      border-radius: 14px;
+      border: 1px solid rgba(148,163,184,0.18);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.38);
+      z-index: 45;
+      backdrop-filter: blur(14px);
+    }
+    .copy-menu[data-open="true"] {
+      display: flex;
+      flex-direction: column;
+      gap: var(--copy-menu-space);
+    }
+    .copy-menu-title {
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.75;
+      margin: 0 0 var(--copy-menu-space);
+    }
+    .copy-menu-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--copy-menu-space);
+    }
+    .copy-option {
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: rgba(148,163,184,0.07);
+      color: #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+    .copy-option:hover { background: rgba(148,163,184,0.14); }
+    .copy-option:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
     }
     .overlay-toggle-icon {
       width: 14px;
@@ -1047,13 +1105,21 @@
           </div>
           <span class="overlay-top-name" id="overlayTopName">Cálcio</span>
         </div>
-        <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
-          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-        </button>
+        <div class="overlay-actions">
+          <button id="copyBtn" class="copy-btn" type="button" aria-label="Copy element details" title="Copy element details">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <rect x="2" y="6" width="12" height="12" rx="2.8" ry="2.8"></rect>
+              <rect x="6" y="2" width="12" height="12" rx="2.8" ry="2.8"></rect>
+            </svg>
+          </button>
+          <button id="referenceBtn" class="reference-btn" type="button" aria-label="Open reference" title="Open reference">
+            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+              <path d="M11 3h6v6" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M11 9 17 3" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </div>
       </div>
       <div id="overlayLeft">
         <span class="overlayLabel" id="overlayProtonsLabel">Protons</span>
@@ -1070,6 +1136,16 @@
       <div id="overlayBottom">
       <span class="overlayLabel" id="overlayShellsLabel">Shells</span>
       <span id="overlayShells">2, 8, 8, 2</span>
+      </div>
+    </div>
+    <div id="copyMenu" class="copy-menu" role="menu" aria-label="Copy content as" data-open="false">
+      <div class="copy-menu-title" id="copyMenuTitle">Copy content as:</div>
+      <div class="copy-menu-options">
+        <button class="copy-option" id="copyOptionText" type="button" data-format="text">Plain text</button>
+        <button class="copy-option" id="copyOptionMarkdown" type="button" data-format="markdown">Markdown</button>
+        <button class="copy-option" id="copyOptionHtml" type="button" data-format="html">HTML</button>
+        <button class="copy-option" id="copyOptionJson" type="button" data-format="json">JSON</button>
+        <button class="copy-option" id="copyOptionCsv" type="button" data-format="csv">CSV</button>
       </div>
     </div>
       <div id="bottomControls">
