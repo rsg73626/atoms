@@ -91,9 +91,15 @@
   const shareMenuTitleEl = document.getElementById('shareMenuTitle');
   const infoBtn = document.getElementById('infoBtn');
   const infoDialogEl = document.getElementById('infoDialog');
+  const infoDialogBackdropEl = document.getElementById('infoDialogBackdrop');
   const infoDialogTitleEl = document.getElementById('infoDialogTitle');
-  const infoDialogBodyEl = document.getElementById('infoDialogBody');
+  const infoDialogContentEl = document.getElementById('infoDialogContent');
   const infoDialogCloseEl = document.getElementById('infoDialogClose');
+  const infoDialogOpenInTabEl = document.getElementById('infoDialogOpenInTab');
+  const infoDialogOpenInTabLabelEl = document.getElementById('infoDialogOpenInTabLabel');
+  const shareHideControllersEl = document.getElementById('shareHideControllers');
+  const shareHideControllersLabelEl = document.getElementById('shareHideControllersLabel');
+  const toastContainerEl = document.getElementById('toastContainer');
 
   // --- i18n strings --------------------------------------------------------
   const i18n = {
@@ -175,35 +181,11 @@
       shareCopyLink: "Copy link",
       shareCopied: "Link copied to clipboard.",
       shareInstagramHint: "Link copied. Paste it on Instagram to share.",
+      shareHideControllers: "Hide controllers in the shared link",
+      shareLinkPrompt: "Copy this link:",
       infoLabel: "About this application",
       infoCloseLabel: "Close",
-      infoTitle: "About Atomic Explorer",
-      infoIntro: "Atomic Explorer is an interactive 3D model that lets you visualize any of the 118 chemical elements with a Bohr-like nucleus and orbital shells. You can rotate, zoom, change colors, hide individual electron shells and customize the visualization to match what you want to explain.",
-      infoShareTitle: "Sharing your visualization",
-      infoShareBody: "Every visualization parameter is encoded in the URL. Use the share button (next to the language selector) to copy or share the current configuration as a link. Anyone opening that link will see the exact same scene.",
-      infoParamsTitle: "URL query parameters",
-      infoParamsBody: "Append parameters to the URL using the standard <code>?key=value&amp;key=value</code> form to control the visualization. Boolean parameters accept <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> or <code>on/off</code>. Color parameters accept an index from 0 to 12 (rainbow + neutrals).",
-      infoExampleTitle: "Example",
-      infoExampleBody: "This URL opens carbon, paused, with orbits and charges visible, electrons green and the camera tilted:",
-      paramElementDesc: "Element by symbol (e.g. <code>C</code>), atomic number (e.g. <code>6</code>), or <code>first</code>/<code>last</code>.",
-      paramLangDesc: "Interface language: <code>en</code>, <code>pt</code> or <code>es</code>.",
-      paramOrbitsDesc: "Show orbit lines (boolean).",
-      paramAxesDesc: "Show 3D axes (boolean).",
-      paramChargesDesc: "Display + / 0 / − charge symbols (boolean).",
-      paramPausedDesc: "Start the scene paused (boolean).",
-      paramSpeedDesc: "Orbital speed multiplier (0–5, e.g. <code>1.5</code>).",
-      paramShellsDesc: "Visible electron shells, comma-separated indices starting at 0 (e.g. <code>0,1</code>) or <code>all</code> / <code>none</code>.",
-      paramOverlayDesc: "Element overlay state: <code>expanded</code> or <code>collapsed</code>.",
-      paramUiDesc: "UI visibility: <code>visible</code> or <code>hidden</code> (cinema mode).",
-      paramZoomDesc: "Camera zoom factor (0.25–2.5, e.g. <code>0.9</code>).",
-      paramRotXDesc: "Camera vertical rotation, in radians (e.g. <code>-1.2</code>).",
-      paramRotYDesc: "Camera horizontal rotation, in radians (e.g. <code>0</code>).",
-      paramProtonDesc: "Proton color index (0–12).",
-      paramNeutronDesc: "Neutron color index (0–12).",
-      paramElectronDesc: "Electron color index (0–12).",
-      paramBackgroundDesc: "Background color index (0–12).",
-      paramHeaderName: "Parameter",
-      paramHeaderDesc: "Description"
+      infoOpenInTab: "Open in new tab"
     },
     pt: {
       panelTitle: "Explorador Atômico",
@@ -283,35 +265,11 @@
       shareCopyLink: "Copiar link",
       shareCopied: "Link copiado para a área de transferência.",
       shareInstagramHint: "Link copiado. Cole no Instagram para compartilhar.",
+      shareHideControllers: "Ocultar controles no link compartilhado",
+      shareLinkPrompt: "Copie este link:",
       infoLabel: "Sobre esta aplicação",
       infoCloseLabel: "Fechar",
-      infoTitle: "Sobre o Explorador Atômico",
-      infoIntro: "O Explorador Atômico é um modelo 3D interativo que permite visualizar qualquer um dos 118 elementos químicos com núcleo e camadas eletrônicas no estilo de Bohr. Você pode girar, dar zoom, mudar cores, ocultar camadas e personalizar a visualização do jeito que precisar para explicar o conteúdo.",
-      infoShareTitle: "Compartilhando sua visualização",
-      infoShareBody: "Cada configuração da visualização fica codificada na URL. Use o botão de compartilhar (ao lado do seletor de idioma) para copiar ou compartilhar a configuração atual como um link. Quem abrir o link verá exatamente a mesma cena.",
-      infoParamsTitle: "Parâmetros de URL",
-      infoParamsBody: "Acrescente parâmetros à URL usando o formato padrão <code>?chave=valor&amp;chave=valor</code> para controlar a visualização. Parâmetros booleanos aceitam <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> ou <code>on/off</code>. Parâmetros de cor aceitam um índice de 0 a 12 (arco-íris + neutros).",
-      infoExampleTitle: "Exemplo",
-      infoExampleBody: "Esta URL abre o carbono, pausado, com órbitas e cargas visíveis, elétrons verdes e a câmera inclinada:",
-      paramElementDesc: "Elemento por símbolo (ex.: <code>C</code>), número atômico (ex.: <code>6</code>) ou <code>first</code>/<code>last</code>.",
-      paramLangDesc: "Idioma da interface: <code>en</code>, <code>pt</code> ou <code>es</code>.",
-      paramOrbitsDesc: "Mostrar linhas das órbitas (booleano).",
-      paramAxesDesc: "Mostrar eixos 3D (booleano).",
-      paramChargesDesc: "Mostrar símbolos de carga + / 0 / − (booleano).",
-      paramPausedDesc: "Iniciar a cena pausada (booleano).",
-      paramSpeedDesc: "Multiplicador de velocidade orbital (0–5, ex.: <code>1.5</code>).",
-      paramShellsDesc: "Camadas visíveis, índices separados por vírgula a partir de 0 (ex.: <code>0,1</code>) ou <code>all</code> / <code>none</code>.",
-      paramOverlayDesc: "Estado do overlay do elemento: <code>expanded</code> ou <code>collapsed</code>.",
-      paramUiDesc: "Visibilidade da interface: <code>visible</code> ou <code>hidden</code> (modo cinema).",
-      paramZoomDesc: "Fator de zoom da câmera (0,25–2,5, ex.: <code>0.9</code>).",
-      paramRotXDesc: "Rotação vertical da câmera em radianos (ex.: <code>-1.2</code>).",
-      paramRotYDesc: "Rotação horizontal da câmera em radianos (ex.: <code>0</code>).",
-      paramProtonDesc: "Índice da cor do próton (0–12).",
-      paramNeutronDesc: "Índice da cor do nêutron (0–12).",
-      paramElectronDesc: "Índice da cor do elétron (0–12).",
-      paramBackgroundDesc: "Índice da cor de fundo (0–12).",
-      paramHeaderName: "Parâmetro",
-      paramHeaderDesc: "Descrição"
+      infoOpenInTab: "Abrir em nova aba"
     },
     es: {
       panelTitle: "Explorador Atómico",
@@ -391,35 +349,11 @@
       shareCopyLink: "Copiar enlace",
       shareCopied: "Enlace copiado al portapapeles.",
       shareInstagramHint: "Enlace copiado. Pégalo en Instagram para compartir.",
+      shareHideControllers: "Ocultar controles en el enlace compartido",
+      shareLinkPrompt: "Copia este enlace:",
       infoLabel: "Acerca de esta aplicación",
       infoCloseLabel: "Cerrar",
-      infoTitle: "Acerca del Explorador Atómico",
-      infoIntro: "El Explorador Atómico es un modelo 3D interactivo que te permite visualizar cualquiera de los 118 elementos químicos con un núcleo y capas electrónicas al estilo de Bohr. Puedes rotar, hacer zoom, cambiar los colores, ocultar capas y personalizar la visualización para mostrar lo que necesites.",
-      infoShareTitle: "Compartir tu visualización",
-      infoShareBody: "Cada parámetro de la visualización queda codificado en la URL. Usa el botón de compartir (al lado del selector de idioma) para copiar o compartir la configuración actual como un enlace. Quien abra el enlace verá exactamente la misma escena.",
-      infoParamsTitle: "Parámetros de URL",
-      infoParamsBody: "Añade parámetros a la URL con el formato estándar <code>?clave=valor&amp;clave=valor</code> para controlar la visualización. Los parámetros booleanos aceptan <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> u <code>on/off</code>. Los parámetros de color aceptan un índice de 0 a 12 (arcoíris + neutros).",
-      infoExampleTitle: "Ejemplo",
-      infoExampleBody: "Esta URL abre el carbono, pausado, con órbitas y cargas visibles, electrones verdes y la cámara inclinada:",
-      paramElementDesc: "Elemento por símbolo (p. ej. <code>C</code>), número atómico (p. ej. <code>6</code>) o <code>first</code>/<code>last</code>.",
-      paramLangDesc: "Idioma de la interfaz: <code>en</code>, <code>pt</code> o <code>es</code>.",
-      paramOrbitsDesc: "Mostrar líneas de órbita (booleano).",
-      paramAxesDesc: "Mostrar ejes 3D (booleano).",
-      paramChargesDesc: "Mostrar símbolos de carga + / 0 / − (booleano).",
-      paramPausedDesc: "Iniciar la escena pausada (booleano).",
-      paramSpeedDesc: "Multiplicador de velocidad orbital (0–5, p. ej. <code>1.5</code>).",
-      paramShellsDesc: "Capas visibles, índices separados por comas a partir de 0 (p. ej. <code>0,1</code>) o <code>all</code> / <code>none</code>.",
-      paramOverlayDesc: "Estado del panel del elemento: <code>expanded</code> o <code>collapsed</code>.",
-      paramUiDesc: "Visibilidad de la interfaz: <code>visible</code> o <code>hidden</code> (modo cine).",
-      paramZoomDesc: "Factor de zoom de la cámara (0,25–2,5, p. ej. <code>0.9</code>).",
-      paramRotXDesc: "Rotación vertical de la cámara en radianes (p. ej. <code>-1.2</code>).",
-      paramRotYDesc: "Rotación horizontal de la cámara en radianes (p. ej. <code>0</code>).",
-      paramProtonDesc: "Índice del color del protón (0–12).",
-      paramNeutronDesc: "Índice del color del neutrón (0–12).",
-      paramElectronDesc: "Índice del color del electrón (0–12).",
-      paramBackgroundDesc: "Índice del color de fondo (0–12).",
-      paramHeaderName: "Parámetro",
-      paramHeaderDesc: "Descripción"
+      infoOpenInTab: "Abrir en una nueva pestaña"
     }
   };
 
@@ -470,6 +404,7 @@
   const queryShells = parseShellsParam(queryParams.get("shells"));
   const queryOverlayRaw = (queryParams.get("overlay") || "").trim().toLowerCase();
   const queryUiRaw = (queryParams.get("ui") || "").trim().toLowerCase();
+  const queryLocked = parseBooleanParam(queryParams.get("locked")) === true;
   const queryZoom = parseFloatParam(queryParams.get("zoom"));
   const queryRotX = parseFloatParam(queryParams.get("rotX") ?? queryParams.get("rotx"));
   const queryRotY = parseFloatParam(queryParams.get("rotY") ?? queryParams.get("roty"));
@@ -558,7 +493,8 @@
   function defaultRotX() { return -1.2; }
   function defaultRotY() { return 0; }
 
-  function buildShareUrl() {
+  function buildShareUrl(opts = {}) {
+    const hideControllers = !!opts.hideControllers;
     const params = new URLSearchParams();
     if (currentSymbol) params.set("element", currentSymbol);
     if (currentLanguage) params.set("lang", currentLanguage);
@@ -591,6 +527,11 @@
     if (Math.abs(globalRotY - defaultRotY()) > 1e-3) {
       params.set("rotY", globalRotY.toFixed(2));
     }
+    if (hideControllers) {
+      params.set("locked", "1");
+      // When locking the controllers we don't need the redundant `ui=hidden`.
+      params.delete("ui");
+    }
     const colorParticles = [
       ["proton", protonColor, defaultProtonColor],
       ["neutron", neutronColor, defaultNeutronColor],
@@ -617,7 +558,8 @@
     requestAnimationFrame(() => {
       urlSyncScheduled = false;
       try {
-        const target = buildShareUrl();
+        // Preserve the `locked` flag so reloading the page keeps the UI locked.
+        const target = buildShareUrl({ hideControllers: queryLocked });
         const current = window.location.href;
         if (target !== current) {
           window.history.replaceState({}, "", target);
@@ -920,6 +862,10 @@
   }
   if (queryUiRaw === "hidden") {
     document.body.classList.add("ui-hidden");
+  }
+  if (queryLocked) {
+    document.body.classList.add("ui-hidden");
+    document.body.classList.add("ui-locked");
   }
 
   function openLanguageMenu() {
@@ -1552,8 +1498,10 @@
   }, { passive: false });
 
   // Toggle UI by clicking the canvas background (not UI controls).
+  // Disabled entirely when the visualization is locked via ?locked=1.
   const canvasWrapper = document.getElementById("canvasWrapper");
   canvasWrapper?.addEventListener("click", (e) => {
+    if (queryLocked) return;
     if (didUserDrag) {
       didUserDrag = false;
       return;
@@ -1570,6 +1518,8 @@
     if (target.closest("#copyMenu")) return;
     if (target.closest("#shareMenu")) return;
     if (target.closest("#infoDialog")) return;
+    if (target.closest("#infoDialogBackdrop")) return;
+    if (target.closest("#toastContainer")) return;
     if (target.closest("#colorMenu")) return;
     toggleUiHidden();
   });
@@ -2518,6 +2468,22 @@
     focusContext = "elements";
   });
 
+  // --- Toast notifications --------------------------------------------------
+  function showToast(message, opts = {}) {
+    if (!toastContainerEl || !message) return;
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.setAttribute("role", "status");
+    toast.textContent = message;
+    toastContainerEl.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("visible"));
+    const duration = opts.duration ?? 3200;
+    setTimeout(() => {
+      toast.classList.remove("visible");
+      setTimeout(() => toast.remove(), 220);
+    }, duration);
+  }
+
   // --- Share button + menu --------------------------------------------------
   function openShareMenu() {
     if (!shareMenuEl || !shareBtn) return;
@@ -2554,9 +2520,14 @@
     }
   }
 
+  function getShareUrlForCurrentSelection() {
+    const hide = !!shareHideControllersEl?.checked;
+    return buildShareUrl({ hideControllers: hide });
+  }
+
   async function runShareAction(action) {
     const t = i18n[currentLanguage] || i18n.en;
-    const shareUrl = buildShareUrl();
+    const shareUrl = getShareUrlForCurrentSelection();
     const elementName = currentElement ? getElementName(currentElement) : "";
     const shareTitle = elementName ? `${t.panelTitle} – ${elementName} (${currentSymbol})` : t.panelTitle;
     const shareText = `${shareTitle}\n${shareUrl}`;
@@ -2567,19 +2538,16 @@
           await navigator.share({ title: shareTitle, text: shareTitle, url: shareUrl });
           return;
         } catch (_err) {
-          // continue to fallback
+          // fall through to clipboard fallback
         }
       }
-      window.prompt(t.shareLabel || "Share", shareUrl);
+      const ok = await copyTextToClipboard(shareUrl);
+      showToast(ok ? t.shareCopied : `${t.shareLinkPrompt} ${shareUrl}`);
       return;
     }
     if (action === "copy") {
       const ok = await copyTextToClipboard(shareUrl);
-      if (ok) {
-        try { window.alert(t.shareCopied); } catch (_) {}
-        return;
-      }
-      window.prompt(t.shareLabel || "Share", shareUrl);
+      showToast(ok ? t.shareCopied : `${t.shareLinkPrompt} ${shareUrl}`);
       return;
     }
     if (action === "whatsapp") {
@@ -2593,7 +2561,7 @@
     if (action === "instagram") {
       try { await copyTextToClipboard(shareUrl); } catch (_) {}
       window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-      try { window.alert(t.shareInstagramHint); } catch (_) {}
+      showToast(t.shareInstagramHint);
       return;
     }
     if (action === "x") {
@@ -2623,21 +2591,25 @@
   });
 
   // --- Info dialog ---------------------------------------------------------
-  function buildExampleUrl() {
+  function infoT() {
+    const sharedI18n = window.AtomicExplorerInfo;
+    return (sharedI18n ? sharedI18n.tr(currentLanguage) : null) || {};
+  }
+
+  function buildInfoPageHref() {
     try {
-      const url = new URL(window.location.href);
-      url.search = "?element=C&paused=1&orbits=1&charges=1&electron=3&rotX=-0.6";
-      url.hash = "";
+      const url = new URL("info.html", window.location.href);
+      url.searchParams.set("lang", currentLanguage);
       return url.toString();
     } catch (_) {
-      return "?element=C&paused=1&orbits=1&charges=1&electron=3&rotX=-0.6";
+      return "info.html?lang=" + encodeURIComponent(currentLanguage);
     }
   }
 
   function renderInfoDialogContent() {
-    if (!infoDialogBodyEl) return;
     const t = i18n[currentLanguage] || i18n.en;
-    if (infoDialogTitleEl) infoDialogTitleEl.textContent = t.infoTitle;
+    const ti = infoT();
+    if (infoDialogTitleEl) infoDialogTitleEl.textContent = ti.title || "";
     if (infoBtn) {
       infoBtn.setAttribute("aria-label", t.infoLabel);
       infoBtn.setAttribute("title", t.infoLabel);
@@ -2662,52 +2634,36 @@
         if (labelMap[key]) el.textContent = labelMap[key];
       });
     }
-    if (infoDialogCloseEl) infoDialogCloseEl.setAttribute("aria-label", t.infoCloseLabel);
-
-    const params = [
-      { name: "element", desc: t.paramElementDesc },
-      { name: "lang", desc: t.paramLangDesc },
-      { name: "orbits", desc: t.paramOrbitsDesc },
-      { name: "axes", desc: t.paramAxesDesc },
-      { name: "charges", desc: t.paramChargesDesc },
-      { name: "paused", desc: t.paramPausedDesc },
-      { name: "speed", desc: t.paramSpeedDesc },
-      { name: "shells", desc: t.paramShellsDesc },
-      { name: "overlay", desc: t.paramOverlayDesc },
-      { name: "ui", desc: t.paramUiDesc },
-      { name: "zoom", desc: t.paramZoomDesc },
-      { name: "rotX", desc: t.paramRotXDesc },
-      { name: "rotY", desc: t.paramRotYDesc },
-      { name: "proton", desc: t.paramProtonDesc },
-      { name: "neutron", desc: t.paramNeutronDesc },
-      { name: "electron", desc: t.paramElectronDesc },
-      { name: "background", desc: t.paramBackgroundDesc }
-    ];
-
-    const exampleUrl = buildExampleUrl();
-    const rows = params.map(p => `<tr><td><code>${p.name}</code></td><td>${p.desc}</td></tr>`).join("");
-    infoDialogBodyEl.innerHTML = [
-      `<p>${t.infoIntro}</p>`,
-      `<h2>${t.infoShareTitle}</h2>`,
-      `<p>${t.infoShareBody}</p>`,
-      `<h2>${t.infoParamsTitle}</h2>`,
-      `<p>${t.infoParamsBody}</p>`,
-      `<table class="params"><thead><tr><th>${t.paramHeaderName}</th><th>${t.paramHeaderDesc}</th></tr></thead><tbody>${rows}</tbody></table>`,
-      `<h2>${t.infoExampleTitle}</h2>`,
-      `<p>${t.infoExampleBody}</p>`,
-      `<p><a class="example-link" href="${exampleUrl}">${exampleUrl}</a></p>`
-    ].join("");
+    if (shareHideControllersLabelEl) shareHideControllersLabelEl.textContent = t.shareHideControllers;
+    if (infoDialogCloseEl) {
+      infoDialogCloseEl.setAttribute("aria-label", t.infoCloseLabel);
+      infoDialogCloseEl.setAttribute("title", t.infoCloseLabel);
+    }
+    if (infoDialogOpenInTabEl) {
+      const href = buildInfoPageHref();
+      infoDialogOpenInTabEl.setAttribute("href", href);
+      infoDialogOpenInTabEl.setAttribute("title", t.infoOpenInTab);
+      infoDialogOpenInTabEl.setAttribute("aria-label", t.infoOpenInTab);
+    }
+    if (infoDialogOpenInTabLabelEl) infoDialogOpenInTabLabelEl.textContent = t.infoOpenInTab;
+    if (infoDialogContentEl && window.AtomicExplorerInfo) {
+      window.AtomicExplorerInfo.render(infoDialogContentEl, currentLanguage, {
+        exampleBaseUrl: window.location.href
+      });
+    }
   }
 
   function openInfoDialog() {
     if (!infoDialogEl) return;
     renderInfoDialogContent();
     infoDialogEl.setAttribute("data-open", "true");
+    infoDialogBackdropEl?.setAttribute("data-open", "true");
     infoDialogCloseEl?.focus();
   }
   function closeInfoDialog() {
     if (!infoDialogEl) return;
     infoDialogEl.setAttribute("data-open", "false");
+    infoDialogBackdropEl?.setAttribute("data-open", "false");
     infoBtn?.focus();
   }
 
@@ -2719,6 +2675,12 @@
     });
   }
   infoDialogCloseEl?.addEventListener("click", closeInfoDialog);
+  infoDialogBackdropEl?.addEventListener("click", closeInfoDialog);
+  // Close the dialog on the parent tab when the user clicks "Open in new tab",
+  // so they end up looking at the standalone info page only.
+  infoDialogOpenInTabEl?.addEventListener("click", () => {
+    setTimeout(closeInfoDialog, 0);
+  });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && infoDialogEl?.getAttribute("data-open") === "true") {
       closeInfoDialog();
