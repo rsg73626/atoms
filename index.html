@@ -95,6 +95,319 @@
       backdrop-filter: var(--ctrl-blur);
       transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
     }
+    #languageCorner { gap: 8px; }
+    .icon-ball-btn {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      border: 1px solid var(--ctrl-border);
+      border-radius: 999px;
+      background: var(--ctrl-bg);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--ctrl-shadow);
+      backdrop-filter: var(--ctrl-blur);
+      transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+    }
+    .icon-ball-btn:hover {
+      background: var(--ctrl-bg-hover);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.42);
+      transform: translateY(-1px);
+    }
+    .icon-ball-btn:active {
+      transform: translateY(0);
+    }
+    .icon-ball-btn:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .icon-ball-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    /* Share menu options (extends .copy-menu styles) */
+    .share-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: rgba(148,163,184,0.07);
+      color: #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.12s ease;
+    }
+    .share-option:hover { background: rgba(148,163,184,0.14); }
+    .share-option:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    .share-option-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+    }
+    .share-option-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #e5e7eb;
+    }
+    .share-label {
+      flex: 1;
+      text-align: left;
+    }
+
+    /* Info dialog (centered overlay) */
+    #infoDialogBackdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+      display: none;
+      background: rgba(2,6,23,0.42);
+      backdrop-filter: blur(4px);
+    }
+    #infoDialogBackdrop[data-open="true"] { display: block; }
+    #infoDialog {
+      position: fixed;
+      z-index: 200;
+      display: none;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(840px, calc(100vw - 48px));
+      max-height: calc(100vh - 64px);
+      box-sizing: border-box;
+      background: rgba(15,23,42,0.78);
+      border: 1px solid rgba(148,163,184,0.28);
+      border-radius: 22px;
+      box-shadow: 0 22px 50px rgba(0,0,0,0.5);
+      backdrop-filter: blur(14px);
+      color: #e5e7eb;
+      overflow: hidden;
+      flex-direction: column;
+    }
+    #infoDialog[data-open="true"] { display: flex; }
+    #infoDialogHeader {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 16px 0;
+    }
+    #infoDialogBody {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 4px 28px 28px;
+    }
+    #infoDialog h1 {
+      font-size: 24px;
+      margin: 0 0 8px;
+      letter-spacing: 0.02em;
+    }
+    #infoDialog h2 {
+      font-size: 16px;
+      margin: 22px 0 6px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+    #infoDialog p {
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 8px 0;
+    }
+    #infoDialog code {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148,163,184,0.18);
+    }
+    #infoDialog .info-table-wrapper {
+      overflow-x: auto;
+    }
+    #infoDialog table.params {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+    #infoDialog table.params th,
+    #infoDialog table.params td {
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(148,163,184,0.18);
+      vertical-align: top;
+    }
+    #infoDialog table.params th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      opacity: 0.75;
+      font-weight: 600;
+    }
+    #infoDialog table.params td:first-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+    #infoDialog table.params td:first-child code {
+      font-size: 12px;
+    }
+    #infoDialog .info-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid var(--ctrl-border);
+      background: var(--ctrl-bg);
+      color: #e5e7eb;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-family: inherit;
+      text-decoration: none;
+      backdrop-filter: var(--ctrl-blur);
+      box-shadow: var(--ctrl-shadow);
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
+    }
+    #infoDialog .info-action-btn:hover {
+      background: var(--ctrl-bg-hover);
+      transform: translateY(-1px);
+    }
+    #infoDialog .info-action-btn:focus-visible {
+      outline: 2px solid rgba(56,189,248,0.7);
+      outline-offset: 2px;
+    }
+    #infoDialog .info-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+    #infoDialog .info-action-btn svg path,
+    #infoDialog .info-action-btn svg line,
+    #infoDialog .info-action-btn svg polyline {
+      stroke: #e5e7eb;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    #infoDialog .info-close {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid var(--ctrl-border);
+      border-radius: 999px;
+      background: var(--ctrl-bg);
+      color: #e5e7eb;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      line-height: 1;
+      backdrop-filter: var(--ctrl-blur);
+      box-shadow: var(--ctrl-shadow);
+      transition: background 0.12s ease, transform 0.08s ease;
+    }
+    #infoDialog .info-close:hover {
+      background: var(--ctrl-bg-hover);
+      transform: translateY(-1px);
+    }
+    #infoDialog .example-link {
+      color: #60a5fa;
+      text-decoration: none;
+      font-weight: 600;
+      word-break: break-all;
+    }
+    #infoDialog .example-link:hover { color: #93c5fd; }
+
+    /* Toast notifications */
+    #toastContainer {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 250;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(2,6,23,0.92);
+      border: 1px solid rgba(148,163,184,0.28);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      color: #e5e7eb;
+      font-size: 13px;
+      max-width: min(420px, calc(100vw - 32px));
+      text-align: center;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Share menu hide-controllers row */
+    .share-menu-options-divider {
+      height: 1px;
+      background: rgba(148,163,184,0.18);
+      margin: 2px 0;
+    }
+    .share-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      font-size: 12px;
+      color: #e5e7eb;
+      cursor: pointer;
+      user-select: none;
+    }
+    .share-toggle-row input[type="checkbox"] {
+      accent-color: #38bdf8;
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Locked mode (no UI, no canvas-click toggle) */
+    body.ui-locked #languageCorner,
+    body.ui-locked #particleControllers,
+    body.ui-locked #bottomControls,
+    body.ui-locked #elementOverlay,
+    body.ui-locked #colorMenu,
+    body.ui-locked #shellVisibilityPanel,
+    body.ui-locked #panel {
+      display: none !important;
+    }
+    body.ui-locked #canvasWrapper {
+      width: 100vw;
+      flex: none;
+    }
     .language-btn:hover {
       background: var(--ctrl-bg-hover);
       box-shadow: 0 10px 22px rgba(0,0,0,0.42);
@@ -1176,6 +1489,18 @@
         </button>
       </div>
       <div id="languageCorner">
+        <button id="infoBtn" class="icon-ball-btn" type="button" aria-label="About this application" title="About this application">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="9" fill="none" stroke="#e5e7eb" stroke-width="1.8"/>
+            <circle cx="12" cy="7.6" r="1.25" fill="#e5e7eb"/>
+            <path d="M12 11v6.4" stroke="#e5e7eb" stroke-width="1.9" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
+        <button id="shareBtn" class="icon-ball-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Share visualization" title="Share visualization">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M14 3h7v7h-2V6.41l-8.29 8.3-1.42-1.42 8.3-8.29H14V3Zm4 16H6V7h6V5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6h-2v6Z" fill="#e5e7eb"/>
+          </svg>
+        </button>
         <button id="languageBtn" class="language-btn" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="Language">
           <span class="language-flag" id="languageFlag" aria-hidden="true">🇧🇷</span>
           <span class="language-label" id="languageLabel">Português</span>
@@ -1199,6 +1524,52 @@
         <button class="copy-option" type="button" data-lang="en">🇺🇸 English</button>
         <button class="copy-option" type="button" data-lang="pt">🇧🇷 Português</button>
         <button class="copy-option" type="button" data-lang="es">🇪🇸 Español</button>
+      </div>
+    </div>
+    <div id="shareMenu" class="copy-menu" role="menu" aria-label="Share visualization" data-open="false">
+      <div class="copy-menu-title" id="shareMenuTitle">Share:</div>
+      <label class="share-toggle-row" for="shareHideControllers">
+        <input type="checkbox" id="shareHideControllers" />
+        <span id="shareHideControllersLabel">Hide controllers</span>
+      </label>
+      <div class="share-menu-options-divider" aria-hidden="true"></div>
+      <div class="copy-menu-options">
+        <button type="button" class="share-option" data-share-action="system" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M14 3h7v7h-2V6.41l-8.29 8.3-1.42-1.42 8.3-8.29H14V3Zm4 16H6V7h6V5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6h-2v6Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="system">Share...</span>
+        </button>
+        <button type="button" class="share-option" data-share-action="whatsapp" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M20.52 3.48A11.86 11.86 0 0 0 12.05 0C5.5 0 .16 5.33.16 11.88c0 2.1.55 4.14 1.6 5.94L0 24l6.35-1.66a11.9 11.9 0 0 0 5.7 1.45h.01c6.55 0 11.88-5.34 11.88-11.9 0-3.17-1.23-6.15-3.42-8.4ZM12.06 21.7h-.01a9.83 9.83 0 0 1-5-1.37l-.36-.22-3.77.99 1-3.67-.24-.38a9.82 9.82 0 0 1-1.5-5.17c0-5.45 4.43-9.89 9.89-9.89 2.64 0 5.12 1.03 6.99 2.9a9.8 9.8 0 0 1 2.9 6.98c0 5.46-4.44 9.9-9.9 9.9Zm5.42-7.41c-.3-.15-1.78-.88-2.05-.97-.27-.1-.47-.15-.66.15-.2.3-.76.97-.93 1.16-.17.2-.34.22-.64.08-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.48-1.75-1.65-2.05-.17-.3-.02-.47.13-.62.13-.13.3-.34.44-.5.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.66-1.6-.9-2.2-.24-.58-.49-.5-.66-.5h-.56c-.2 0-.52.08-.8.37-.27.3-1.04 1.02-1.04 2.49s1.06 2.89 1.2 3.1c.15.2 2.08 3.18 5.03 4.46.7.3 1.25.49 1.68.62.7.22 1.33.19 1.83.11.56-.08 1.78-.73 2.03-1.44.25-.71.25-1.33.17-1.45-.07-.11-.27-.18-.57-.33Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="whatsapp">WhatsApp</span>
+        </button>
+        <button type="button" class="share-option" data-share-action="facebook" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.39H7.08V12h3.04V9.36c0-3.01 1.8-4.67 4.55-4.67 1.32 0 2.7.24 2.7.24v2.96h-1.52c-1.5 0-1.97.93-1.97 1.89V12h3.35l-.54 3.46h-2.8v8.39A12 12 0 0 0 24 12Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="facebook">Facebook</span>
+        </button>
+        <button type="button" class="share-option" data-share-action="instagram" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm-.2 1.9A3.65 3.65 0 0 0 3.9 7.55v8.9A3.65 3.65 0 0 0 7.55 20.1h8.9a3.65 3.65 0 0 0 3.65-3.65v-8.9a3.65 3.65 0 0 0-3.65-3.65h-8.9ZM17.5 6.4a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.9A3.1 3.1 0 1 0 12 15.1 3.1 3.1 0 0 0 12 8.9Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="instagram">Instagram</span>
+        </button>
+        <button type="button" class="share-option" data-share-action="x" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M18.25 2h3.42l-7.47 8.54L23 22h-6.83l-5.35-7-6.12 7H1.28l7.98-9.12L1 2h7l4.84 6.4L18.25 2Zm-1.2 18h1.9L6.95 3.9h-2L17.05 20Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="x">X</span>
+        </button>
+        <button type="button" class="share-option" data-share-action="copy" role="menuitem">
+          <span class="share-option-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M16 1H6a2 2 0 0 0-2 2v12h2V3h10V1Zm3 4H10a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H10V7h9v14Z"/></svg>
+          </span>
+          <span class="share-label" data-share-label="copy">Copy link</span>
+        </button>
       </div>
     </div>
     <div id="bottomControls">
@@ -1256,7 +1627,29 @@
     </div>
   </div>
 
+  <div id="infoDialogBackdrop" data-open="false" aria-hidden="true"></div>
+  <div id="infoDialog" role="dialog" aria-modal="true" aria-labelledby="infoDialogTitle" data-open="false">
+    <div id="infoDialogHeader">
+      <a id="infoDialogOpenInTab" class="info-action-btn" href="info.html" target="_blank" rel="noopener" title="Open in new tab">
+        <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M11 3h6v6"/>
+          <path d="M11 9 17 3"/>
+          <path d="M9 5H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-4"/>
+        </svg>
+        <span id="infoDialogOpenInTabLabel">Open in new tab</span>
+      </a>
+      <button type="button" id="infoDialogClose" class="info-close" aria-label="Close" title="Close">×</button>
+    </div>
+    <div id="infoDialogBody">
+      <h1 id="infoDialogTitle">About Atomic Explorer</h1>
+      <div id="infoDialogContent"></div>
+    </div>
+  </div>
+
+  <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
   <script src="data/elements.js"></script>
+  <script src="data/info_content.js"></script>
   <script src="atom_multi.js"></script>
 </body>
 </html>
