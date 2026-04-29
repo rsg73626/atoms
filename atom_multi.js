@@ -86,6 +86,14 @@
   const copyOptionHtmlEl = document.getElementById('copyOptionHtml');
   const copyOptionJsonEl = document.getElementById('copyOptionJson');
   const copyOptionCsvEl = document.getElementById('copyOptionCsv');
+  const shareBtn = document.getElementById('shareBtn');
+  const shareMenuEl = document.getElementById('shareMenu');
+  const shareMenuTitleEl = document.getElementById('shareMenuTitle');
+  const infoBtn = document.getElementById('infoBtn');
+  const infoDialogEl = document.getElementById('infoDialog');
+  const infoDialogTitleEl = document.getElementById('infoDialogTitle');
+  const infoDialogBodyEl = document.getElementById('infoDialogBody');
+  const infoDialogCloseEl = document.getElementById('infoDialogClose');
 
   // --- i18n strings --------------------------------------------------------
   const i18n = {
@@ -156,7 +164,46 @@
         white: "White"
       },
       playLabel: "Play",
-      pauseLabel: "Pause"
+      pauseLabel: "Pause",
+      shareLabel: "Share visualization",
+      shareMenuTitle: "Share:",
+      shareSystem: "Share...",
+      shareWhatsApp: "WhatsApp",
+      shareFacebook: "Facebook",
+      shareInstagram: "Instagram",
+      shareX: "X",
+      shareCopyLink: "Copy link",
+      shareCopied: "Link copied to clipboard.",
+      shareInstagramHint: "Link copied. Paste it on Instagram to share.",
+      infoLabel: "About this application",
+      infoCloseLabel: "Close",
+      infoTitle: "About Atomic Explorer",
+      infoIntro: "Atomic Explorer is an interactive 3D model that lets you visualize any of the 118 chemical elements with a Bohr-like nucleus and orbital shells. You can rotate, zoom, change colors, hide individual electron shells and customize the visualization to match what you want to explain.",
+      infoShareTitle: "Sharing your visualization",
+      infoShareBody: "Every visualization parameter is encoded in the URL. Use the share button (next to the language selector) to copy or share the current configuration as a link. Anyone opening that link will see the exact same scene.",
+      infoParamsTitle: "URL query parameters",
+      infoParamsBody: "Append parameters to the URL using the standard <code>?key=value&amp;key=value</code> form to control the visualization. Boolean parameters accept <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> or <code>on/off</code>. Color parameters accept an index from 0 to 12 (rainbow + neutrals).",
+      infoExampleTitle: "Example",
+      infoExampleBody: "This URL opens carbon, paused, with orbits and charges visible, electrons green and the camera tilted:",
+      paramElementDesc: "Element by symbol (e.g. <code>C</code>), atomic number (e.g. <code>6</code>), or <code>first</code>/<code>last</code>.",
+      paramLangDesc: "Interface language: <code>en</code>, <code>pt</code> or <code>es</code>.",
+      paramOrbitsDesc: "Show orbit lines (boolean).",
+      paramAxesDesc: "Show 3D axes (boolean).",
+      paramChargesDesc: "Display + / 0 / − charge symbols (boolean).",
+      paramPausedDesc: "Start the scene paused (boolean).",
+      paramSpeedDesc: "Orbital speed multiplier (0–5, e.g. <code>1.5</code>).",
+      paramShellsDesc: "Visible electron shells, comma-separated indices starting at 0 (e.g. <code>0,1</code>) or <code>all</code> / <code>none</code>.",
+      paramOverlayDesc: "Element overlay state: <code>expanded</code> or <code>collapsed</code>.",
+      paramUiDesc: "UI visibility: <code>visible</code> or <code>hidden</code> (cinema mode).",
+      paramZoomDesc: "Camera zoom factor (0.25–2.5, e.g. <code>0.9</code>).",
+      paramRotXDesc: "Camera vertical rotation, in radians (e.g. <code>-1.2</code>).",
+      paramRotYDesc: "Camera horizontal rotation, in radians (e.g. <code>0</code>).",
+      paramProtonDesc: "Proton color index (0–12).",
+      paramNeutronDesc: "Neutron color index (0–12).",
+      paramElectronDesc: "Electron color index (0–12).",
+      paramBackgroundDesc: "Background color index (0–12).",
+      paramHeaderName: "Parameter",
+      paramHeaderDesc: "Description"
     },
     pt: {
       panelTitle: "Explorador Atômico",
@@ -225,7 +272,46 @@
         white: "Branco"
       },
       playLabel: "Reproduzir",
-      pauseLabel: "Pausar"
+      pauseLabel: "Pausar",
+      shareLabel: "Compartilhar visualização",
+      shareMenuTitle: "Compartilhar:",
+      shareSystem: "Compartilhar...",
+      shareWhatsApp: "WhatsApp",
+      shareFacebook: "Facebook",
+      shareInstagram: "Instagram",
+      shareX: "X",
+      shareCopyLink: "Copiar link",
+      shareCopied: "Link copiado para a área de transferência.",
+      shareInstagramHint: "Link copiado. Cole no Instagram para compartilhar.",
+      infoLabel: "Sobre esta aplicação",
+      infoCloseLabel: "Fechar",
+      infoTitle: "Sobre o Explorador Atômico",
+      infoIntro: "O Explorador Atômico é um modelo 3D interativo que permite visualizar qualquer um dos 118 elementos químicos com núcleo e camadas eletrônicas no estilo de Bohr. Você pode girar, dar zoom, mudar cores, ocultar camadas e personalizar a visualização do jeito que precisar para explicar o conteúdo.",
+      infoShareTitle: "Compartilhando sua visualização",
+      infoShareBody: "Cada configuração da visualização fica codificada na URL. Use o botão de compartilhar (ao lado do seletor de idioma) para copiar ou compartilhar a configuração atual como um link. Quem abrir o link verá exatamente a mesma cena.",
+      infoParamsTitle: "Parâmetros de URL",
+      infoParamsBody: "Acrescente parâmetros à URL usando o formato padrão <code>?chave=valor&amp;chave=valor</code> para controlar a visualização. Parâmetros booleanos aceitam <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> ou <code>on/off</code>. Parâmetros de cor aceitam um índice de 0 a 12 (arco-íris + neutros).",
+      infoExampleTitle: "Exemplo",
+      infoExampleBody: "Esta URL abre o carbono, pausado, com órbitas e cargas visíveis, elétrons verdes e a câmera inclinada:",
+      paramElementDesc: "Elemento por símbolo (ex.: <code>C</code>), número atômico (ex.: <code>6</code>) ou <code>first</code>/<code>last</code>.",
+      paramLangDesc: "Idioma da interface: <code>en</code>, <code>pt</code> ou <code>es</code>.",
+      paramOrbitsDesc: "Mostrar linhas das órbitas (booleano).",
+      paramAxesDesc: "Mostrar eixos 3D (booleano).",
+      paramChargesDesc: "Mostrar símbolos de carga + / 0 / − (booleano).",
+      paramPausedDesc: "Iniciar a cena pausada (booleano).",
+      paramSpeedDesc: "Multiplicador de velocidade orbital (0–5, ex.: <code>1.5</code>).",
+      paramShellsDesc: "Camadas visíveis, índices separados por vírgula a partir de 0 (ex.: <code>0,1</code>) ou <code>all</code> / <code>none</code>.",
+      paramOverlayDesc: "Estado do overlay do elemento: <code>expanded</code> ou <code>collapsed</code>.",
+      paramUiDesc: "Visibilidade da interface: <code>visible</code> ou <code>hidden</code> (modo cinema).",
+      paramZoomDesc: "Fator de zoom da câmera (0,25–2,5, ex.: <code>0.9</code>).",
+      paramRotXDesc: "Rotação vertical da câmera em radianos (ex.: <code>-1.2</code>).",
+      paramRotYDesc: "Rotação horizontal da câmera em radianos (ex.: <code>0</code>).",
+      paramProtonDesc: "Índice da cor do próton (0–12).",
+      paramNeutronDesc: "Índice da cor do nêutron (0–12).",
+      paramElectronDesc: "Índice da cor do elétron (0–12).",
+      paramBackgroundDesc: "Índice da cor de fundo (0–12).",
+      paramHeaderName: "Parâmetro",
+      paramHeaderDesc: "Descrição"
     },
     es: {
       panelTitle: "Explorador Atómico",
@@ -294,7 +380,46 @@
         white: "Blanco"
       },
       playLabel: "Reproducir",
-      pauseLabel: "Pausar"
+      pauseLabel: "Pausar",
+      shareLabel: "Compartir visualización",
+      shareMenuTitle: "Compartir:",
+      shareSystem: "Compartir...",
+      shareWhatsApp: "WhatsApp",
+      shareFacebook: "Facebook",
+      shareInstagram: "Instagram",
+      shareX: "X",
+      shareCopyLink: "Copiar enlace",
+      shareCopied: "Enlace copiado al portapapeles.",
+      shareInstagramHint: "Enlace copiado. Pégalo en Instagram para compartir.",
+      infoLabel: "Acerca de esta aplicación",
+      infoCloseLabel: "Cerrar",
+      infoTitle: "Acerca del Explorador Atómico",
+      infoIntro: "El Explorador Atómico es un modelo 3D interactivo que te permite visualizar cualquiera de los 118 elementos químicos con un núcleo y capas electrónicas al estilo de Bohr. Puedes rotar, hacer zoom, cambiar los colores, ocultar capas y personalizar la visualización para mostrar lo que necesites.",
+      infoShareTitle: "Compartir tu visualización",
+      infoShareBody: "Cada parámetro de la visualización queda codificado en la URL. Usa el botón de compartir (al lado del selector de idioma) para copiar o compartir la configuración actual como un enlace. Quien abra el enlace verá exactamente la misma escena.",
+      infoParamsTitle: "Parámetros de URL",
+      infoParamsBody: "Añade parámetros a la URL con el formato estándar <code>?clave=valor&amp;clave=valor</code> para controlar la visualización. Los parámetros booleanos aceptan <code>1/0</code>, <code>true/false</code>, <code>yes/no</code> u <code>on/off</code>. Los parámetros de color aceptan un índice de 0 a 12 (arcoíris + neutros).",
+      infoExampleTitle: "Ejemplo",
+      infoExampleBody: "Esta URL abre el carbono, pausado, con órbitas y cargas visibles, electrones verdes y la cámara inclinada:",
+      paramElementDesc: "Elemento por símbolo (p. ej. <code>C</code>), número atómico (p. ej. <code>6</code>) o <code>first</code>/<code>last</code>.",
+      paramLangDesc: "Idioma de la interfaz: <code>en</code>, <code>pt</code> o <code>es</code>.",
+      paramOrbitsDesc: "Mostrar líneas de órbita (booleano).",
+      paramAxesDesc: "Mostrar ejes 3D (booleano).",
+      paramChargesDesc: "Mostrar símbolos de carga + / 0 / − (booleano).",
+      paramPausedDesc: "Iniciar la escena pausada (booleano).",
+      paramSpeedDesc: "Multiplicador de velocidad orbital (0–5, p. ej. <code>1.5</code>).",
+      paramShellsDesc: "Capas visibles, índices separados por comas a partir de 0 (p. ej. <code>0,1</code>) o <code>all</code> / <code>none</code>.",
+      paramOverlayDesc: "Estado del panel del elemento: <code>expanded</code> o <code>collapsed</code>.",
+      paramUiDesc: "Visibilidad de la interfaz: <code>visible</code> o <code>hidden</code> (modo cine).",
+      paramZoomDesc: "Factor de zoom de la cámara (0,25–2,5, p. ej. <code>0.9</code>).",
+      paramRotXDesc: "Rotación vertical de la cámara en radianes (p. ej. <code>-1.2</code>).",
+      paramRotYDesc: "Rotación horizontal de la cámara en radianes (p. ej. <code>0</code>).",
+      paramProtonDesc: "Índice del color del protón (0–12).",
+      paramNeutronDesc: "Índice del color del neutrón (0–12).",
+      paramElectronDesc: "Índice del color del electrón (0–12).",
+      paramBackgroundDesc: "Índice del color de fondo (0–12).",
+      paramHeaderName: "Parámetro",
+      paramHeaderDesc: "Descripción"
     }
   };
 
@@ -312,6 +437,28 @@
     return Number.isNaN(idx) ? null : idx;
   }
 
+  function parseFloatParam(value) {
+    if (value == null) return null;
+    const v = Number.parseFloat(String(value));
+    return Number.isFinite(v) ? v : null;
+  }
+
+  function parseShellsParam(value) {
+    if (value == null) return null;
+    const raw = String(value).trim().toLowerCase();
+    if (!raw) return null;
+    if (raw === "all") return { mode: "all" };
+    if (raw === "none") return { mode: "none" };
+    const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+    const indices = [];
+    for (const p of parts) {
+      const n = Number.parseInt(p, 10);
+      if (Number.isNaN(n) || n < 0) continue;
+      indices.push(n);
+    }
+    return { mode: "set", indices };
+  }
+
   const queryParams = new URLSearchParams(window.location.search || "");
   const queryElementRaw = (queryParams.get("element") || queryParams.get("symbol") || "").trim();
   const queryLanguage = (queryParams.get("lang") || queryParams.get("language") || "").trim().toLowerCase();
@@ -319,6 +466,13 @@
   const queryAxes = parseBooleanParam(queryParams.get("axes"));
   const queryCharges = parseBooleanParam(queryParams.get("charges"));
   const queryPaused = parseBooleanParam(queryParams.get("paused"));
+  const querySpeed = parseFloatParam(queryParams.get("speed"));
+  const queryShells = parseShellsParam(queryParams.get("shells"));
+  const queryOverlayRaw = (queryParams.get("overlay") || "").trim().toLowerCase();
+  const queryUiRaw = (queryParams.get("ui") || "").trim().toLowerCase();
+  const queryZoom = parseFloatParam(queryParams.get("zoom"));
+  const queryRotX = parseFloatParam(queryParams.get("rotX") ?? queryParams.get("rotx"));
+  const queryRotY = parseFloatParam(queryParams.get("rotY") ?? queryParams.get("roty"));
   const queryColorIndexes = {
     proton: parseIndexParam(queryParams.get("proton") ?? queryParams.get("protonColor")),
     neutron: parseIndexParam(queryParams.get("neutron") ?? queryParams.get("neutronColor")),
@@ -375,7 +529,7 @@
     if (languageLabelEl) languageLabelEl.textContent = choice.label;
   }
 
-  function setOverlayExpanded(expanded, { skipClassUpdate } = {}) {
+  function setOverlayExpanded(expanded, { skipClassUpdate, skipUrlSync } = {}) {
     if (!elementOverlayEl) return;
     const nextExpanded = Boolean(expanded);
     overlayExpanded = nextExpanded;
@@ -387,6 +541,92 @@
     if (!skipClassUpdate) {
       elementOverlayEl.classList.toggle("collapsed", !overlayExpanded);
     }
+    if (!skipUrlSync) syncUrlState();
+  }
+
+  // --- URL state synchronization ----------------------------------------
+  // Visualization-only parameters are reflected in the URL using
+  // history.replaceState so the user can copy/share the link at any moment.
+  // Note: `info` and `share` actions are intentionally NOT URL-synced.
+  function colorIndexFromValue(color) {
+    if (!color) return -1;
+    const idx = sharedColorOptions.findIndex((opt) => opt.value === color);
+    return idx;
+  }
+
+  function defaultZoomFactor() { return 0.9; }
+  function defaultRotX() { return -1.2; }
+  function defaultRotY() { return 0; }
+
+  function buildShareUrl() {
+    const params = new URLSearchParams();
+    if (currentSymbol) params.set("element", currentSymbol);
+    if (currentLanguage) params.set("lang", currentLanguage);
+    if (orbitLinesToggle?.checked) params.set("orbits", "1");
+    if (axesToggle?.checked) params.set("axes", "1");
+    if (chargeToggle?.checked) params.set("charges", "1");
+    if (isPaused) params.set("paused", "1");
+    const speedVal = parseFloat(speedRange?.value || "1");
+    if (Number.isFinite(speedVal) && Math.abs(speedVal - 1) > 1e-6) {
+      params.set("speed", speedVal.toFixed(2).replace(/\.?0+$/, ""));
+    }
+    // Shells: omit when "all"
+    const totalShells = shells?.length || 0;
+    if (totalShells > 0) {
+      const visible = Array.from(visibleShellSet).filter(i => i < totalShells).sort((a, b) => a - b);
+      if (visible.length === 0) {
+        params.set("shells", "none");
+      } else if (visible.length < totalShells) {
+        params.set("shells", visible.join(","));
+      }
+    }
+    if (!overlayExpanded) params.set("overlay", "collapsed");
+    if (document.body.classList.contains("ui-hidden")) params.set("ui", "hidden");
+    if (Math.abs(cameraDistanceFactor - defaultZoomFactor()) > 1e-3) {
+      params.set("zoom", cameraDistanceFactor.toFixed(2));
+    }
+    if (Math.abs(globalRotX - defaultRotX()) > 1e-3) {
+      params.set("rotX", globalRotX.toFixed(2));
+    }
+    if (Math.abs(globalRotY - defaultRotY()) > 1e-3) {
+      params.set("rotY", globalRotY.toFixed(2));
+    }
+    const colorParticles = [
+      ["proton", protonColor, defaultProtonColor],
+      ["neutron", neutronColor, defaultNeutronColor],
+      ["electron", electronColorOuter, defaultElectronColorOuter],
+      ["background", backgroundColor, defaultBackgroundColor]
+    ];
+    colorParticles.forEach(([name, value, defaultVal]) => {
+      if (value === defaultVal) return;
+      const idx = colorIndexFromValue(value);
+      if (idx >= 0) params.set(name, String(idx));
+    });
+    const url = new URL(window.location.href);
+    url.search = params.toString() ? "?" + params.toString() : "";
+    url.hash = "";
+    return url.toString();
+  }
+
+  let urlSyncReady = false;
+  let urlSyncScheduled = false;
+  function syncUrlState() {
+    if (!urlSyncReady) return;
+    if (urlSyncScheduled) return;
+    urlSyncScheduled = true;
+    requestAnimationFrame(() => {
+      urlSyncScheduled = false;
+      try {
+        const target = buildShareUrl();
+        const current = window.location.href;
+        if (target !== current) {
+          window.history.replaceState({}, "", target);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn("URL sync failed", err);
+      }
+    });
   }
 
 
@@ -631,6 +871,7 @@
         else visibleShellSet.add(i);
         rebuildShellButtons(total);
         requestPausedRedraw();
+        syncUrlState();
       });
       shellButtonsEl.appendChild(btn);
     }
@@ -654,11 +895,12 @@
     chargeToggle.addEventListener("change", () => {
       showCharges = !!chargeToggle.checked;
       requestPausedRedraw();
+      syncUrlState();
     });
   }
 
-  orbitLinesToggle?.addEventListener("change", requestPausedRedraw);
-  axesToggle?.addEventListener("change", requestPausedRedraw);
+  orbitLinesToggle?.addEventListener("change", () => { requestPausedRedraw(); syncUrlState(); });
+  axesToggle?.addEventListener("change", () => { requestPausedRedraw(); syncUrlState(); });
 
   if (queryOrbits != null && orbitLinesToggle) orbitLinesToggle.checked = queryOrbits;
   if (queryAxes != null && axesToggle) axesToggle.checked = queryAxes;
@@ -668,6 +910,16 @@
   }
   if (queryPaused != null) {
     isPaused = queryPaused;
+  }
+  if (querySpeed != null && speedRange) {
+    const min = parseFloat(speedRange.min || "0");
+    const max = parseFloat(speedRange.max || "5");
+    const clamped = Math.max(min, Math.min(max, querySpeed));
+    speedRange.value = String(clamped);
+    globalSpeedFactor = clamped;
+  }
+  if (queryUiRaw === "hidden") {
+    document.body.classList.add("ui-hidden");
   }
 
   function openLanguageMenu() {
@@ -689,6 +941,8 @@
     if (isColorMenuOpen() && openParticle) {
       rebuildColorMenu(openParticle);
     }
+    if (typeof renderInfoDialogContent === "function") renderInfoDialogContent();
+    syncUrlState();
   }
 
   function openMenu(menuEl, anchorEl, toggleEl = anchorEl) {
@@ -715,11 +969,15 @@
     toggleEl?.setAttribute("aria-expanded", "false");
   }
 
-  let protonColor = "#2563eb";
-  let neutronColor = "#ffffff";
-  let electronColorOuter = "#ff0000";
+  const defaultProtonColor = "#2563eb";
+  const defaultNeutronColor = "#ffffff";
+  const defaultElectronColorOuter = "#ff0000";
+  const defaultBackgroundColor = "#000000";
+  let protonColor = defaultProtonColor;
+  let neutronColor = defaultNeutronColor;
+  let electronColorOuter = defaultElectronColorOuter;
   let electronColorInner = "#ff8080";
-  let backgroundColor = "#000000";
+  let backgroundColor = defaultBackgroundColor;
   // Keep electrons more "solid" by default (less fade-out).
   let electronOuterFadeAlpha = "66";
 
@@ -899,6 +1157,7 @@
     persistParticleColor(particle, color);
     setLegendColors();
     requestPausedRedraw();
+    syncUrlState();
   }
 
   let openParticle = null;
@@ -907,6 +1166,7 @@
   function setUiHidden(hidden) {
     document.body.classList.toggle("ui-hidden", !!hidden);
     if (hidden) closeColorMenu();
+    syncUrlState();
   }
 
   function toggleUiHidden() {
@@ -1143,7 +1403,11 @@
   if (queryOrbits != null || queryAxes != null || queryCharges != null) {
     requestPausedRedraw();
   }
-  setOverlayExpanded(true, { skipClassUpdate: true });
+  const initialOverlayExpanded = queryOverlayRaw !== "collapsed";
+  setOverlayExpanded(initialOverlayExpanded, {
+    skipClassUpdate: initialOverlayExpanded,
+    skipUrlSync: true
+  });
   updateShellVisibilityUI(currentElement?.electrons?.length);
 
   if (shellAllBtn) shellAllBtn.addEventListener("click", (e) => { e.stopPropagation(); setAllShells(); });
@@ -1158,6 +1422,7 @@
   if (overlayToggleBtn) {
     overlayToggleBtn.addEventListener("click", () => {
       setOverlayExpanded(!overlayExpanded);
+      syncUrlState();
     });
   }
   if (copyBtn) {
@@ -1206,6 +1471,7 @@
   speedRange.addEventListener("input", () => {
     globalSpeedFactor = parseFloat(speedRange.value || "1");
     updateSpeedUI();
+    syncUrlState();
   });
 
   function nudgeSpeed(delta) {
@@ -1217,6 +1483,7 @@
     speedRange.value = next.toString();
     globalSpeedFactor = next;
     updateSpeedUI();
+    syncUrlState();
   }
 
   // Click-and-hold to continuously change speed.
@@ -1267,6 +1534,7 @@
       lastFrameTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
       requestAnimationFrame(draw);
     }
+    syncUrlState();
   });
 
   canvas.addEventListener("wheel", (e) => {
@@ -1280,6 +1548,7 @@
     }
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
     requestPausedRedraw();
+    syncUrlState();
   }, { passive: false });
 
   // Toggle UI by clicking the canvas background (not UI controls).
@@ -1299,6 +1568,8 @@
     if (target.closest("#elementOverlay")) return;
     if (target.closest("#languageMenu")) return;
     if (target.closest("#copyMenu")) return;
+    if (target.closest("#shareMenu")) return;
+    if (target.closest("#infoDialog")) return;
     if (target.closest("#colorMenu")) return;
     toggleUiHidden();
   });
@@ -1446,12 +1717,14 @@
     visibleShellSet = new Set(Array.from({ length: total }, (_, idx) => idx));
     updateShellVisibilityUI(total);
     requestPausedRedraw();
+    syncUrlState();
   }
 
   function setNoShells() {
     visibleShellSet.clear();
     updateShellVisibilityUI(shells.length);
     requestPausedRedraw();
+    syncUrlState();
   }
 
   function moveElementSelection(delta) {
@@ -1467,6 +1740,7 @@
     globalRotY += dx * step;
     globalRotX += dy * step;
     requestPausedRedraw();
+    syncUrlState();
   }
 
   function buildStars() {
@@ -1584,10 +1858,28 @@
   rebuildShellsAndElectrons();
   rebuildNucleusNucleons();
 
+  // Apply shells visibility from URL after shells are initialized.
+  if (queryShells && shells.length > 0) {
+    if (queryShells.mode === "none") {
+      visibleShellSet = new Set();
+    } else if (queryShells.mode === "set") {
+      const filtered = queryShells.indices.filter(i => i < shells.length);
+      visibleShellSet = new Set(filtered);
+    } else {
+      visibleShellSet = new Set(shells.map((_, i) => i));
+    }
+    updateShellVisibilityUI(shells.length);
+  }
+
   // Start closer to a top-down angle so the core and orbits are visible
   let globalRotY = 0;
   let globalRotX = -1.2;
   cameraDistanceFactor = 0.9;
+  if (queryZoom != null) {
+    cameraDistanceFactor = Math.max(0.25, Math.min(2.5, queryZoom));
+  }
+  if (queryRotX != null) globalRotX = queryRotX;
+  if (queryRotY != null) globalRotY = queryRotY;
   cameraDistance = baseCameraDistance * cameraDistanceFactor;
   let lastFrameTime = (typeof performance !== "undefined" && performance.now) ? performance.now() : Date.now();
   const orbitSpinStartTime = lastFrameTime;
@@ -1599,11 +1891,13 @@
     cameraDistanceFactor = 0.9;
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
     requestPausedRedraw();
+    syncUrlState();
   }
   function adjustZoom(delta) {
     cameraDistanceFactor = Math.max(0.25, Math.min(2.5, cameraDistanceFactor + delta));
     cameraDistance = baseCameraDistance * cameraDistanceFactor;
     requestPausedRedraw();
+    syncUrlState();
   }
 
   controlCentralize?.addEventListener("click", resetView);
@@ -1637,6 +1931,7 @@
     lastY = e.clientY;
   });
   window.addEventListener("mouseup", () => {
+    if (isDragging && didUserDrag) syncUrlState();
     isDragging = false;
   });
   window.addEventListener("mousemove", (e) => {
@@ -1663,6 +1958,7 @@
     }
   }, { passive: true });
   window.addEventListener("touchend", () => {
+    if (isDragging && didUserDrag) syncUrlState();
     isDragging = false;
   }, { passive: true });
   window.addEventListener("touchmove", (e) => {
@@ -2062,6 +2358,7 @@
     rebuildNucleusNucleons();
     updateDetails(currentSymbol);
     requestPausedRedraw();
+    syncUrlState();
   }
 
   function buildPeriodicGrid() {
@@ -2159,6 +2456,12 @@
       if (languageBtn?.contains(target)) return;
       closeLanguageMenu();
     }
+
+    if (shareMenuEl?.getAttribute("data-open") === "true") {
+      if (shareMenuEl?.contains(target)) return;
+      if (shareBtn?.contains(target)) return;
+      closeShareMenu();
+    }
   });
 
   document.addEventListener("keydown", (e) => {
@@ -2214,6 +2517,219 @@
     searchInput.focus();
     focusContext = "elements";
   });
+
+  // --- Share button + menu --------------------------------------------------
+  function openShareMenu() {
+    if (!shareMenuEl || !shareBtn) return;
+    openMenu(shareMenuEl, shareBtn, shareBtn);
+  }
+  function closeShareMenu() {
+    if (!shareMenuEl) return;
+    closeMenu(shareMenuEl, shareBtn);
+  }
+
+  async function copyTextToClipboard(text) {
+    if (!text) return false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_err) {
+      // fall through to fallback
+    }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "absolute";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (_err) {
+      return false;
+    }
+  }
+
+  async function runShareAction(action) {
+    const t = i18n[currentLanguage] || i18n.en;
+    const shareUrl = buildShareUrl();
+    const elementName = currentElement ? getElementName(currentElement) : "";
+    const shareTitle = elementName ? `${t.panelTitle} – ${elementName} (${currentSymbol})` : t.panelTitle;
+    const shareText = `${shareTitle}\n${shareUrl}`;
+
+    if (action === "system") {
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: shareTitle, text: shareTitle, url: shareUrl });
+          return;
+        } catch (_err) {
+          // continue to fallback
+        }
+      }
+      window.prompt(t.shareLabel || "Share", shareUrl);
+      return;
+    }
+    if (action === "copy") {
+      const ok = await copyTextToClipboard(shareUrl);
+      if (ok) {
+        try { window.alert(t.shareCopied); } catch (_) {}
+        return;
+      }
+      window.prompt(t.shareLabel || "Share", shareUrl);
+      return;
+    }
+    if (action === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (action === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (action === "instagram") {
+      try { await copyTextToClipboard(shareUrl); } catch (_) {}
+      window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+      try { window.alert(t.shareInstagramHint); } catch (_) {}
+      return;
+    }
+    if (action === "x") {
+      const text = encodeURIComponent(shareTitle);
+      const url = encodeURIComponent(shareUrl);
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, "_blank", "noopener,noreferrer");
+      return;
+    }
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (shareMenuEl?.getAttribute("data-open") === "true") closeShareMenu();
+      else openShareMenu();
+    });
+  }
+  shareMenuEl?.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const target = e.target instanceof HTMLElement ? e.target.closest(".share-option") : null;
+    if (!target) return;
+    const action = target.getAttribute("data-share-action");
+    if (!action) return;
+    closeShareMenu();
+    await runShareAction(action);
+  });
+
+  // --- Info dialog ---------------------------------------------------------
+  function buildExampleUrl() {
+    try {
+      const url = new URL(window.location.href);
+      url.search = "?element=C&paused=1&orbits=1&charges=1&electron=3&rotX=-0.6";
+      url.hash = "";
+      return url.toString();
+    } catch (_) {
+      return "?element=C&paused=1&orbits=1&charges=1&electron=3&rotX=-0.6";
+    }
+  }
+
+  function renderInfoDialogContent() {
+    if (!infoDialogBodyEl) return;
+    const t = i18n[currentLanguage] || i18n.en;
+    if (infoDialogTitleEl) infoDialogTitleEl.textContent = t.infoTitle;
+    if (infoBtn) {
+      infoBtn.setAttribute("aria-label", t.infoLabel);
+      infoBtn.setAttribute("title", t.infoLabel);
+    }
+    if (shareBtn) {
+      shareBtn.setAttribute("aria-label", t.shareLabel);
+      shareBtn.setAttribute("title", t.shareLabel);
+    }
+    if (shareMenuEl) shareMenuEl.setAttribute("aria-label", t.shareLabel);
+    if (shareMenuTitleEl) shareMenuTitleEl.textContent = t.shareMenuTitle;
+    if (shareMenuEl) {
+      const labelMap = {
+        system: t.shareSystem,
+        whatsapp: t.shareWhatsApp,
+        facebook: t.shareFacebook,
+        instagram: t.shareInstagram,
+        x: t.shareX,
+        copy: t.shareCopyLink
+      };
+      shareMenuEl.querySelectorAll(".share-label[data-share-label]").forEach((el) => {
+        const key = el.getAttribute("data-share-label");
+        if (labelMap[key]) el.textContent = labelMap[key];
+      });
+    }
+    if (infoDialogCloseEl) infoDialogCloseEl.setAttribute("aria-label", t.infoCloseLabel);
+
+    const params = [
+      { name: "element", desc: t.paramElementDesc },
+      { name: "lang", desc: t.paramLangDesc },
+      { name: "orbits", desc: t.paramOrbitsDesc },
+      { name: "axes", desc: t.paramAxesDesc },
+      { name: "charges", desc: t.paramChargesDesc },
+      { name: "paused", desc: t.paramPausedDesc },
+      { name: "speed", desc: t.paramSpeedDesc },
+      { name: "shells", desc: t.paramShellsDesc },
+      { name: "overlay", desc: t.paramOverlayDesc },
+      { name: "ui", desc: t.paramUiDesc },
+      { name: "zoom", desc: t.paramZoomDesc },
+      { name: "rotX", desc: t.paramRotXDesc },
+      { name: "rotY", desc: t.paramRotYDesc },
+      { name: "proton", desc: t.paramProtonDesc },
+      { name: "neutron", desc: t.paramNeutronDesc },
+      { name: "electron", desc: t.paramElectronDesc },
+      { name: "background", desc: t.paramBackgroundDesc }
+    ];
+
+    const exampleUrl = buildExampleUrl();
+    const rows = params.map(p => `<tr><td><code>${p.name}</code></td><td>${p.desc}</td></tr>`).join("");
+    infoDialogBodyEl.innerHTML = [
+      `<p>${t.infoIntro}</p>`,
+      `<h2>${t.infoShareTitle}</h2>`,
+      `<p>${t.infoShareBody}</p>`,
+      `<h2>${t.infoParamsTitle}</h2>`,
+      `<p>${t.infoParamsBody}</p>`,
+      `<table class="params"><thead><tr><th>${t.paramHeaderName}</th><th>${t.paramHeaderDesc}</th></tr></thead><tbody>${rows}</tbody></table>`,
+      `<h2>${t.infoExampleTitle}</h2>`,
+      `<p>${t.infoExampleBody}</p>`,
+      `<p><a class="example-link" href="${exampleUrl}">${exampleUrl}</a></p>`
+    ].join("");
+  }
+
+  function openInfoDialog() {
+    if (!infoDialogEl) return;
+    renderInfoDialogContent();
+    infoDialogEl.setAttribute("data-open", "true");
+    infoDialogCloseEl?.focus();
+  }
+  function closeInfoDialog() {
+    if (!infoDialogEl) return;
+    infoDialogEl.setAttribute("data-open", "false");
+    infoBtn?.focus();
+  }
+
+  if (infoBtn) {
+    infoBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openInfoDialog();
+    });
+  }
+  infoDialogCloseEl?.addEventListener("click", closeInfoDialog);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && infoDialogEl?.getAttribute("data-open") === "true") {
+      closeInfoDialog();
+    }
+  });
+
+  renderInfoDialogContent();
+
+  // Enable URL synchronization now that all initial state has been applied.
+  urlSyncReady = true;
+  syncUrlState();
 
   updateSpeedUI();
   } catch (err) {
