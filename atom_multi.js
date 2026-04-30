@@ -405,6 +405,10 @@
   const queryOverlayRaw = (queryParams.get("overlay") || "").trim().toLowerCase();
   const queryUiRaw = (queryParams.get("ui") || "").trim().toLowerCase();
   const queryLocked = parseBooleanParam(queryParams.get("locked")) === true;
+  const queryTransparent = parseBooleanParam(queryParams.get("transparent")) === true;
+  const queryStarsRaw = parseBooleanParam(queryParams.get("stars"));
+  // `stars` defaults to true (the existing behavior). `stars=0` removes them.
+  const queryShowStars = queryStarsRaw == null ? true : queryStarsRaw;
   const queryZoom = parseFloatParam(queryParams.get("zoom"));
   const queryRotX = parseFloatParam(queryParams.get("rotX") ?? queryParams.get("rotx"));
   const queryRotY = parseFloatParam(queryParams.get("rotY") ?? queryParams.get("roty"));
@@ -532,6 +536,9 @@
       // When locking the controllers we don't need the redundant `ui=hidden`.
       params.delete("ui");
     }
+    // Preserve transparency / stars flags so reloads and shared links keep them.
+    if (queryTransparent) params.set("transparent", "1");
+    if (queryStarsRaw === false) params.set("stars", "0");
     const colorParticles = [
       ["proton", protonColor, defaultProtonColor],
       ["neutron", neutronColor, defaultNeutronColor],
@@ -867,6 +874,10 @@
     document.body.classList.add("ui-hidden");
     document.body.classList.add("ui-locked");
   }
+  if (queryTransparent) {
+    document.body.classList.add("bg-transparent");
+    document.documentElement.classList.add("bg-transparent");
+  }
 
   function openLanguageMenu() {
     if (!languageMenuEl || !languageBtn) return;
@@ -979,6 +990,10 @@
 
   function applyBackgroundColor(color) {
     if (!color) return;
+    if (queryTransparent) {
+      document.documentElement.style.setProperty("--bg-solid", "transparent");
+      return;
+    }
     document.documentElement.style.setProperty("--bg-solid", color);
   }
 
@@ -1349,12 +1364,44 @@
   if (queryOrbits != null || queryAxes != null || queryCharges != null) {
     requestPausedRedraw();
   }
-  const initialOverlayExpanded = queryOverlayRaw !== "collapsed";
+  // On small viewports default the overlay to collapsed unless the user
+  // explicitly requested a state via the URL. We treat "small" as either
+  // a narrow width (phones) or a short height (landscape phones / split-screen).
+  const smallViewportMql = (typeof window.matchMedia === "function")
+    ? window.matchMedia("(max-width: 600px), (max-height: 520px)") : null;
+  const overlayExplicitFromQuery = (queryOverlayRaw === "collapsed" || queryOverlayRaw === "expanded");
+  let userOverridOverlayExpanded = overlayExplicitFromQuery;
+  let initialOverlayExpanded;
+  if (queryOverlayRaw === "collapsed") initialOverlayExpanded = false;
+  else if (queryOverlayRaw === "expanded") initialOverlayExpanded = true;
+  else initialOverlayExpanded = !(smallViewportMql && smallViewportMql.matches);
   setOverlayExpanded(initialOverlayExpanded, {
     skipClassUpdate: initialOverlayExpanded,
     skipUrlSync: true
   });
   updateShellVisibilityUI(currentElement?.electrons?.length);
+
+  // Track when the user manually toggles the overlay so we don't fight them on resize.
+  if (overlayToggleBtn) {
+    overlayToggleBtn.addEventListener("click", () => {
+      userOverridOverlayExpanded = true;
+    }, true);
+  }
+  function handleViewportSizeChange() {
+    if (userOverridOverlayExpanded) return;
+    const wantCollapsed = !!(smallViewportMql && smallViewportMql.matches);
+    const currentlyCollapsed = !overlayExpanded;
+    if (wantCollapsed !== currentlyCollapsed) {
+      setOverlayExpanded(!wantCollapsed, { skipUrlSync: true });
+    }
+  }
+  if (smallViewportMql) {
+    if (typeof smallViewportMql.addEventListener === "function") {
+      smallViewportMql.addEventListener("change", handleViewportSizeChange);
+    } else if (typeof smallViewportMql.addListener === "function") {
+      smallViewportMql.addListener(handleViewportSizeChange);
+    }
+  }
 
   if (shellAllBtn) shellAllBtn.addEventListener("click", (e) => { e.stopPropagation(); setAllShells(); });
   if (shellNoneBtn) shellNoneBtn.addEventListener("click", (e) => { e.stopPropagation(); setNoShells(); });
@@ -1407,11 +1454,25 @@
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight * dpr;
+    const cssW = Math.max(1, Math.floor(canvas.clientWidth));
+    const cssH = Math.max(1, Math.floor(canvas.clientHeight));
+    const targetW = Math.max(1, Math.floor(cssW * dpr));
+    const targetH = Math.max(1, Math.floor(cssH * dpr));
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    requestPausedRedraw();
   }
   window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", resize);
+  if (typeof ResizeObserver !== "undefined") {
+    try {
+      const ro = new ResizeObserver(() => resize());
+      ro.observe(canvas);
+    } catch (_err) { /* ignore */ }
+  }
   resize();
 
   speedRange.addEventListener("input", () => {
@@ -1952,6 +2013,16 @@
       z: v.z * cos + (ax * v.y - ay * v.x) * sin + az * dot * (1 - cos)
     };
   }
+  // Reference focal length tuned for the original ~960x720 viewport. We scale
+  // it down (never up) so the atom stays inside the frame on narrow / short
+  // viewports such as phones in portrait mode.
+  const REFERENCE_FOCAL_LENGTH = 420;
+  const REFERENCE_VIEWPORT_DIMENSION = 720;
+  function getProjectionFocalLength(width, height) {
+    const minDim = Math.max(1, Math.min(width, height));
+    const fitFactor = Math.min(1, minDim / REFERENCE_VIEWPORT_DIMENSION);
+    return REFERENCE_FOCAL_LENGTH * fitFactor;
+  }
   function project(v, width, height) {
     const camZ = cameraDistance;
     const z = camZ - v.z;
@@ -1960,7 +2031,8 @@
     if (!Number.isFinite(z) || z <= 1) {
       return { x: 0, y: 0, scale: 0 };
     }
-    const f = 420 / z;
+    const focal = getProjectionFocalLength(width, height);
+    const f = focal / z;
     if (!Number.isFinite(f) || f <= 0) {
       return { x: 0, y: 0, scale: 0 };
     }
@@ -2006,38 +2078,48 @@
     lastFrameTime = now;
     const dtAnim = isPaused ? 0 : dt;
 
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
+    const w = Math.max(1, canvas.clientWidth);
+    const h = Math.max(1, canvas.clientHeight);
+    if (w < 2 || h < 2) {
+      // Canvas is laying out — skip this frame to avoid degenerate geometry.
+      if (!isPaused) requestAnimationFrame(draw);
+      return;
+    }
     ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    const gradBg = ctx.createRadialGradient(
-      w * 0.5, h * 0.15, 0,
-      w * 0.5, h * 0.55, Math.max(w, h)
-    );
-    gradBg.addColorStop(0, "rgba(30,64,175,0.55)");
-    gradBg.addColorStop(1, "rgba(0,0,0,1)");
-    ctx.fillStyle = gradBg;
-    ctx.fillRect(0, 0, w, h);
-    ctx.restore();
+    if (!queryTransparent) {
+      ctx.save();
+      const gradRadius = Math.max(1, Math.max(w, h));
+      const gradBg = ctx.createRadialGradient(
+        w * 0.5, h * 0.15, 0,
+        w * 0.5, h * 0.55, gradRadius
+      );
+      gradBg.addColorStop(0, "rgba(30,64,175,0.55)");
+      gradBg.addColorStop(1, "rgba(0,0,0,1)");
+      ctx.fillStyle = gradBg;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
 
-    const starCamRotY = globalRotY * 0.2;
-    const starCamRotX = globalRotX * 0.2;
-    ctx.save();
-    ctx.fillStyle = "white";
-    stars.forEach(s => {
-      let v = { x: s.x, y: s.y, z: s.z };
-      v = rotateY(v, starCamRotY);
-      v = rotateX(v, starCamRotX);
-      const p = project(v, w, h);
-      if (p.scale <= 0) return;
-      const r = Math.max(0.4, 1.2 * p.scale);
-      ctx.globalAlpha = 0.12 + 0.4 * Math.random();
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.restore();
-    ctx.globalAlpha = 1;
+    if (queryShowStars) {
+      const starCamRotY = globalRotY * 0.2;
+      const starCamRotX = globalRotX * 0.2;
+      ctx.save();
+      ctx.fillStyle = "white";
+      stars.forEach(s => {
+        let v = { x: s.x, y: s.y, z: s.z };
+        v = rotateY(v, starCamRotY);
+        v = rotateX(v, starCamRotX);
+        const p = project(v, w, h);
+        if (p.scale <= 0) return;
+        const r = Math.max(0.4, 1.2 * p.scale);
+        ctx.globalAlpha = 0.12 + 0.4 * Math.random();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
 
     const totalShellCount = shells.length;
     ensureVisibleShellSet(totalShellCount);

@@ -99,6 +99,16 @@ window.AtomicExplorerInfo = (function () {
         background: {
           desc: "Background color.",
           values: "Integer from <code>0</code> to <code>12</code> (palette index)."
+        },
+        transparent: {
+          desc:
+            "Render the visualization with a transparent background (no gradient and no body color). Useful when embedding the app in another page so that the host's background shows through.",
+          values: "<code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code> (presence enables it)."
+        },
+        stars: {
+          desc: "Show the small white star dots scattered around the atom in the background.",
+          values:
+            "<code>1</code> / <code>true</code> / <code>yes</code> / <code>on</code> (default, stars are visible) or <code>0</code> / <code>false</code> / <code>no</code> / <code>off</code> (no stars)."
         }
       }
     },
@@ -197,6 +207,16 @@ window.AtomicExplorerInfo = (function () {
         background: {
           desc: "Cor do fundo.",
           values: "Inteiro de <code>0</code> a <code>12</code> (índice da paleta)."
+        },
+        transparent: {
+          desc:
+            "Renderiza a visualização com fundo transparente (sem gradiente e sem cor sólida no body). Útil para incorporar a aplicação em outra página, deixando o fundo do site hospedeiro aparecer.",
+          values: "<code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code> (a presença ativa o modo)."
+        },
+        stars: {
+          desc: "Mostrar os pequenos pontos brancos (estrelas) espalhados ao fundo, em volta do átomo.",
+          values:
+            "<code>1</code> / <code>true</code> / <code>yes</code> / <code>on</code> (padrão, estrelas visíveis) ou <code>0</code> / <code>false</code> / <code>no</code> / <code>off</code> (sem estrelas)."
         }
       }
     },
@@ -295,6 +315,16 @@ window.AtomicExplorerInfo = (function () {
         background: {
           desc: "Color del fondo.",
           values: "Entero de <code>0</code> a <code>12</code> (índice de la paleta)."
+        },
+        transparent: {
+          desc:
+            "Renderiza la visualización con fondo transparente (sin degradado ni color sólido en el body). Útil para incrustar la aplicación en otra página dejando ver el fondo del sitio anfitrión.",
+          values: "<code>1</code>, <code>true</code>, <code>yes</code>, <code>on</code> (la presencia activa el modo)."
+        },
+        stars: {
+          desc: "Mostrar los pequeños puntos blancos (estrellas) repartidos al fondo, alrededor del átomo.",
+          values:
+            "<code>1</code> / <code>true</code> / <code>yes</code> / <code>on</code> (predeterminado, estrellas visibles) o <code>0</code> / <code>false</code> / <code>no</code> / <code>off</code> (sin estrellas)."
         }
       }
     }
@@ -318,7 +348,9 @@ window.AtomicExplorerInfo = (function () {
     "proton",
     "neutron",
     "electron",
-    "background"
+    "background",
+    "transparent",
+    "stars"
   ];
 
   function tr(lang) {
