@@ -408,6 +408,22 @@
       width: 100vw;
       flex: none;
     }
+
+    /* Transparent background mode: makes the body and canvas paint nothing of
+       their own so the application can be embedded over a custom background. */
+    html.bg-transparent,
+    body.bg-transparent {
+      background: transparent !important;
+      /* Disable the dark color-scheme initial background so embedding hosts
+         and the iframe initial paint can show through. */
+      color-scheme: normal;
+    }
+    body.bg-transparent #canvasWrapper {
+      background: transparent;
+    }
+    body.bg-transparent #panel {
+      background: transparent;
+    }
     .language-btn:hover {
       background: var(--ctrl-bg-hover);
       box-shadow: 0 10px 22px rgba(0,0,0,0.42);
