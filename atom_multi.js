@@ -405,6 +405,10 @@
   const queryOverlayRaw = (queryParams.get("overlay") || "").trim().toLowerCase();
   const queryUiRaw = (queryParams.get("ui") || "").trim().toLowerCase();
   const queryLocked = parseBooleanParam(queryParams.get("locked")) === true;
+  const queryTransparent = parseBooleanParam(queryParams.get("transparent")) === true;
+  const queryStarsRaw = parseBooleanParam(queryParams.get("stars"));
+  // `stars` defaults to true (the existing behavior). `stars=0` removes them.
+  const queryShowStars = queryStarsRaw == null ? true : queryStarsRaw;
   const queryZoom = parseFloatParam(queryParams.get("zoom"));
   const queryRotX = parseFloatParam(queryParams.get("rotX") ?? queryParams.get("rotx"));
   const queryRotY = parseFloatParam(queryParams.get("rotY") ?? queryParams.get("roty"));
@@ -532,6 +536,9 @@
       // When locking the controllers we don't need the redundant `ui=hidden`.
       params.delete("ui");
     }
+    // Preserve transparency / stars flags so reloads and shared links keep them.
+    if (queryTransparent) params.set("transparent", "1");
+    if (queryStarsRaw === false) params.set("stars", "0");
     const colorParticles = [
       ["proton", protonColor, defaultProtonColor],
       ["neutron", neutronColor, defaultNeutronColor],
@@ -867,6 +874,10 @@
     document.body.classList.add("ui-hidden");
     document.body.classList.add("ui-locked");
   }
+  if (queryTransparent) {
+    document.body.classList.add("bg-transparent");
+    document.documentElement.classList.add("bg-transparent");
+  }
 
   function openLanguageMenu() {
     if (!languageMenuEl || !languageBtn) return;
@@ -979,6 +990,10 @@
 
   function applyBackgroundColor(color) {
     if (!color) return;
+    if (queryTransparent) {
+      document.documentElement.style.setProperty("--bg-solid", "transparent");
+      return;
+    }
     document.documentElement.style.setProperty("--bg-solid", color);
   }
 
@@ -2071,36 +2086,40 @@
       return;
     }
     ctx.clearRect(0, 0, w, h);
-    ctx.save();
-    const gradRadius = Math.max(1, Math.max(w, h));
-    const gradBg = ctx.createRadialGradient(
-      w * 0.5, h * 0.15, 0,
-      w * 0.5, h * 0.55, gradRadius
-    );
-    gradBg.addColorStop(0, "rgba(30,64,175,0.55)");
-    gradBg.addColorStop(1, "rgba(0,0,0,1)");
-    ctx.fillStyle = gradBg;
-    ctx.fillRect(0, 0, w, h);
-    ctx.restore();
+    if (!queryTransparent) {
+      ctx.save();
+      const gradRadius = Math.max(1, Math.max(w, h));
+      const gradBg = ctx.createRadialGradient(
+        w * 0.5, h * 0.15, 0,
+        w * 0.5, h * 0.55, gradRadius
+      );
+      gradBg.addColorStop(0, "rgba(30,64,175,0.55)");
+      gradBg.addColorStop(1, "rgba(0,0,0,1)");
+      ctx.fillStyle = gradBg;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
 
-    const starCamRotY = globalRotY * 0.2;
-    const starCamRotX = globalRotX * 0.2;
-    ctx.save();
-    ctx.fillStyle = "white";
-    stars.forEach(s => {
-      let v = { x: s.x, y: s.y, z: s.z };
-      v = rotateY(v, starCamRotY);
-      v = rotateX(v, starCamRotX);
-      const p = project(v, w, h);
-      if (p.scale <= 0) return;
-      const r = Math.max(0.4, 1.2 * p.scale);
-      ctx.globalAlpha = 0.12 + 0.4 * Math.random();
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.restore();
-    ctx.globalAlpha = 1;
+    if (queryShowStars) {
+      const starCamRotY = globalRotY * 0.2;
+      const starCamRotX = globalRotX * 0.2;
+      ctx.save();
+      ctx.fillStyle = "white";
+      stars.forEach(s => {
+        let v = { x: s.x, y: s.y, z: s.z };
+        v = rotateY(v, starCamRotY);
+        v = rotateX(v, starCamRotX);
+        const p = project(v, w, h);
+        if (p.scale <= 0) return;
+        const r = Math.max(0.4, 1.2 * p.scale);
+        ctx.globalAlpha = 0.12 + 0.4 * Math.random();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
 
     const totalShellCount = shells.length;
     ensureVisibleShellSet(totalShellCount);
